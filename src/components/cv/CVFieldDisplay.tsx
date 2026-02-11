@@ -4,12 +4,11 @@ import { useTranslations } from 'next-intl';
 import { ComprehensiveCV, CVFieldStatus, CVSection } from '@/lib/types';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { FieldStatusBadge } from '@/components/cv/FieldStatusBadge';
 import { ConfidenceIndicator } from '@/components/cv/ConfidenceIndicator';
 import { format } from 'date-fns';
-import { CalendarIcon, BriefcaseIcon, GraduationCapIcon, InfoIcon, PenSquare, EyeIcon } from 'lucide-react';
+import { BriefcaseIcon, GraduationCapIcon, InfoIcon, PenSquare, EyeIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface CVFieldDisplayProps {
     cv: ComprehensiveCV;
@@ -27,30 +26,6 @@ export function CVFieldDisplay({
     className
 }: CVFieldDisplayProps) {
     const t = useTranslations('cv');
-
-    // Calculate section status based on fields within it
-    const getSectionStatus = (sectionPath: CVSection) => {
-        // Basic implementation: if any field in section is incomplete, section is marked
-        const sectionFields = fieldStatuses.filter(f => f.field_path.startsWith(sectionPath));
-        const incomplete = sectionFields.filter(f => !f.is_complete);
-
-        return {
-            isComplete: incomplete.length === 0,
-            incompleteCount: incomplete.length,
-            totalCount: sectionFields.length
-        };
-    };
-
-    const sections: CVSection[] = [
-        'personal_info',
-        'work_experience',
-        'education',
-        'skills',
-        'projects',
-        'certifications',
-        'languages',
-        'additional_sections'
-    ];
 
     const formatDate = (date: string) => {
         if (!date) return '-';
@@ -82,7 +57,7 @@ export function CVFieldDisplay({
                             <InfoIcon className="h-5 w-5 text-primary" />
                             {t('personal_info')}
                         </CardTitle>
-                        <Button variant="ghost" size="sm" onClick={() => { /* Open Edit Dialog */ }}>
+                        <Button variant="ghost" size="sm">
                             <PenSquare className="h-4 w-4 mr-1" />
                             {t('edit')}
                         </Button>
@@ -170,10 +145,10 @@ export function CVFieldDisplay({
                             </div>
                         )}
                     </CardContent>
-                </Card >
+                </Card>
 
                 {/* Education */}
-                < Card >
+                <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-lg font-semibold flex items-center gap-2">
                             <GraduationCapIcon className="h-5 w-5 text-primary" />
@@ -204,10 +179,10 @@ export function CVFieldDisplay({
                             </div>
                         )}
                     </CardContent>
-                </Card >
+                </Card>
 
                 {/* Skills */}
-                < Card >
+                <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-lg font-semibold flex items-center gap-2">
                             <EyeIcon className="h-5 w-5 text-primary" />
@@ -231,18 +206,10 @@ export function CVFieldDisplay({
                             )}
                         </div>
                     </CardContent>
-                </Card >
+                </Card>
 
-            </div >
+            </div>
 
-        </div >
+        </div>
     );
-}
-
-// Utility to combine class names
-import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
 }
