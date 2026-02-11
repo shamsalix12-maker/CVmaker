@@ -28,7 +28,12 @@ You can now continue pushing changes as usual, and large dependency files will b
 - **Auth**: Fully functional with real Supabase backend (Google Auth & Email).
 ## ✅ Google Authentication Setup (COMPLETED)
 
-1.  **Google Cloud Console**: Fully configured with `localhost:3000` and `Vercel` origins and localized redirect URIs (`/en/` and `/fa/`).
+1.  **Google Cloud Console**:
+    - **Authorized JavaScript origins**: `http://localhost:3000`, `https://cv-tailor-app-kappa.vercel.app`
+    - **Authorized redirect URIs** (MANDATORY):
+        - `https://wsmvwbsjietvoppvytqd.supabase.co/auth/v1/callback` (Critically important!)
+        - `http://localhost:3000/[en|fa]/auth/callback`
+        - `https://cv-tailor-app-kappa.vercel.app/[en|fa]/auth/callback`
 2.  **Supabase Console**: URL Configuration (Site URL and Redirect URLs) updated to match the localized routing structure.
 3.  **Codebase Implementation**: 
     - `GoogleLoginButton.tsx` dynamically handles localized redirects.
