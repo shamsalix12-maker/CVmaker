@@ -110,7 +110,9 @@
         "view_all_applications": "View all applications",
         "total_applications": "Total Applications",
         "draft_applications": "Drafts",
-        "completed_applications": "Completed"
+        "completed_applications": "Completed",
+        "cv_complete_desc": "Your profile is up to date and ready for tailoring.",
+        "cv_missing_desc": "Upload or create your CV to start generating applications."
     },
     "cv": {
         "title": "Comprehensive CV",

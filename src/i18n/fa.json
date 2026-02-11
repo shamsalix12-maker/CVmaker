@@ -110,7 +110,9 @@
         "view_all_applications": "مشاهده همه درخواست‌ها",
         "total_applications": "کل درخواست‌ها",
         "draft_applications": "پیش‌نویس‌ها",
-        "completed_applications": "تکمیل‌شده"
+        "completed_applications": "تکمیل‌شده",
+        "cv_complete_desc": "پروفایل شما به‌روز و آماده برای تولید درخواست‌های شغلی است.",
+        "cv_missing_desc": "برای شروع فرآیند درخواست، سی‌وی خود را آپلود یا ایجاد کنید."
     },
     "cv": {
         "title": "سی‌وی جامع",
