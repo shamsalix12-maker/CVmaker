@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import {
     FileText, Upload, AlertCircle, Loader2, FileUp, Clipboard, CheckCircle, Brain, Sparkles, Plus
@@ -34,7 +34,7 @@ export function CVUploader({
 }: CVUploaderProps) {
     const t = useTranslations('cv');
     const { extractFromFile, extractFromText } = useCV();
-    const { getModelsForProvider, getValidProviders } = useAIKeys();
+    const { getModelsForProvider, validProviders, fetchKeys, loading: keysLoading } = useAIKeys();
 
     const [activeTab, setActiveTab] = useState<'file' | 'text'>('file');
     const [file, setFile] = useState<File | null>(null);
@@ -43,36 +43,45 @@ export function CVUploader({
     const [isExtracting, setIsExtracting] = useState(false);
 
     // AI Settings State
-    const validProviders = getValidProviders();
-    const [selectedProvider, setSelectedProvider] = useState<AIProviderName | ''>(
-        validProviders.length > 0 ? validProviders[0] : ''
-    );
-
-    const availableModels = selectedProvider ? getModelsForProvider(selectedProvider) : [];
+    // validProviders is now directly from the hook
+    const [selectedProvider, setSelectedProvider] = useState<AIProviderName | ''>('');
     const [selectedModel, setSelectedModel] = useState<string>('');
+
+    // Derived available models
+    const availableModels = selectedProvider ? getModelsForProvider(selectedProvider as AIProviderName) : [];
+
+    // Sync provider when validProviders change
+    useEffect(() => {
+        // Also trigger a re-fetch on mount to ensure we pick up changes from settings
+        fetchKeys();
+    }, [fetchKeys]);
+
+    useEffect(() => {
+        if (!selectedProvider && validProviders.length > 0) {
+            setSelectedProvider(validProviders[0]);
+        }
+    }, [validProviders, selectedProvider]);
+
+    // Sync model when provider changes or models available
+    useEffect(() => {
+        if (selectedProvider) {
+            const models = getModelsForProvider(selectedProvider as AIProviderName);
+            if (models.length > 0 && !selectedModel) {
+                setSelectedModel(models[0].model_id);
+            }
+        }
+    }, [selectedProvider, getModelsForProvider, selectedModel]);
 
     // Update model when provider changes
     const handleProviderChange = (provider: AIProviderName) => {
         setSelectedProvider(provider);
         const models = getModelsForProvider(provider);
         if (models.length > 0) {
-            // Prefer models with vision capabilities or higher intelligence if possible
-            // This logic could be improved with more metadata about models
             setSelectedModel(models[0].model_id);
         } else {
             setSelectedModel('');
         }
     };
-
-    // Set initial model if provider is selected
-    useState(() => {
-        if (selectedProvider && !selectedModel) {
-            const models = getModelsForProvider(selectedProvider);
-            if (models.length > 0) {
-                setSelectedModel(models[0].model_id);
-            }
-        }
-    });
 
     // Drag and drop handlers
     const handleDragOver = (e: React.DragEvent) => {
@@ -222,7 +231,7 @@ export function CVUploader({
                     </div>
                 </div>
 
-                {validProviders.length === 0 && (
+                {!keysLoading && validProviders.length === 0 && (
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-lg">
                         <div className="flex items-center gap-3 text-sm text-amber-700 dark:text-amber-400">
                             <AlertCircle className="h-5 w-5 shrink-0" />

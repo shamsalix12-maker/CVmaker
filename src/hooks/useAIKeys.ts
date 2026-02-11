@@ -43,7 +43,10 @@ export function useAIKeys() {
                 headers['x-user-id'] = user.id;
             }
 
-            const res = await fetch('/api/ai/keys', { headers });
+            const res = await fetch('/api/ai/keys', {
+                headers,
+                cache: 'no-store'
+            });
             const data = await res.json();
 
             if (data.error) {
@@ -146,9 +149,9 @@ export function useAIKeys() {
         return key?.is_valid || false;
     }, [keys]);
 
-    const getValidProviders = useCallback((): AIProviderName[] => {
-        return keys.filter(k => k.is_valid).map(k => k.provider_name);
-    }, [keys]);
+    const validProviders = (keys || [])
+        .filter(k => k.is_valid)
+        .map(k => k.provider_name);
 
     return {
         keys,
@@ -160,6 +163,6 @@ export function useAIKeys() {
         validateKey,
         getModelsForProvider,
         hasValidKey,
-        getValidProviders
+        validProviders
     };
 }
