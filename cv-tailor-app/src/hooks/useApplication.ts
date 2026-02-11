@@ -112,6 +112,28 @@ export function useApplication(initialId?: string) {
         }
     };
 
+    const submitAnswer = async (answer: string) => {
+        if (!application) return null;
+        setProcessing(true);
+        try {
+            const res = await fetch(`/api/applications/${application.id}/clarify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answer })
+            });
+            if (!res.ok) throw new Error('Clarification failed');
+            const data = await res.json();
+            setApplication(data);
+            toast.success('Answer submitted');
+            return data;
+        } catch (error: any) {
+            toast.error(error.message);
+            return null;
+        } finally {
+            setProcessing(false);
+        }
+    };
+
     return {
         application,
         setApplication,
@@ -121,6 +143,7 @@ export function useApplication(initialId?: string) {
         createApplication,
         updateApplication,
         startProcessing,
-        finalizeApplication
+        finalizeApplication,
+        submitAnswer
     };
 }
