@@ -112,7 +112,17 @@
         "draft_applications": "Drafts",
         "completed_applications": "Completed",
         "cv_complete_desc": "Your profile is up to date and ready for tailoring.",
-        "cv_missing_desc": "Upload or create your CV to start generating applications."
+        "cv_missing_desc": "Upload or create your CV to start generating applications.",
+        "no_applications_yet": "No applications yet",
+        "no_applications_desc": "Start your job hunt by creating a tailored application for your dream job.",
+        "update_cv": "Update CV",
+        "upload_cv": "Upload CV",
+        "total_desc": "Applications created so far",
+        "drafts_desc": "In progress or pending review",
+        "completed_desc": "Ready for submission",
+        "no_description": "No description provided",
+        "lang_en": "English",
+        "lang_fa": "Persian"
     },
     "cv": {
         "title": "Comprehensive CV",

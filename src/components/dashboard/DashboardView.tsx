@@ -109,7 +109,7 @@ export function DashboardView({ cv, applications }: DashboardViewProps) {
                     </CardContent>
                     <CardFooter>
                         <Link href="/cv-manager" className="text-sm font-bold text-primary flex items-center hover:underline">
-                            {cv ? 'Update CV' : 'Upload CV'} <ChevronRight className="h-4 w-4" />
+                            {cv ? t('update_cv') : t('upload_cv')} <ChevronRight className="h-4 w-4" />
                         </Link>
                     </CardFooter>
                 </Card>
@@ -121,7 +121,7 @@ export function DashboardView({ cv, applications }: DashboardViewProps) {
                         <CardTitle className="text-4xl font-black">{stats.total}</CardTitle>
                     </CardHeader>
                     <CardContent className="text-sm text-muted-foreground">
-                        Applications created so far
+                        {t('total_desc')}
                     </CardContent>
                 </Card>
 
@@ -132,7 +132,7 @@ export function DashboardView({ cv, applications }: DashboardViewProps) {
                         <CardTitle className="text-4xl font-black text-amber-500">{stats.drafts}</CardTitle>
                     </CardHeader>
                     <CardContent className="text-sm text-muted-foreground">
-                        In progress or pending review
+                        {t('drafts_desc')}
                     </CardContent>
                 </Card>
 
@@ -143,7 +143,7 @@ export function DashboardView({ cv, applications }: DashboardViewProps) {
                         <CardTitle className="text-4xl font-black text-green-500">{stats.completed}</CardTitle>
                     </CardHeader>
                     <CardContent className="text-sm text-muted-foreground">
-                        Ready for submission
+                        {t('completed_desc')}
                     </CardContent>
                 </Card>
             </div>
@@ -169,7 +169,7 @@ export function DashboardView({ cv, applications }: DashboardViewProps) {
                         </div>
                         <h4 className="text-lg font-semibold mb-2">{t('no_applications_yet')}</h4>
                         <p className="text-muted-foreground max-w-sm mb-6">
-                            Start your job hunt by creating a tailored application for your dream job.
+                            {t('no_applications_desc')}
                         </p>
                         <Button onClick={() => router.push('/new-application')}>
                             {t('create_first_application')}
@@ -199,13 +199,13 @@ export function DashboardView({ cv, applications }: DashboardViewProps) {
                                     </CardHeader>
                                     <CardContent>
                                         <p className="text-xs text-muted-foreground line-clamp-2">
-                                            {app.job_description || "No description provided"}
+                                            {app.job_description || t('no_description')}
                                         </p>
                                     </CardContent>
                                     <CardFooter className="pt-0 pb-4 text-xs text-muted-foreground justify-between">
                                         <div className="flex items-center gap-2">
                                             <FileText className="h-3 w-3" />
-                                            {app.output_language === 'fa' ? 'Persian' : 'English'}
+                                            {app.output_language === 'fa' ? t('lang_fa') : t('lang_en')}
                                         </div>
                                         <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0" />
                                     </CardFooter>
