@@ -28,11 +28,15 @@ You can now continue pushing changes as usual, and large dependency files will b
 - **Auth**: Fully functional with real Supabase backend (Google Auth & Email).
 ## ✅ Google Authentication Setup
 
-1.  **Callback URL Received**: `https://wsmvwbsjietvoppvytqd.supabase.co/auth/v1/callback`
-2.  **Configuration Verified**:
-    - `redirectTo` in `GoogleLoginButton.tsx` is correctly set to `${window.location.origin}/auth/callback`.
-    - `src/app/auth/callback/route.ts` is in place to handle the OAuth code exchange.
-3.  **Action Item**: Ensure that `http://localhost:3000/auth/callback` (and the Vercel URL) is added to "Redirect URLs" in the Supabase Dashboard -> Auth -> Settings.
+1.  **Google Cloud Console Configured**:
+    - **Authorized JavaScript origins**: Added `https://cv-tailor-app-kappa.vercel.app` and should add `http://localhost:3000`.
+    - **Authorized redirect URIs**: Added Supabase callback `https://wsmvwbsjietvoppvytqd.supabase.co/auth/v1/callback`.
+2.  **Supabase Console Action Required**:
+    - Go to **Auth -> Settings -> Redirect URLs**.
+    - Add `http://localhost:3000/auth/callback`.
+    - Add `https://cv-tailor-app-kappa.vercel.app/auth/callback`.
+3.  **Code Ready**:
+    - `GoogleLoginButton.tsx` uses `window.location.origin` which dynamically handles localhost and production.
 
 ## Next Steps
 - Continue with Block B27: Multi-AI Draft Panel.
