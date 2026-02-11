@@ -72,7 +72,8 @@
         "name_label": "نام",
         "login_button": "ورود",
         "email_placeholder": "example@email.com",
-        "name_placeholder": "نام شما"
+        "name_placeholder": "نام شما",
+        "or": "یا"
     },
     "dashboard": {
         "title": "داشبورد",

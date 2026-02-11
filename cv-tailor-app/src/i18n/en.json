@@ -72,7 +72,8 @@
         "name_label": "Name",
         "login_button": "Login",
         "email_placeholder": "john@example.com",
-        "name_placeholder": "John Doe"
+        "name_placeholder": "John Doe",
+        "or": "or"
     },
     "dashboard": {
         "title": "Dashboard",

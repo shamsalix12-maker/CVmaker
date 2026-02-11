@@ -35,6 +35,7 @@ You can now continue pushing changes as usual, and large dependency files will b
     - Auth callback moved to localized directory `src/app/[locale]/auth/callback/route.ts`.
     - Removed conflicting root layout.
     - Simplified middleware routing.
+    - Fixed missing `or` translation in login page.
 
 ## Next Steps
 - **Test**: Perform a real Google login at `http://localhost:3000`.
