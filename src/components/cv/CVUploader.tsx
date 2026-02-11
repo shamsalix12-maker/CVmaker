@@ -22,13 +22,15 @@ interface CVUploaderProps {
     existingCV: ComprehensiveCV | null;
     disabled?: boolean;
     allowReupload?: boolean;
+    onManualStart?: () => void;
 }
 
 export function CVUploader({
     onExtractionComplete,
     existingCV,
     disabled = false,
-    allowReupload = false
+    allowReupload = false,
+    onManualStart
 }: CVUploaderProps) {
     const t = useTranslations('cv');
     const { extractFromFile, extractFromText } = useCV();
@@ -220,6 +222,23 @@ export function CVUploader({
                     </div>
                 </div>
 
+                {validProviders.length === 0 && (
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-lg">
+                        <div className="flex items-center gap-3 text-sm text-amber-700 dark:text-amber-400">
+                            <AlertCircle className="h-5 w-5 shrink-0" />
+                            <p>{t('no_keys_alert')}</p>
+                        </div>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="shrink-0 border-amber-300 hover:bg-amber-100 dark:border-amber-800 dark:hover:bg-amber-900/30"
+                            asChild
+                        >
+                            <a href="/settings">{t('configure_keys')}</a>
+                        </Button>
+                    </div>
+                )}
+
                 <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'file' | 'text')} className="w-full">
                     <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="file" disabled={isExtracting || disabled}>
@@ -267,8 +286,9 @@ export function CVUploader({
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            className="mt-2 text-destructive hover:text-destructive"
+                                            className="mt-2 text-destructive hover:text-destructive z-10"
                                             onClick={(e) => {
+                                                e.preventDefault();
                                                 e.stopPropagation();
                                                 setFile(null);
                                             }}
@@ -326,6 +346,27 @@ export function CVUploader({
                             {t('extract_data')}
                         </>
                     )}
+                </Button>
+
+                <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">
+                            {t('or_enter_manually')}
+                        </span>
+                    </div>
+                </div>
+
+                <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={onManualStart}
+                    disabled={isExtracting || disabled}
+                >
+                    <Plus className="h-4 w-4 mr-2" />
+                    {t('enter_manually')}
                 </Button>
 
                 {existingCV && (

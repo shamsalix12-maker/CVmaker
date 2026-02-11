@@ -110,6 +110,23 @@ export default function CVManagerPage() {
     // Get incomplete fields
     const incompleteFields = fieldStatuses.filter(s => !s.is_complete);
 
+    const handleManualStart = () => {
+        if (!cv) {
+            // Initialize with empty CV if none exists
+            updateCV({
+                personal_info: { full_name: '', email: '', phone: '', location: '' },
+                summary: '',
+                work_experience: [],
+                education: [],
+                skills: [],
+                languages: [],
+                certifications: [],
+                projects: []
+            });
+        }
+        setActiveTab('fields');
+    };
+
     return (
         <AuthGuard>
             <MainLayout>
@@ -169,6 +186,7 @@ export default function CVManagerPage() {
                                         existingCV={cv}
                                         disabled={saving}
                                         allowReupload={!!cv}
+                                        onManualStart={handleManualStart}
                                     />
                                 )}
 
