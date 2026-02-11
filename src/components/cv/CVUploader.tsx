@@ -178,7 +178,7 @@ export function CVUploader({
                             {t('ai_provider')}
                         </Label>
                         <Select
-                            value={selectedProvider}
+                            value={selectedProvider || undefined}
                             onValueChange={(val) => handleProviderChange(val as AIProviderName)}
                             disabled={isExtracting || disabled || validProviders.length === 0}
                         >
@@ -210,9 +210,11 @@ export function CVUploader({
                                 <SelectValue placeholder={t('select_model')} />
                             </SelectTrigger>
                             <SelectContent>
-                                {availableModels.map(m => (
-                                    <SelectItem key={m.model_id} value={m.model_id}>{m.model_name}</SelectItem>
-                                ))}
+                                {availableModels
+                                    .filter(m => m.model_id && m.model_id.trim() !== '')
+                                    .map(m => (
+                                        <SelectItem key={m.model_id} value={m.model_id}>{m.model_name}</SelectItem>
+                                    ))}
                             </SelectContent>
                         </Select>
                     </div>
