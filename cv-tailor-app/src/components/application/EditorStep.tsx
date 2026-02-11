@@ -88,7 +88,7 @@ export function EditorStep({ application, onSave, onApprove }: EditorStepProps) 
                     <OutputEditor
                         initialContent={currentOutput.tailored_cv}
                         onSave={(content) => handleFieldChange('tailored_cv', content)}
-                        isRTL={application.output_language === 'fa'}
+                        onApprove={onApprove}
                         title={t('tailored_cv')}
                     />
                 </TabsContent>
@@ -97,7 +97,7 @@ export function EditorStep({ application, onSave, onApprove }: EditorStepProps) 
                     <OutputEditor
                         initialContent={currentOutput.cover_letter}
                         onSave={(content) => handleFieldChange('cover_letter', content)}
-                        isRTL={application.output_language === 'fa'}
+                        onApprove={onApprove}
                         title={t('cover_letter')}
                     />
                 </TabsContent>
@@ -106,7 +106,7 @@ export function EditorStep({ application, onSave, onApprove }: EditorStepProps) 
                     <OutputEditor
                         initialContent={currentOutput.application_email}
                         onSave={(content) => handleFieldChange('application_email', content)}
-                        isRTL={application.output_language === 'fa'}
+                        onApprove={onApprove}
                         title={t('application_email')}
                     />
                 </TabsContent>
