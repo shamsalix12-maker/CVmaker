@@ -138,9 +138,7 @@ export function CVFieldDisplay({
                                     <div>
                                         <h4 className="font-semibold text-base">{exp.job_title}</h4>
                                         <span className="text-sm text-foreground/80">{exp.company}</span>
-                                    </div>
-                                    <span className="text-xs bg-muted px-2 py-1 rounded text-muted-foreground">
-                                        {formatDate(exp.start_date)} - {exp.is_current ? t('current_job') : formatDate(exp.end_date)}
+                                        {formatDate(exp.start_date || '')} - {exp.is_current ? t('current_job') : (exp.end_date ? formatDate(exp.end_date) : '')}
                                     </span>
                                 </div>
 
