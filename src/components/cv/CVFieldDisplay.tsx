@@ -138,6 +138,8 @@ export function CVFieldDisplay({
                                     <div>
                                         <h4 className="font-semibold text-base">{exp.job_title}</h4>
                                         <span className="text-sm text-foreground/80">{exp.company}</span>
+                                    </div>
+                                    <span className="text-xs bg-muted px-2 py-1 rounded text-muted-foreground">
                                         {formatDate(exp.start_date || '')} - {exp.is_current ? t('current_job') : (exp.end_date ? formatDate(exp.end_date) : '')}
                                     </span>
                                 </div>
@@ -168,10 +170,10 @@ export function CVFieldDisplay({
                             </div>
                         )}
                     </CardContent>
-                </Card>
+                </Card >
 
                 {/* Education */}
-                <Card>
+                < Card >
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-lg font-semibold flex items-center gap-2">
                             <GraduationCapIcon className="h-5 w-5 text-primary" />
@@ -202,10 +204,10 @@ export function CVFieldDisplay({
                             </div>
                         )}
                     </CardContent>
-                </Card>
+                </Card >
 
                 {/* Skills */}
-                <Card>
+                < Card >
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-lg font-semibold flex items-center gap-2">
                             <EyeIcon className="h-5 w-5 text-primary" />
@@ -229,11 +231,11 @@ export function CVFieldDisplay({
                             )}
                         </div>
                     </CardContent>
-                </Card>
+                </Card >
 
-            </div>
+            </div >
 
-        </div>
+        </div >
     );
 }
 

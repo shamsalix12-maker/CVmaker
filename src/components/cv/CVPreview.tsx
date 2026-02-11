@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { ComprehensiveCV } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Markdown } from '@/components/ui/markdown'; // Assuming this exists or markdown-to-jsx
+
 import { Download, FileText, Code } from 'lucide-react';
 
 interface CVPreviewProps {

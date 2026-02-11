@@ -56,7 +56,7 @@ export function CVUploader({
         if (models.length > 0) {
             // Prefer models with vision capabilities or higher intelligence if possible
             // This logic could be improved with more metadata about models
-            setSelectedModel(models[0].id);
+            setSelectedModel(models[0].model_id);
         } else {
             setSelectedModel('');
         }
@@ -67,7 +67,7 @@ export function CVUploader({
         if (selectedProvider && !selectedModel) {
             const models = getModelsForProvider(selectedProvider);
             if (models.length > 0) {
-                setSelectedModel(models[0].id);
+                setSelectedModel(models[0].model_id);
             }
         }
     });
@@ -211,7 +211,7 @@ export function CVUploader({
                             </SelectTrigger>
                             <SelectContent>
                                 {availableModels.map(m => (
-                                    <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+                                    <SelectItem key={m.model_id} value={m.model_id}>{m.model_name}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
