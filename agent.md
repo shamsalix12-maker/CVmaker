@@ -40,7 +40,8 @@ You can now continue pushing changes as usual, and large dependency files will b
     - Auth callback moved to localized directory `src/app/[locale]/auth/callback/route.ts`.
     - Removed conflicting root layout.
     - Simplified middleware routing.
-    - Fixed missing `or` translation in login page.
+4.  **Translation Fix**: Fixed the missing `or` translation in login page.
+5.  **Style Restoration (CRITICAL)**: Fixed the broken layout (missing styles) by importing `globals.css` in the new localized root layout (`src/app/[locale]/layout.tsx`). This went missing after removing the top-level layout.
 
 ## Next Steps
 - **Test**: Perform a real Google login at `http://localhost:3000`.
