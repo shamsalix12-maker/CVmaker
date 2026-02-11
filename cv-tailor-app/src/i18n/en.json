@@ -75,6 +75,28 @@
         "name_placeholder": "John Doe",
         "or": "or"
     },
+    "cv_manager": {
+        "title": "My Comprehensive CV",
+        "description": "Upload, edit, and manage your comprehensive CV",
+        "upload_tab": "Upload",
+        "fields_tab": "Edit Fields",
+        "preview_tab": "Preview",
+        "loading": "Loading your CV...",
+        "extraction_success": "CV Extracted Successfully",
+        "extraction_success_desc": "Your CV has been processed. Please review the extracted information.",
+        "extraction_error": "Extraction Failed",
+        "saved": "Saved",
+        "changes_saved": "Your changes have been saved.",
+        "save_error": "Save Failed",
+        "delete_confirm": "Are you sure you want to delete your CV? This action cannot be undone.",
+        "deleted": "Deleted",
+        "cv_deleted": "Your CV has been deleted.",
+        "delete_error": "Delete Failed",
+        "completion": "{percent}% complete",
+        "save_cv": "Save CV",
+        "saving": "Saving...",
+        "delete_cv": "Delete CV"
+    },
     "dashboard": {
         "title": "Dashboard",
         "welcome_message": "Welcome to CV Tailor",

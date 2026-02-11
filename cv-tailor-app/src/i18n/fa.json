@@ -75,6 +75,28 @@
         "name_placeholder": "نام شما",
         "or": "یا"
     },
+    "cv_manager": {
+        "title": "سی‌وی جامع من",
+        "description": "آپلود، ویرایش و مدیریت سی‌وی جامع شما",
+        "upload_tab": "آپلود",
+        "fields_tab": "ویرایش فیلدها",
+        "preview_tab": "پیش‌نمایش",
+        "loading": "در حال بارگذاری سی‌وی...",
+        "extraction_success": "سی‌وی با موفقیت استخراج شد",
+        "extraction_success_desc": "سی‌وی شما پردازش شد. لطفاً اطلاعات استخراج‌شده را بررسی کنید.",
+        "extraction_error": "استخراج ناموفق بود",
+        "saved": "ذخیره شد",
+        "changes_saved": "تغییرات شما ذخیره شد.",
+        "save_error": "ذخیره ناموفق بود",
+        "delete_confirm": "آیا مطمئن هستید که می‌خواهید سی‌وی خود را حذف کنید؟ این عمل قابل بازگشت نیست.",
+        "deleted": "حذف شد",
+        "cv_deleted": "سی‌وی شما حذف شد.",
+        "delete_error": "حذف ناموفق بود",
+        "completion": "{percent}% تکمیل",
+        "save_cv": "ذخیره سی‌وی",
+        "saving": "در حال ذخیره...",
+        "delete_cv": "حذف سی‌وی"
+    },
     "dashboard": {
         "title": "داشبورد",
         "welcome_message": "به سی‌وی تیلور خوش آمدید",
