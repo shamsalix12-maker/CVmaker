@@ -36,8 +36,11 @@ You can now continue pushing changes as usual, and large dependency files will b
     - Set **Site URL** to your Vercel URL.
     - Add `http://localhost:3000/auth/callback` to **Redirect URLs**.
     - Add `https://cv-tailor-app-kappa.vercel.app/auth/callback` to **Redirect URLs**.
-3.  **Code Ready**:
-    - `GoogleLoginButton.tsx` uses `window.location.origin` which dynamically handles localhost and production.
+## ✅ OAuth & Layout Fixes
+
+1.  **Fixed Root Layout**: Added missing `<html>` and `<body>` tags to `src/app/layout.tsx`. This prevents the "Missing html and body tags" runtime error during 404s or non-localized routes.
+2.  **Fixed Auth Callback Routing**: Updated `src/middleware.ts` to exclude `/auth` routes from `next-intl` locale redirection. This ensures that the Supabase callback at `/auth/callback` is reachable directly without a locale prefix.
 
 ## Next Steps
+- Re-test the Google Login flow.
 - Continue with Block B27: Multi-AI Draft Panel.
