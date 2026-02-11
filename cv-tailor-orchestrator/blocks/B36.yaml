@@ -1,0 +1,52 @@
+id: B36
+name: "Google OAuth"
+phase: 8
+phase_name: "Final Authentication"
+
+goal: |
+  Replace development login with Google OAuth.
+  Features:
+  - Login with Google button
+  - Supabase Auth integration
+  - Auth callback handler
+  - Protected routes
+
+dependencies: [B35]
+
+files_to_modify:
+  - id: F011
+    path: "src/app/[locale]/page.tsx"
+    description: "Update landing page with Google login"
+  - id: F030
+    path: "src/middleware.ts"
+    description: "Update middleware for auth protection"
+
+files_to_create:
+  - id: F065
+    path: "src/lib/supabase/middleware.ts"
+    description: "Supabase auth middleware"
+  - id: F169
+    path: "src/lib/supabase/auth.ts"
+    description: "Google OAuth helper functions"
+  - id: F170
+    path: "src/components/auth/GoogleLoginButton.tsx"
+    description: "Google sign-in button"
+  - id: F171
+    path: "src/app/auth/callback/route.ts"
+    description: "OAuth callback handler"
+
+checkpoint_tests:
+  - id: T01
+    description: "Login with Google button works"
+    type: "manual"
+  - id: T02
+    description: "User is correctly redirected after login"
+    type: "manual"
+  - id: T03
+    description: "UserInfo is stored in Supabase"
+    type: "manual"
+  - id: T04
+    description: "Logout works"
+    type: "manual"
+
+max_retries: 3

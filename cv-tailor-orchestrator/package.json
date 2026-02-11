@@ -1,0 +1,20 @@
+{
+  "name": "cv-tailor-orchestrator",
+  "version": "1.0.0",
+  "description": "Orchestrator for CV Tailor Project",
+  "main": "orchestrator.ts",
+  "scripts": {
+    "start": "ts-node orchestrator.ts",
+    "block": "ts-node orchestrator.ts block",
+    "verify": "ts-node orchestrator.ts verify",
+    "dashboard": "ts-node orchestrator.ts dashboard"
+  },
+  "dependencies": {
+    "yaml": "^2.3.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

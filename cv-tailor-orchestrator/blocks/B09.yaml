@@ -1,0 +1,173 @@
+id: B09
+name: "File Parsers (Word + Markdown)"
+phase: 1
+phase_name: "CV Management"
+
+goal: |
+  Create utility functions to parse Word (.docx) and Markdown (.md) files
+  and extract their text content. These will be used to parse uploaded CVs.
+
+dependencies: [B01, B02, B03, B04]
+
+files_to_create:
+  - id: F072
+    path: "src/lib/parsers/docx-parser.ts"
+    description: "Parse .docx files and extract text content"
+
+  - id: F073
+    path: "src/lib/parsers/markdown-parser.ts"
+    description: "Parse .md files and extract text content"
+
+  - id: F095
+    path: "src/lib/parsers/index.ts"
+    description: "Export all parsers from single entry point"
+
+files_to_modify: []
+
+files_available:
+  - id: F001
+    path: "package.json"
+    from_block: B01
+  - id: F079
+    path: "src/lib/types.ts"
+    from_block: B03
+  - id: F080
+    path: "src/lib/utils.ts"
+    from_block: B04
+
+commands: []
+
+instructions: |
+  1. Create docx-parser.ts:
+     ```typescript
+     import mammoth from 'mammoth';
+     
+     export interface ParsedDocument {
+       text: string;
+       html?: string;
+       metadata?: {
+         wordCount: number;
+         hasImages: boolean;
+       };
+     }
+     
+     export async function parseDocx(file: File | Buffer): Promise<ParsedDocument> {
+       // If File, convert to ArrayBuffer first
+       // Use mammoth.extractRawText() for text
+       // Use mammoth.convertToHtml() for HTML (optional)
+       // Return ParsedDocument
+       // Handle errors gracefully
+     }
+     
+     export async function parseDocxFromArrayBuffer(arrayBuffer: ArrayBuffer): Promise<ParsedDocument> {
+       // Direct parsing from ArrayBuffer
+     }
+     ```
+  
+  2. Create markdown-parser.ts:
+     ```typescript
+     import { unified } from 'unified';
+     import remarkParse from 'remark-parse';
+     import remarkHtml from 'remark-html';
+     
+     export interface ParsedMarkdown {
+       text: string;
+       html: string;
+       metadata?: {
+         wordCount: number;
+         headings: string[];
+       };
+     }
+     
+     export async function parseMarkdown(content: string): Promise<ParsedMarkdown> {
+       // Parse markdown to AST
+       // Extract plain text (strip formatting)
+       // Convert to HTML
+       // Extract headings
+       // Return ParsedMarkdown
+     }
+     
+     export async function parseMarkdownFile(file: File): Promise<ParsedMarkdown> {
+       // Read file as text
+       // Call parseMarkdown
+     }
+     ```
+  
+  3. Create index.ts:
+     ```typescript
+     export * from './docx-parser';
+     export * from './markdown-parser';
+     
+     export type SupportedFileType = 'docx' | 'md' | 'txt';
+     
+     export function detectFileType(filename: string): SupportedFileType | null {
+       // Check file extension
+       // Return type or null if unsupported
+     }
+     
+     export async function parseFile(file: File): Promise<{ text: string; html?: string }> {
+       // Detect type
+       // Call appropriate parser
+       // Throw error if unsupported
+     }
+     ```
+  
+  IMPORTANT:
+  - Handle errors gracefully (corrupted files, empty files, etc.)
+  - Return meaningful error messages
+  - Keep functions pure and testable
+  - Word count should count actual words, not characters
+
+checkpoint_tests:
+  - id: T01
+    description: "All parser files exist"
+    type: "files_exist"
+    files:
+      - "src/lib/parsers/docx-parser.ts"
+      - "src/lib/parsers/markdown-parser.ts"
+      - "src/lib/parsers/index.ts"
+
+  - id: T02
+    description: "TypeScript compiles without errors"
+    type: "command"
+    command: "npx tsc --noEmit"
+    expected_exit_code: 0
+
+  - id: T03
+    description: "docx-parser exports parseDocx function"
+    type: "grep"
+    file: "src/lib/parsers/docx-parser.ts"
+    patterns:
+      - "export async function parseDocx"
+      - "mammoth"
+      - "ParsedDocument"
+
+  - id: T04
+    description: "markdown-parser exports parseMarkdown function"
+    type: "grep"
+    file: "src/lib/parsers/markdown-parser.ts"
+    patterns:
+      - "export async function parseMarkdown"
+      - "unified"
+      - "ParsedMarkdown"
+
+  - id: T05
+    description: "index.ts exports all parsers and utilities"
+    type: "grep"
+    file: "src/lib/parsers/index.ts"
+    patterns:
+      - "export * from './docx-parser'"
+      - "export * from './markdown-parser'"
+      - "parseFile"
+      - "detectFileType"
+
+  - id: T06
+    description: "Error handling is implemented"
+    type: "grep"
+    file: "src/lib/parsers/docx-parser.ts"
+    patterns:
+      - "try"
+      - "catch"
+      - "throw"
+
+max_retries: 3

@@ -1,0 +1,2144 @@
+# BLOCK B17: Prompt Management System
+
+## COMPLETED BLOCKS
+- B01 ✅: Create Empty Next.js Project — Files: [F001], [F002], [F003], [F004], [F005], [F006], [F007], [F008], [F009]
+- B02 ✅: Install All Dependencies — Files: [F027], [F028], [F029], [F030], [F031], [F032], [F033], [F034], [F035], [F036], [F090], [F091]
+- B03 ✅: Central TypeScript Types — Files: [F079]
+- B04 ✅: Constants and Utilities — Files: [F078], [F080]
+- B05 ✅: Internationalization (i18n) System — Files: [F086], [F087], [F088], [F089]
+- B06 ✅: Supabase Connection and Database Setup — Files: [F063], [F064], [F065], [F093], [F094]
+- B07 ✅: Development Auth (Temporary Login) — Files: [F089], [F090], [F091], [F092]
+- B08 ✅: Main Layout (Header + Sidebar + Footer) — Files: [F037], [F038], [F039], [F040], [F093], [F094], [F012]
+- B09 ✅: File Parsers (Word + Markdown) — Files: [F072], [F073], [F095]
+- B10 ✅: AI Provider Interface (Abstract Layer) — Files: [F066], [F067], [F068], [F069], [F070], [F104]
+- B11 ✅: API Key Encryption and Storage — Files: [F077], [F105], [F106], [F081]
+- B12 ✅: AI-Powered CV Field Extraction — Files: [F074], [F107], [F108], [F109], [F110]
+
+## GOAL
+Create the complete prompt management system - the heart of the application.
+This includes:
+- API routes for CRUD operations on prompts
+- React hook for prompt state management
+- UI components for listing, creating, editing, and selecting prompts
+- Admin page for managing prompts (no-code management)
+
+Prompts are pre-built templates that define how AI should process CVs and job descriptions.
+Each prompt has titles/descriptions in both English and Farsi.
+
+
+## FILES TO CREATE
+[F024] src/app/api/prompts/route.ts
+[F118] src/app/api/prompts/[id]/route.ts
+[F119] src/lib/prompts/prompt-service.ts
+[F120] src/lib/prompts/index.ts
+[F121] src/lib/prompts/default-prompts.ts
+[F083] src/hooks/usePrompts.ts
+[F045] src/components/prompts/PromptList.tsx
+[F046] src/components/prompts/PromptEditor.tsx
+[F047] src/components/prompts/PromptSelector.tsx
+[F048] src/components/prompts/PromptCategoryFilter.tsx
+[F122] src/components/prompts/PromptCard.tsx
+[F123] src/components/prompts/PromptPreview.tsx
+[F015] src/app/[locale]/prompts/page.tsx
+[F124] src/app/[locale]/prompts/loading.tsx
+
+## FILES TO MODIFY
+[F087] src/i18n/en.json
+[F088] src/i18n/fa.json
+
+## EXISTING FILES YOU MAY IMPORT FROM
+[F001] package.json (from B01)
+[F002] tsconfig.json (from B01)
+[F003] next.config.ts (from B01)
+[F004] tailwind.config.ts (from B01)
+[F005] .env.local (from B01)
+[F006] .env.example (from B01)
+[F007] src/app/layout.tsx (from B01)
+[F008] src/app/page.tsx (from B01)
+[F009] src/app/globals.css (from B01)
+[F027] src/components/ui/button.tsx (from B02)
+[F028] src/components/ui/input.tsx (from B02)
+[F029] src/components/ui/card.tsx (from B02)
+[F030] src/components/ui/dialog.tsx (from B02)
+[F031] src/components/ui/select.tsx (from B02)
+[F032] src/components/ui/textarea.tsx (from B02)
+[F033] src/components/ui/tabs.tsx (from B02)
+[F034] src/components/ui/badge.tsx (from B02)
+[F035] src/components/ui/sonner.tsx (from B02)
+[F036] src/components/ui/dropdown-menu.tsx (from B02)
+[F090] src/context/AuthContext.tsx (from B07)
+[F091] src/components/auth/DevLoginForm.tsx (from B07)
+[F079] src/lib/types.ts (from B03)
+[F078] src/lib/constants.ts (from B04)
+[F080] src/lib/helpers.ts (from B04)
+[F086] src/i18n/config.ts (from B05)
+[F087] src/i18n/en.json (from B05)
+[F088] src/i18n/fa.json (from B05)
+[F089] src/lib/auth/dev-auth.ts (from B07)
+[F063] src/lib/supabase/client.ts (from B06)
+[F064] src/lib/supabase/server.ts (from B06)
+[F065] src/lib/supabase/middleware.ts (from B06)
+[F093] src/components/layout/MainLayout.tsx (from B08)
+[F094] src/components/layout/MobileMenu.tsx (from B08)
+[F092] src/components/auth/AuthGuard.tsx (from B07)
+[F037] src/components/layout/Header.tsx (from B08)
+[F038] src/components/layout/Sidebar.tsx (from B08)
+[F039] src/components/layout/Footer.tsx (from B08)
+[F040] src/components/layout/LanguageSwitcher.tsx (from B08)
+[F012] src/app/[locale]/dashboard/page.tsx (from B08)
+[F072] src/lib/parsers/docx-parser.ts (from B09)
+[F073] src/lib/parsers/markdown-parser.ts (from B09)
+[F095] src/lib/parsers/index.ts (from B09)
+[F066] src/lib/ai/ai-provider.ts (from B10)
+[F067] src/lib/ai/openai-provider.ts (from B10)
+[F068] src/lib/ai/anthropic-provider.ts (from B10)
+[F069] src/lib/ai/google-ai-provider.ts (from B10)
+[F070] src/lib/ai/ai-factory.ts (from B10)
+[F104] src/lib/ai/index.ts (from B10)
+[F077] src/lib/encryption.ts (from B11)
+[F105] src/app/api/ai/keys/route.ts (from B11)
+[F106] src/app/api/ai/validate/route.ts (from B11)
+[F081] src/hooks/useAIKeys.ts (from B11)
+[F074] src/lib/cv/cv-extractor.ts (from B12)
+[F107] src/lib/cv/cv-extraction-prompt.ts (from B12)
+[F108] src/lib/cv/cv-validator.ts (from B12)
+[F109] src/lib/cv/index.ts (from B12)
+[F110] src/app/api/cv/extract/route.ts (from B12)
+
+## FILES YOU MUST NOT TOUCH
+Everything not listed above.
+
+## INSTRUCTIONS
+1. Create default-prompts.ts (seed data):
+   ```typescript
+   // ============================================
+   // [F121] src/lib/prompts/default-prompts.ts
+   // ============================================
+   
+   import { Prompt } from '@/lib/types';
+   
+   export const DEFAULT_PROMPTS: Omit<Prompt, 'id' | 'created_at' | 'updated_at'>[] = [
+     {
+       title_en: "Professional CV Tailoring",
+       title_fa: "تنظیم حرفه‌ای سی‌وی",
+       description_en: "Tailors your CV to match the job description with professional language and formatting.",
+       description_fa: "سی‌وی شما را با زبان و قالب‌بندی حرفه‌ای مطابق شرح شغل تنظیم می‌کند.",
+       prompt_text: `You are an expert CV writer and career consultant. Your task is to tailor the candidate's CV to match the job description.
+
+   INPUTS:
+   - Candidate's comprehensive CV
+   - Target job description
+   - Desired output language
+   - Tone preference
+
+   INSTRUCTIONS:
+   1. Analyze the job description to identify:
+      - Required skills and qualifications
+      - Key responsibilities
+      - Company culture indicators
+      - Industry-specific terminology
+
+   2. Review the candidate's CV and identify:
+      - Relevant experience that matches the job
+      - Transferable skills
+      - Achievements that demonstrate required competencies
+      - Gaps that need to be addressed
+
+   3. Create a tailored CV that:
+      - Highlights the most relevant experience first
+      - Uses keywords from the job description
+      - Quantifies achievements where possible
+      - Matches the tone and style appropriate for the industry
+      - Is concise yet comprehensive (ideally 1-2 pages)
+
+   4. If you need clarification on any aspect, ask specific questions.
+
+   5. Output the tailored CV in a clean, professional format.
+
+   Remember: The goal is to present the candidate as the ideal fit for this specific role while remaining truthful about their experience.`,
+       category: "cv_tailoring",
+       is_active: true,
+       sort_order: 1
+     },
+     {
+       title_en: "Technical Role Focus",
+       title_fa: "تمرکز بر نقش فنی",
+       description_en: "Emphasizes technical skills, projects, and achievements for engineering/IT roles.",
+       description_fa: "مهارت‌های فنی، پروژه‌ها و دستاوردها را برای نقش‌های مهندسی/فناوری اطلاعات برجسته می‌کند.",
+       prompt_text: `You are a technical recruiter and CV specialist for engineering and IT roles.
+
+   FOCUS AREAS:
+   - Technical skills and proficiencies (languages, frameworks, tools)
+   - Project experience with technical details
+   - Problem-solving achievements with measurable outcomes
+   - Certifications and technical education
+   - Open source contributions or technical publications
+
+   INSTRUCTIONS:
+   1. Parse the job description for:
+      - Required tech stack
+      - Experience level needed
+      - Specific technical challenges mentioned
+      - Team structure and methodology (Agile, etc.)
+
+   2. From the CV, extract and prioritize:
+      - Matching technical skills (order by relevance)
+      - Projects using similar technologies
+      - Scale of systems worked on
+      - Technical leadership experience
+
+   3. Format the output with:
+      - Skills section prominently placed
+      - Project descriptions with tech stack tags
+      - Metrics (users served, performance improvements, etc.)
+      - Clean, ATS-friendly formatting
+
+   Ask clarifying questions if the technical requirements are unclear or if you need more details about specific projects.`,
+       category: "cv_tailoring",
+       is_active: true,
+       sort_order: 2
+     },
+     {
+       title_en: "Executive/Leadership Focus",
+       title_fa: "تمرکز بر مدیریت اجرایی",
+       description_en: "Crafts CVs for senior leadership positions, emphasizing strategic impact and team leadership.",
+       description_fa: "سی‌وی را برای موقعیت‌های مدیریت ارشد با تأکید بر تأثیر استراتژیک و رهبری تیم تنظیم می‌کند.",
+       prompt_text: `You are an executive career consultant specializing in C-suite and senior leadership positions.
+
+   FOCUS AREAS:
+   - Strategic vision and business impact
+   - P&L responsibility and budget management
+   - Team building and organizational development
+   - Board presentations and stakeholder management
+   - Industry thought leadership
+
+   INSTRUCTIONS:
+   1. Analyze the role for:
+      - Scope of responsibility
+      - Reporting structure
+      - Strategic priorities
+      - Cultural fit indicators
+
+   2. Highlight from the CV:
+      - Revenue/growth achievements with numbers
+      - Transformation initiatives led
+      - Team sizes managed
+      - Board-level experience
+      - Industry recognition
+
+   3. Craft an executive summary that:
+      - Leads with the most impressive achievement
+      - Positions the candidate as a strategic leader
+      - Uses powerful, confident language
+      - Demonstrates industry expertise
+
+   The output should be polished, concise, and appropriate for executive-level review.`,
+       category: "cv_tailoring",
+       is_active: true,
+       sort_order: 3
+     },
+     {
+       title_en: "Cover Letter Generator",
+       title_fa: "تولیدکننده کاورلتر",
+       description_en: "Creates compelling cover letters that complement the tailored CV.",
+       description_fa: "کاورلترهای جذابی ایجاد می‌کند که مکمل سی‌وی تنظیم‌شده هستند.",
+       prompt_text: `You are an expert cover letter writer. Create a compelling cover letter based on the candidate's CV and target job.
+
+   STRUCTURE:
+   1. Opening paragraph:
+      - Hook that captures attention
+      - Clear statement of the position applied for
+      - Brief indication of why you're a great fit
+
+   2. Body paragraphs (2-3):
+      - Match your top qualifications to job requirements
+      - Provide specific examples with results
+      - Show knowledge of the company
+      - Demonstrate cultural fit
+
+   3. Closing paragraph:
+      - Reiterate enthusiasm
+      - Clear call to action
+      - Professional sign-off
+
+   GUIDELINES:
+   - Keep it to one page (300-400 words)
+   - Use the same tone as the job posting
+   - Avoid repeating the CV verbatim
+   - Show personality while remaining professional
+   - Address it properly (research the hiring manager if possible)
+
+   If the job posting mentions specific values or initiatives, incorporate them naturally.`,
+       category: "cover_letter",
+       is_active: true,
+       sort_order: 10
+     },
+     {
+       title_en: "Application Email",
+       title_fa: "ایمیل درخواست",
+       description_en: "Writes professional application emails for job submissions.",
+       description_fa: "ایمیل‌های درخواست حرفه‌ای برای ارسال درخواست شغلی می‌نویسد.",
+       prompt_text: `You are writing a professional job application email. This email will accompany the CV and cover letter.
+
+   EMAIL STRUCTURE:
+   1. Subject line: Clear and professional
+      Example: "Application for [Position] - [Your Name]"
+
+   2. Greeting: Formal, addressed properly
+
+   3. Body (brief, 3-4 sentences):
+      - State the position you're applying for
+      - One compelling reason you're a fit
+      - Mention attached documents
+      - Express enthusiasm
+
+   4. Closing:
+      - Thank them for their time
+      - Professional signature with contact info
+
+   GUIDELINES:
+   - Keep it SHORT - this is not the cover letter
+   - Professional but warm tone
+   - Easy to read on mobile
+   - Include all contact information
+   - Mention if referred by someone
+
+   The email should make them want to open the attachments.`,
+       category: "email",
+       is_active: true,
+       sort_order: 20
+     },
+     {
+       title_en: "Career Changer",
+       title_fa: "تغییر مسیر شغلی",
+       description_en: "Helps candidates transitioning to a new industry or role highlight transferable skills.",
+       description_fa: "به متقاضیانی که به صنعت یا نقش جدیدی منتقل می‌شوند کمک می‌کند مهارت‌های قابل انتقال را برجسته کنند.",
+       prompt_text: `You are a career transition specialist. Help the candidate present their experience for a new industry/role.
+
+   APPROACH:
+   1. Identify transferable skills:
+      - Leadership and management
+      - Communication and presentation
+      - Problem-solving and analytical thinking
+      - Project management
+      - Technical skills that cross industries
+
+   2. Reframe experience:
+      - Use industry-neutral language
+      - Focus on outcomes, not industry-specific processes
+      - Highlight adaptability and learning agility
+      - Emphasize relevant training or education
+
+   3. Address the elephant in the room:
+      - Acknowledge the transition positively
+      - Show genuine interest in the new field
+      - Demonstrate research into the industry
+      - Highlight any bridge experiences
+
+   4. Structure the CV to:
+      - Lead with a strong summary explaining the transition
+      - Group skills by relevance to new role
+      - Include any relevant projects, courses, or certifications
+      - De-emphasize irrelevant experience without hiding it
+
+   Ask about their motivation for the change and any steps they've taken toward the new field.`,
+       category: "cv_tailoring",
+       is_active: true,
+       sort_order: 4
+     },
+     {
+       title_en: "ATS Optimization",
+       title_fa: "بهینه‌سازی ATS",
+       description_en: "Optimizes CV format and keywords for Applicant Tracking Systems.",
+       description_fa: "فرمت و کلمات کلیدی سی‌وی را برای سیستم‌های ردیابی متقاضیان بهینه می‌کند.",
+       prompt_text: `You are an ATS (Applicant Tracking System) optimization expert.
+
+   OBJECTIVE:
+   Ensure the CV passes through ATS filters while remaining readable for humans.
+
+   KEY OPTIMIZATIONS:
+   1. Keywords:
+      - Extract exact keywords from job description
+      - Include variations (e.g., "Project Management" and "PM")
+      - Place keywords in context, not just listed
+      - Include both spelled-out and acronym versions
+
+   2. Formatting:
+      - Use standard section headings (Experience, Education, Skills)
+      - Avoid tables, columns, headers/footers
+      - Use standard fonts
+      - No images or graphics
+      - Simple bullet points
+
+   3. Structure:
+      - Contact info at the top
+      - Clear date formats (MM/YYYY)
+      - Company name, title, dates in consistent order
+      - Avoid creative layouts
+
+   4. Content:
+      - Match job title variations
+      - Include required qualifications verbatim
+      - Quantify achievements with numbers
+      - Use industry-standard terminology
+
+   Output the CV in a clean, ATS-friendly format while ensuring it's still engaging for human readers.`,
+       category: "cv_tailoring",
+       is_active: true,
+       sort_order: 5
+     }
+   ];
+   
+   export const PROMPT_CATEGORIES = [
+     { value: 'cv_tailoring', label_en: 'CV Tailoring', label_fa: 'تنظیم سی‌وی' },
+     { value: 'cover_letter', label_en: 'Cover Letter', label_fa: 'کاورلتر' },
+     { value: 'email', label_en: 'Application Email', label_fa: 'ایمیل درخواست' },
+     { value: 'interview', label_en: 'Interview Prep', label_fa: 'آماده‌سازی مصاحبه' },
+     { value: 'general', label_en: 'General', label_fa: 'عمومی' },
+   ];
+   ```
+
+2. Create prompt-service.ts:
+   ```typescript
+   // ============================================
+   // [F119] src/lib/prompts/prompt-service.ts
+   // ============================================
+   
+   import { SupabaseClient } from '@supabase/supabase-js';
+   import { Prompt } from '@/lib/types';
+   import { DEFAULT_PROMPTS } from './default-prompts';
+   
+   export class PromptService {
+     constructor(private supabase: SupabaseClient) {}
+     
+     async getAllPrompts(activeOnly: boolean = false): Promise<Prompt[]> {
+       let query = this.supabase
+         .from('prompts')
+         .select('*')
+         .order('sort_order', { ascending: true });
+       
+       if (activeOnly) {
+         query = query.eq('is_active', true);
+       }
+       
+       const { data, error } = await query;
+       
+       if (error) throw error;
+       return data || [];
+     }
+     
+     async getPromptById(id: string): Promise<Prompt | null> {
+       const { data, error } = await this.supabase
+         .from('prompts')
+         .select('*')
+         .eq('id', id)
+         .single();
+       
+       if (error) {
+         if (error.code === 'PGRST116') return null;
+         throw error;
+       }
+       
+       return data;
+     }
+     
+     async getPromptsByCategory(category: string): Promise<Prompt[]> {
+       const { data, error } = await this.supabase
+         .from('prompts')
+         .select('*')
+         .eq('category', category)
+         .eq('is_active', true)
+         .order('sort_order', { ascending: true });
+       
+       if (error) throw error;
+       return data || [];
+     }
+     
+     async getPromptsByIds(ids: string[]): Promise<Prompt[]> {
+       if (ids.length === 0) return [];
+       
+       const { data, error } = await this.supabase
+         .from('prompts')
+         .select('*')
+         .in('id', ids);
+       
+       if (error) throw error;
+       return data || [];
+     }
+     
+     async createPrompt(prompt: Omit<Prompt, 'id' | 'created_at' | 'updated_at'>): Promise<Prompt> {
+       const { data, error } = await this.supabase
+         .from('prompts')
+         .insert(prompt)
+         .select()
+         .single();
+       
+       if (error) throw error;
+       return data;
+     }
+     
+     async updatePrompt(id: string, updates: Partial<Prompt>): Promise<Prompt> {
+       // Remove fields that shouldn't be updated
+       const { id: _, created_at, updated_at, ...validUpdates } = updates as any;
+       
+       const { data, error } = await this.supabase
+         .from('prompts')
+         .update(validUpdates)
+         .eq('id', id)
+         .select()
+         .single();
+       
+       if (error) throw error;
+       return data;
+     }
+     
+     async deletePrompt(id: string): Promise<void> {
+       const { error } = await this.supabase
+         .from('prompts')
+         .delete()
+         .eq('id', id);
+       
+       if (error) throw error;
+     }
+     
+     async togglePromptActive(id: string): Promise<Prompt> {
+       // Get current state
+       const prompt = await this.getPromptById(id);
+       if (!prompt) throw new Error('Prompt not found');
+       
+       // Toggle
+       return this.updatePrompt(id, { is_active: !prompt.is_active });
+     }
+     
+     async reorderPrompts(orderedIds: string[]): Promise<void> {
+       // Update sort_order for each prompt
+       const updates = orderedIds.map((id, index) => 
+         this.supabase
+           .from('prompts')
+           .update({ sort_order: index })
+           .eq('id', id)
+       );
+       
+       await Promise.all(updates);
+     }
+     
+     async seedDefaultPrompts(): Promise<void> {
+       // Check if prompts already exist
+       const existing = await this.getAllPrompts();
+       if (existing.length > 0) {
+         console.log('Prompts already exist, skipping seed');
+         return;
+       }
+       
+       // Insert default prompts
+       const { error } = await this.supabase
+         .from('prompts')
+         .insert(DEFAULT_PROMPTS);
+       
+       if (error) throw error;
+       console.log('Default prompts seeded successfully');
+     }
+     
+     async searchPrompts(query: string, locale: 'en' | 'fa' = 'en'): Promise<Prompt[]> {
+       const searchField = locale === 'fa' ? 'title_fa' : 'title_en';
+       const descField = locale === 'fa' ? 'description_fa' : 'description_en';
+       
+       const { data, error } = await this.supabase
+         .from('prompts')
+         .select('*')
+         .or(`${searchField}.ilike.%${query}%,${descField}.ilike.%${query}%`)
+         .eq('is_active', true)
+         .order('sort_order', { ascending: true });
+       
+       if (error) throw error;
+       return data || [];
+     }
+   }
+   
+   export function createPromptService(supabase: SupabaseClient): PromptService {
+     return new PromptService(supabase);
+   }
+   ```
+
+3. Create src/lib/prompts/index.ts:
+   ```typescript
+   // ============================================
+   // [F120] src/lib/prompts/index.ts
+   // ============================================
+   
+   export * from './prompt-service';
+   export * from './default-prompts';
+   ```
+
+4. Create API route for prompts (GET all, POST new):
+   ```typescript
+   // ============================================
+   // [F024] src/app/api/prompts/route.ts
+   // ============================================
+   
+   import { NextRequest, NextResponse } from 'next/server';
+   import { createServerSupabaseClient } from '@/lib/supabase/server';
+   import { createPromptService } from '@/lib/prompts';
+   
+   // GET - List all prompts
+   export async function GET(request: NextRequest) {
+     try {
+       const { searchParams } = new URL(request.url);
+       const activeOnly = searchParams.get('active') === 'true';
+       const category = searchParams.get('category');
+       const search = searchParams.get('search');
+       const locale = (searchParams.get('locale') || 'en') as 'en' | 'fa';
+       
+       const supabase = createServerSupabaseClient();
+       const promptService = createPromptService(supabase);
+       
+       let prompts;
+       
+       if (search) {
+         prompts = await promptService.searchPrompts(search, locale);
+       } else if (category) {
+         prompts = await promptService.getPromptsByCategory(category);
+       } else {
+         prompts = await promptService.getAllPrompts(activeOnly);
+       }
+       
+       return NextResponse.json({ prompts });
+       
+     } catch (error: any) {
+       console.error('GET /api/prompts error:', error);
+       return NextResponse.json(
+         { error: error.message || 'Failed to fetch prompts' },
+         { status: 500 }
+       );
+     }
+   }
+   
+   // POST - Create new prompt
+   export async function POST(request: NextRequest) {
+     try {
+       const body = await request.json();
+       
+       const {
+         title_en,
+         title_fa,
+         description_en,
+         description_fa,
+         prompt_text,
+         category,
+         is_active = true,
+         sort_order = 0
+       } = body;
+       
+       // Validation
+       if (!title_en || !title_fa || !prompt_text) {
+         return NextResponse.json(
+           { error: 'title_en, title_fa, and prompt_text are required' },
+           { status: 400 }
+         );
+       }
+       
+       const supabase = createServerSupabaseClient();
+       const promptService = createPromptService(supabase);
+       
+       const prompt = await promptService.createPrompt({
+         title_en,
+         title_fa,
+         description_en: description_en || '',
+         description_fa: description_fa || '',
+         prompt_text,
+         category: category || 'general',
+         is_active,
+         sort_order
+       });
+       
+       return NextResponse.json({ prompt, success: true });
+       
+     } catch (error: any) {
+       console.error('POST /api/prompts error:', error);
+       return NextResponse.json(
+         { error: error.message || 'Failed to create prompt' },
+         { status: 500 }
+       );
+     }
+   }
+   ```
+
+5. Create API route for single prompt:
+   ```typescript
+   // ============================================
+   // [F118] src/app/api/prompts/[id]/route.ts
+   // ============================================
+   
+   import { NextRequest, NextResponse } from 'next/server';
+   import { createServerSupabaseClient } from '@/lib/supabase/server';
+   import { createPromptService } from '@/lib/prompts';
+   
+   interface RouteParams {
+     params: { id: string };
+   }
+   
+   // GET - Get single prompt
+   export async function GET(request: NextRequest, { params }: RouteParams) {
+     try {
+       const { id } = params;
+       
+       const supabase = createServerSupabaseClient();
+       const promptService = createPromptService(supabase);
+       
+       const prompt = await promptService.getPromptById(id);
+       
+       if (!prompt) {
+         return NextResponse.json(
+           { error: 'Prompt not found' },
+           { status: 404 }
+         );
+       }
+       
+       return NextResponse.json({ prompt });
+       
+     } catch (error: any) {
+       console.error('GET /api/prompts/[id] error:', error);
+       return NextResponse.json(
+         { error: error.message || 'Failed to fetch prompt' },
+         { status: 500 }
+       );
+     }
+   }
+   
+   // PUT - Update prompt
+   export async function PUT(request: NextRequest, { params }: RouteParams) {
+     try {
+       const { id } = params;
+       const body = await request.json();
+       
+       const supabase = createServerSupabaseClient();
+       const promptService = createPromptService(supabase);
+       
+       // Check if prompt exists
+       const existing = await promptService.getPromptById(id);
+       if (!existing) {
+         return NextResponse.json(
+           { error: 'Prompt not found' },
+           { status: 404 }
+         );
+       }
+       
+       const prompt = await promptService.updatePrompt(id, body);
+       
+       return NextResponse.json({ prompt, success: true });
+       
+     } catch (error: any) {
+       console.error('PUT /api/prompts/[id] error:', error);
+       return NextResponse.json(
+         { error: error.message || 'Failed to update prompt' },
+         { status: 500 }
+       );
+     }
+   }
+   
+   // DELETE - Delete prompt
+   export async function DELETE(request: NextRequest, { params }: RouteParams) {
+     try {
+       const { id } = params;
+       
+       const supabase = createServerSupabaseClient();
+       const promptService = createPromptService(supabase);
+       
+       await promptService.deletePrompt(id);
+       
+       return NextResponse.json({ success: true });
+       
+     } catch (error: any) {
+       console.error('DELETE /api/prompts/[id] error:', error);
+       return NextResponse.json(
+         { error: error.message || 'Failed to delete prompt' },
+         { status: 500 }
+       );
+     }
+   }
+   
+   // PATCH - Toggle active status
+   export async function PATCH(request: NextRequest, { params }: RouteParams) {
+     try {
+       const { id } = params;
+       
+       const supabase = createServerSupabaseClient();
+       const promptService = createPromptService(supabase);
+       
+       const prompt = await promptService.togglePromptActive(id);
+       
+       return NextResponse.json({ prompt, success: true });
+       
+     } catch (error: any) {
+       console.error('PATCH /api/prompts/[id] error:', error);
+       return NextResponse.json(
+         { error: error.message || 'Failed to toggle prompt' },
+         { status: 500 }
+       );
+     }
+   }
+   ```
+
+6. Create usePrompts hook:
+   ```typescript
+   // ============================================
+   // [F083] src/hooks/usePrompts.ts
+   // ============================================
+   
+   'use client';
+   
+   import { useState, useEffect, useCallback } from 'react';
+   import { Prompt } from '@/lib/types';
+   import { PROMPT_CATEGORIES } from '@/lib/prompts/default-prompts';
+   
+   interface UsePromptsOptions {
+     activeOnly?: boolean;
+     category?: string;
+     autoFetch?: boolean;
+   }
+   
+   interface UsePromptsReturn {
+     prompts: Prompt[];
+     loading: boolean;
+     error: string | null;
+     categories: typeof PROMPT_CATEGORIES;
+     
+     // Actions
+     fetchPrompts: () => Promise<void>;
+     searchPrompts: (query: string, locale?: 'en' | 'fa') => Promise<void>;
+     createPrompt: (prompt: Omit<Prompt, 'id' | 'created_at' | 'updated_at'>) => Promise<Prompt>;
+     updatePrompt: (id: string, updates: Partial<Prompt>) => Promise<Prompt>;
+     deletePrompt: (id: string) => Promise<void>;
+     togglePromptActive: (id: string) => Promise<Prompt>;
+     getPromptsByIds: (ids: string[]) => Promise<Prompt[]>;
+   }
+   
+   export function usePrompts(options: UsePromptsOptions = {}): UsePromptsReturn {
+     const { activeOnly = false, category, autoFetch = true } = options;
+     
+     const [prompts, setPrompts] = useState<Prompt[]>([]);
+     const [loading, setLoading] = useState(true);
+     const [error, setError] = useState<string | null>(null);
+     
+     const fetchPrompts = useCallback(async () => {
+       setLoading(true);
+       setError(null);
+       
+       try {
+         const params = new URLSearchParams();
+         if (activeOnly) params.set('active', 'true');
+         if (category) params.set('category', category);
+         
+         const res = await fetch(`/api/prompts?${params}`);
+         const data = await res.json();
+         
+         if (data.error) throw new Error(data.error);
+         
+         setPrompts(data.prompts || []);
+         
+       } catch (err: any) {
+         setError(err.message);
+         setPrompts([]);
+       } finally {
+         setLoading(false);
+       }
+     }, [activeOnly, category]);
+     
+     const searchPrompts = useCallback(async (query: string, locale: 'en' | 'fa' = 'en') => {
+       setLoading(true);
+       setError(null);
+       
+       try {
+         const params = new URLSearchParams({
+           search: query,
+           locale
+         });
+         
+         const res = await fetch(`/api/prompts?${params}`);
+         const data = await res.json();
+         
+         if (data.error) throw new Error(data.error);
+         
+         setPrompts(data.prompts || []);
+         
+       } catch (err: any) {
+         setError(err.message);
+       } finally {
+         setLoading(false);
+       }
+     }, []);
+     
+     const createPrompt = useCallback(async (
+       prompt: Omit<Prompt, 'id' | 'created_at' | 'updated_at'>
+     ): Promise<Prompt> => {
+       const res = await fetch('/api/prompts', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify(prompt)
+       });
+       
+       const data = await res.json();
+       if (data.error) throw new Error(data.error);
+       
+       // Add to local state
+       setPrompts(prev => [...prev, data.prompt]);
+       
+       return data.prompt;
+     }, []);
+     
+     const updatePrompt = useCallback(async (
+       id: string,
+       updates: Partial<Prompt>
+     ): Promise<Prompt> => {
+       const res = await fetch(`/api/prompts/${id}`, {
+         method: 'PUT',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify(updates)
+       });
+       
+       const data = await res.json();
+       if (data.error) throw new Error(data.error);
+       
+       // Update local state
+       setPrompts(prev => prev.map(p => p.id === id ? data.prompt : p));
+       
+       return data.prompt;
+     }, []);
+     
+     const deletePrompt = useCallback(async (id: string): Promise<void> => {
+       const res = await fetch(`/api/prompts/${id}`, {
+         method: 'DELETE'
+       });
+       
+       const data = await res.json();
+       if (data.error) throw new Error(data.error);
+       
+       // Remove from local state
+       setPrompts(prev => prev.filter(p => p.id !== id));
+     }, []);
+     
+     const togglePromptActive = useCallback(async (id: string): Promise<Prompt> => {
+       const res = await fetch(`/api/prompts/${id}`, {
+         method: 'PATCH'
+       });
+       
+       const data = await res.json();
+       if (data.error) throw new Error(data.error);
+       
+       // Update local state
+       setPrompts(prev => prev.map(p => p.id === id ? data.prompt : p));
+       
+       return data.prompt;
+     }, []);
+     
+     const getPromptsByIds = useCallback(async (ids: string[]): Promise<Prompt[]> => {
+       if (ids.length === 0) return [];
+       
+       // First check local cache
+       const localPrompts = prompts.filter(p => ids.includes(p.id));
+       if (localPrompts.length === ids.length) {
+         return localPrompts;
+       }
+       
+       // Fetch from API
+       const res = await fetch(`/api/prompts?ids=${ids.join(',')}`);
+       const data = await res.json();
+       
+       if (data.error) throw new Error(data.error);
+       return data.prompts || [];
+     }, [prompts]);
+     
+     // Auto fetch on mount
+     useEffect(() => {
+       if (autoFetch) {
+         fetchPrompts();
+       }
+     }, [autoFetch, fetchPrompts]);
+     
+     return {
+       prompts,
+       loading,
+       error,
+       categories: PROMPT_CATEGORIES,
+       fetchPrompts,
+       searchPrompts,
+       createPrompt,
+       updatePrompt,
+       deletePrompt,
+       togglePromptActive,
+       getPromptsByIds
+     };
+   }
+   ```
+
+7. Create PromptCard.tsx:
+   ```typescript
+   // ============================================
+   // [F122] src/components/prompts/PromptCard.tsx
+   // ============================================
+   
+   'use client';
+   
+   import { useTranslations } from 'next-intl';
+   import { useParams } from 'next/navigation';
+   import { Prompt } from '@/lib/types';
+   import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+   import { Badge } from '@/components/ui/badge';
+   import { Button } from '@/components/ui/button';
+   import { 
+     Pencil, Trash2, Eye, Power, PowerOff, GripVertical, Check 
+   } from 'lucide-react';
+   import { cn } from '@/lib/utils';
+   import { PROMPT_CATEGORIES } from '@/lib/prompts/default-prompts';
+   
+   interface PromptCardProps {
+     prompt: Prompt;
+     onEdit?: (prompt: Prompt) => void;
+     onDelete?: (prompt: Prompt) => void;
+     onPreview?: (prompt: Prompt) => void;
+     onToggleActive?: (prompt: Prompt) => void;
+     onSelect?: (prompt: Prompt) => void;
+     selected?: boolean;
+     selectable?: boolean;
+     editable?: boolean;
+     draggable?: boolean;
+     className?: string;
+   }
+   
+   export function PromptCard({
+     prompt,
+     onEdit,
+     onDelete,
+     onPreview,
+     onToggleActive,
+     onSelect,
+     selected = false,
+     selectable = false,
+     editable = false,
+     draggable = false,
+     className
+   }: PromptCardProps) {
+     const params = useParams();
+     const locale = params.locale as 'en' | 'fa';
+     const t = useTranslations('prompts');
+     
+     const title = locale === 'fa' ? prompt.title_fa : prompt.title_en;
+     const description = locale === 'fa' ? prompt.description_fa : prompt.description_en;
+     
+     const categoryInfo = PROMPT_CATEGORIES.find(c => c.value === prompt.category);
+     const categoryLabel = locale === 'fa' 
+       ? categoryInfo?.label_fa 
+       : categoryInfo?.label_en;
+     
+     const handleClick = () => {
+       if (selectable && onSelect) {
+         onSelect(prompt);
+       }
+     };
+     
+     return (
+       <Card 
+         className={cn(
+           'relative transition-all',
+           selectable && 'cursor-pointer hover:border-primary',
+           selected && 'border-primary ring-2 ring-primary/20',
+           !prompt.is_active && 'opacity-60',
+           className
+         )}
+         onClick={handleClick}
+       >
+         {/* Drag Handle */}
+         {draggable && (
+           <div className="absolute left-2 top-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing">
+             <GripVertical className="h-5 w-5 text-muted-foreground" />
+           </div>
+         )}
+         
+         {/* Selected Indicator */}
+         {selected && (
+           <div className="absolute top-3 right-3 bg-primary text-primary-foreground rounded-full p-1">
+             <Check className="h-4 w-4" />
+           </div>
+         )}
+         
+         <CardHeader className={cn(draggable && 'pl-10')}>
+           <div className="flex items-start justify-between gap-2">
+             <div className="space-y-1 flex-1">
+               <CardTitle className="text-lg">{title}</CardTitle>
+               <CardDescription className="line-clamp-2">
+                 {description}
+               </CardDescription>
+             </div>
+           </div>
+           
+           <div className="flex items-center gap-2 mt-2">
+             <Badge variant="outline">{categoryLabel}</Badge>
+             <Badge 
+               variant={prompt.is_active ? 'default' : 'secondary'}
+               className={cn(
+                 prompt.is_active 
+                   ? 'bg-green-100 text-green-700 hover:bg-green-100' 
+                   : ''
+               )}
+             >
+               {prompt.is_active ? t('active') : t('inactive')}
+             </Badge>
+           </div>
+         </CardHeader>
+         
+         {editable && (
+           <CardContent className={cn(draggable && 'pl-10')}>
+             <div className="flex items-center gap-2">
+               <Button 
+                 variant="ghost" 
+                 size="sm"
+                 onClick={(e) => { e.stopPropagation(); onPreview?.(prompt); }}
+               >
+                 <Eye className="h-4 w-4 mr-1" />
+                 {t('preview')}
+               </Button>
+               <Button 
+                 variant="ghost" 
+                 size="sm"
+                 onClick={(e) => { e.stopPropagation(); onEdit?.(prompt); }}
+               >
+                 <Pencil className="h-4 w-4 mr-1" />
+                 {t('edit')}
+               </Button>
+               <Button 
+                 variant="ghost" 
+                 size="sm"
+                 onClick={(e) => { e.stopPropagation(); onToggleActive?.(prompt); }}
+               >
+                 {prompt.is_active ? (
+                   <>
+                     <PowerOff className="h-4 w-4 mr-1" />
+                     {t('deactivate')}
+                   </>
+                 ) : (
+                   <>
+                     <Power className="h-4 w-4 mr-1" />
+                     {t('activate')}
+                   </>
+                 )}
+               </Button>
+               <Button 
+                 variant="ghost" 
+                 size="sm"
+                 className="text-destructive hover:text-destructive"
+                 onClick={(e) => { e.stopPropagation(); onDelete?.(prompt); }}
+               >
+                 <Trash2 className="h-4 w-4 mr-1" />
+                 {t('delete')}
+               </Button>
+             </div>
+           </CardContent>
+         )}
+       </Card>
+     );
+   }
+   ```
+
+8. Create PromptPreview.tsx:
+   ```typescript
+   // ============================================
+   // [F123] src/components/prompts/PromptPreview.tsx
+   // ============================================
+   
+   'use client';
+   
+   import { useTranslations } from 'next-intl';
+   import { useParams } from 'next/navigation';
+   import { Prompt } from '@/lib/types';
+   import {
+     Dialog,
+     DialogContent,
+     DialogHeader,
+     DialogTitle,
+     DialogDescription,
+   } from '@/components/ui/dialog';
+   import { Badge } from '@/components/ui/badge';
+   import { ScrollArea } from '@/components/ui/scroll-area';
+   import { PROMPT_CATEGORIES } from '@/lib/prompts/default-prompts';
+   
+   interface PromptPreviewProps {
+     prompt: Prompt | null;
+     open: boolean;
+     onClose: () => void;
+   }
+   
+   export function PromptPreview({ prompt, open, onClose }: PromptPreviewProps) {
+     const params = useParams();
+     const locale = params.locale as 'en' | 'fa';
+     const t = useTranslations('prompts');
+     
+     if (!prompt) return null;
+     
+     const title = locale === 'fa' ? prompt.title_fa : prompt.title_en;
+     const description = locale === 'fa' ? prompt.description_fa : prompt.description_en;
+     
+     const categoryInfo = PROMPT_CATEGORIES.find(c => c.value === prompt.category);
+     const categoryLabel = locale === 'fa' 
+       ? categoryInfo?.label_fa 
+       : categoryInfo?.label_en;
+     
+     return (
+       <Dialog open={open} onOpenChange={onClose}>
+         <DialogContent className="max-w-3xl max-h-[90vh]">
+           <DialogHeader>
+             <div className="flex items-center gap-2 mb-2">
+               <Badge variant="outline">{categoryLabel}</Badge>
+               <Badge variant={prompt.is_active ? 'default' : 'secondary'}>
+                 {prompt.is_active ? t('active') : t('inactive')}
+               </Badge>
+             </div>
+             <DialogTitle>{title}</DialogTitle>
+             <DialogDescription>{description}</DialogDescription>
+           </DialogHeader>
+           
+           <div className="mt-4">
+             <h4 className="text-sm font-medium mb-2">{t('prompt_text')}</h4>
+             <ScrollArea className="h-[400px] rounded-md border p-4 bg-muted/50">
+               <pre className="text-sm whitespace-pre-wrap font-mono">
+                 {prompt.prompt_text}
+               </pre>
+             </ScrollArea>
+           </div>
+         </DialogContent>
+       </Dialog>
+     );
+   }
+   ```
+
+9. Create PromptEditor.tsx:
+   ```typescript
+   // ============================================
+   // [F046] src/components/prompts/PromptEditor.tsx
+   // ============================================
+   
+   'use client';
+   
+   import { useState, useEffect } from 'react';
+   import { useTranslations } from 'next-intl';
+   import { Prompt } from '@/lib/types';
+   import { PROMPT_CATEGORIES } from '@/lib/prompts/default-prompts';
+   import {
+     Dialog,
+     DialogContent,
+     DialogHeader,
+     DialogTitle,
+     DialogFooter,
+   } from '@/components/ui/dialog';
+   import { Button } from '@/components/ui/button';
+   import { Input } from '@/components/ui/input';
+   import { Label } from '@/components/ui/label';
+   import { Textarea } from '@/components/ui/textarea';
+   import {
+     Select,
+     SelectContent,
+     SelectItem,
+     SelectTrigger,
+     SelectValue,
+   } from '@/components/ui/select';
+   import { Switch } from '@/components/ui/switch';
+   import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+   import { Loader2 } from 'lucide-react';
+   
+   interface PromptEditorProps {
+     prompt?: Prompt | null;  // null = create new
+     open: boolean;
+     onClose: () => void;
+     onSave: (prompt: Omit<Prompt, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
+   }
+   
+   const emptyPrompt = {
+     title_en: '',
+     title_fa: '',
+     description_en: '',
+     description_fa: '',
+     prompt_text: '',
+     category: 'general',
+     is_active: true,
+     sort_order: 0
+   };
+   
+   export function PromptEditor({ prompt, open, onClose, onSave }: PromptEditorProps) {
+     const t = useTranslations('prompts');
+     const [formData, setFormData] = useState(emptyPrompt);
+     const [saving, setSaving] = useState(false);
+     const [activeTab, setActiveTab] = useState<'en' | 'fa'>('en');
+     
+     // Reset form when prompt changes
+     useEffect(() => {
+       if (prompt) {
+         setFormData({
+           title_en: prompt.title_en,
+           title_fa: prompt.title_fa,
+           description_en: prompt.description_en,
+           description_fa: prompt.description_fa,
+           prompt_text: prompt.prompt_text,
+           category: prompt.category,
+           is_active: prompt.is_active,
+           sort_order: prompt.sort_order
+         });
+       } else {
+         setFormData(emptyPrompt);
+       }
+     }, [prompt, open]);
+     
+     const handleChange = (field: string, value: any) => {
+       setFormData(prev => ({ ...prev, [field]: value }));
+     };
+     
+     const handleSubmit = async () => {
+       // Validation
+       if (!formData.title_en || !formData.title_fa || !formData.prompt_text) {
+         return;
+       }
+       
+       setSaving(true);
+       try {
+         await onSave(formData);
+         onClose();
+       } finally {
+         setSaving(false);
+       }
+     };
+     
+     const isEditing = prompt !== null && prompt !== undefined;
+     
+     return (
+       <Dialog open={open} onOpenChange={onClose}>
+         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+           <DialogHeader>
+             <DialogTitle>
+               {isEditing ? t('edit_prompt') : t('create_prompt')}
+             </DialogTitle>
+           </DialogHeader>
+           
+           <div className="space-y-6 py-4">
+             {/* Title and Description - Bilingual */}
+             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'en' | 'fa')}>
+               <TabsList className="grid w-full grid-cols-2">
+                 <TabsTrigger value="en">English</TabsTrigger>
+                 <TabsTrigger value="fa">فارسی</TabsTrigger>
+               </TabsList>
+               
+               <TabsContent value="en" className="space-y-4 mt-4">
+                 <div className="grid gap-2">
+                   <Label htmlFor="title_en">{t('title')} (English) *</Label>
+                   <Input
+                     id="title_en"
+                     value={formData.title_en}
+                     onChange={(e) => handleChange('title_en', e.target.value)}
+                     placeholder="Professional CV Tailoring"
+                   />
+                 </div>
+                 <div className="grid gap-2">
+                   <Label htmlFor="description_en">{t('description')} (English)</Label>
+                   <Textarea
+                     id="description_en"
+                     value={formData.description_en}
+                     onChange={(e) => handleChange('description_en', e.target.value)}
+                     placeholder="A brief description of what this prompt does..."
+                     rows={2}
+                   />
+                 </div>
+               </TabsContent>
+               
+               <TabsContent value="fa" className="space-y-4 mt-4" dir="rtl">
+                 <div className="grid gap-2">
+                   <Label htmlFor="title_fa">{t('title')} (فارسی) *</Label>
+                   <Input
+                     id="title_fa"
+                     value={formData.title_fa}
+                     onChange={(e) => handleChange('title_fa', e.target.value)}
+                     placeholder="تنظیم حرفه‌ای سی‌وی"
+                   />
+                 </div>
+                 <div className="grid gap-2">
+                   <Label htmlFor="description_fa">{t('description')} (فارسی)</Label>
+                   <Textarea
+                     id="description_fa"
+                     value={formData.description_fa}
+                     onChange={(e) => handleChange('description_fa', e.target.value)}
+                     placeholder="توضیح کوتاهی درباره عملکرد این پرامپت..."
+                     rows={2}
+                   />
+                 </div>
+               </TabsContent>
+             </Tabs>
+             
+             {/* Category */}
+             <div className="grid gap-2">
+               <Label htmlFor="category">{t('category')}</Label>
+               <Select
+                 value={formData.category}
+                 onValueChange={(v) => handleChange('category', v)}
+               >
+                 <SelectTrigger>
+                   <SelectValue />
+                 </SelectTrigger>
+                 <SelectContent>
+                   {PROMPT_CATEGORIES.map((cat) => (
+                     <SelectItem key={cat.value} value={cat.value}>
+                       {cat.label_en} / {cat.label_fa}
+                     </SelectItem>
+                   ))}
+                 </SelectContent>
+               </Select>
+             </div>
+             
+             {/* Prompt Text */}
+             <div className="grid gap-2">
+               <Label htmlFor="prompt_text">{t('prompt_text')} *</Label>
+               <Textarea
+                 id="prompt_text"
+                 value={formData.prompt_text}
+                 onChange={(e) => handleChange('prompt_text', e.target.value)}
+                 placeholder="You are an expert CV writer..."
+                 rows={12}
+                 className="font-mono text-sm"
+               />
+               <p className="text-xs text-muted-foreground">
+                 {t('prompt_text_hint')}
+               </p>
+             </div>
+             
+             {/* Active Status */}
+             <div className="flex items-center justify-between">
+               <div>
+                 <Label htmlFor="is_active">{t('active_status')}</Label>
+                 <p className="text-sm text-muted-foreground">
+                   {t('active_status_hint')}
+                 </p>
+               </div>
+               <Switch
+                 id="is_active"
+                 checked={formData.is_active}
+                 onCheckedChange={(v) => handleChange('is_active', v)}
+               />
+             </div>
+           </div>
+           
+           <DialogFooter>
+             <Button variant="outline" onClick={onClose} disabled={saving}>
+               {t('cancel')}
+             </Button>
+             <Button onClick={handleSubmit} disabled={saving}>
+               {saving ? (
+                 <>
+                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                   {t('saving')}
+                 </>
+               ) : (
+                 t('save')
+               )}
+             </Button>
+           </DialogFooter>
+         </DialogContent>
+       </Dialog>
+     );
+   }
+   ```
+
+10. Create PromptCategoryFilter.tsx:
+    ```typescript
+    // ============================================
+    // [F048] src/components/prompts/PromptCategoryFilter.tsx
+    // ============================================
+    
+    'use client';
+    
+    import { useTranslations } from 'next-intl';
+    import { useParams } from 'next/navigation';
+    import { PROMPT_CATEGORIES } from '@/lib/prompts/default-prompts';
+    import { Badge } from '@/components/ui/badge';
+    import { cn } from '@/lib/utils';
+    
+    interface PromptCategoryFilterProps {
+      selectedCategory: string | null;
+      onCategoryChange: (category: string | null) => void;
+      className?: string;
+    }
+    
+    export function PromptCategoryFilter({
+      selectedCategory,
+      onCategoryChange,
+      className
+    }: PromptCategoryFilterProps) {
+      const params = useParams();
+      const locale = params.locale as 'en' | 'fa';
+      const t = useTranslations('prompts');
+      
+      return (
+        <div className={cn('flex flex-wrap gap-2', className)}>
+          <Badge
+            variant={selectedCategory === null ? 'default' : 'outline'}
+            className="cursor-pointer"
+            onClick={() => onCategoryChange(null)}
+          >
+            {t('all_categories')}
+          </Badge>
+          {PROMPT_CATEGORIES.map((cat) => (
+            <Badge
+              key={cat.value}
+              variant={selectedCategory === cat.value ? 'default' : 'outline'}
+              className="cursor-pointer"
+              onClick={() => onCategoryChange(cat.value)}
+            >
+              {locale === 'fa' ? cat.label_fa : cat.label_en}
+            </Badge>
+          ))}
+        </div>
+      );
+    }
+    ```
+
+11. Create PromptList.tsx:
+    ```typescript
+    // ============================================
+    // [F045] src/components/prompts/PromptList.tsx
+    // ============================================
+    
+    'use client';
+    
+    import { useState } from 'react';
+    import { useTranslations } from 'next-intl';
+    import { Prompt } from '@/lib/types';
+    import { PromptCard } from './PromptCard';
+    import { PromptCategoryFilter } from './PromptCategoryFilter';
+    import { Input } from '@/components/ui/input';
+    import { Search, Loader2 } from 'lucide-react';
+    import { cn } from '@/lib/utils';
+    
+    interface PromptListProps {
+      prompts: Prompt[];
+      loading?: boolean;
+      editable?: boolean;
+      selectable?: boolean;
+      selectedIds?: string[];
+      onEdit?: (prompt: Prompt) => void;
+      onDelete?: (prompt: Prompt) => void;
+      onPreview?: (prompt: Prompt) => void;
+      onToggleActive?: (prompt: Prompt) => void;
+      onSelect?: (prompt: Prompt) => void;
+      onSearch?: (query: string) => void;
+      className?: string;
+    }
+    
+    export function PromptList({
+      prompts,
+      loading = false,
+      editable = false,
+      selectable = false,
+      selectedIds = [],
+      onEdit,
+      onDelete,
+      onPreview,
+      onToggleActive,
+      onSelect,
+      onSearch,
+      className
+    }: PromptListProps) {
+      const t = useTranslations('prompts');
+      const [searchQuery, setSearchQuery] = useState('');
+      const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+      
+      // Filter prompts locally
+      const filteredPrompts = prompts.filter(prompt => {
+        // Category filter
+        if (selectedCategory && prompt.category !== selectedCategory) {
+          return false;
+        }
+        
+        // Search filter (client-side for immediate feedback)
+        if (searchQuery) {
+          const query = searchQuery.toLowerCase();
+          return (
+            prompt.title_en.toLowerCase().includes(query) ||
+            prompt.title_fa.includes(searchQuery) ||
+            prompt.description_en.toLowerCase().includes(query) ||
+            prompt.description_fa.includes(searchQuery)
+          );
+        }
+        
+        return true;
+      });
+      
+      const handleSearchChange = (value: string) => {
+        setSearchQuery(value);
+        onSearch?.(value);
+      };
+      
+      return (
+        <div className={cn('space-y-4', className)}>
+          {/* Search and Filter */}
+          <div className="space-y-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={t('search_prompts')}
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            <PromptCategoryFilter
+              selectedCategory={selectedCategory}
+              onCategoryChange={setSelectedCategory}
+            />
+          </div>
+          
+          {/* Loading State */}
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          )}
+          
+          {/* Empty State */}
+          {!loading && filteredPrompts.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">{t('no_prompts_found')}</p>
+            </div>
+          )}
+          
+          {/* Prompt Grid */}
+          {!loading && filteredPrompts.length > 0 && (
+            <div className="grid gap-4 md:grid-cols-2">
+              {filteredPrompts.map((prompt) => (
+                <PromptCard
+                  key={prompt.id}
+                  prompt={prompt}
+                  editable={editable}
+                  selectable={selectable}
+                  selected={selectedIds.includes(prompt.id)}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  onPreview={onPreview}
+                  onToggleActive={onToggleActive}
+                  onSelect={onSelect}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+    ```
+
+12. Create PromptSelector.tsx (for use in application flow):
+    ```typescript
+    // ============================================
+    // [F047] src/components/prompts/PromptSelector.tsx
+    // ============================================
+    
+    'use client';
+    
+    import { useState, useCallback, useEffect } from 'react';
+    import { useTranslations } from 'next-intl';
+    import { Prompt } from '@/lib/types';
+    import { usePrompts } from '@/hooks/usePrompts';
+    import { PromptList } from './PromptList';
+    import { PromptPreview } from './PromptPreview';
+    import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+    import { Badge } from '@/components/ui/badge';
+    import { Button } from '@/components/ui/button';
+    import { FileText, X } from 'lucide-react';
+    import { cn } from '@/lib/utils';
+    
+    interface PromptSelectorProps {
+      selectedIds: string[];
+      onSelectionChange: (ids: string[]) => void;
+      maxSelection?: number;  // null = unlimited
+      className?: string;
+    }
+    
+    export function PromptSelector({
+      selectedIds,
+      onSelectionChange,
+      maxSelection = null,
+      className
+    }: PromptSelectorProps) {
+      const t = useTranslations('prompts');
+      const { prompts, loading } = usePrompts({ activeOnly: true });
+      const [previewPrompt, setPreviewPrompt] = useState<Prompt | null>(null);
+      
+      const handleSelect = useCallback((prompt: Prompt) => {
+        const isSelected = selectedIds.includes(prompt.id);
+        
+        if (isSelected) {
+          // Deselect
+          onSelectionChange(selectedIds.filter(id => id !== prompt.id));
+        } else {
+          // Select (check max)
+          if (maxSelection && selectedIds.length >= maxSelection) {
+            // Replace last selection
+            onSelectionChange([...selectedIds.slice(0, -1), prompt.id]);
+          } else {
+            onSelectionChange([...selectedIds, prompt.id]);
+          }
+        }
+      }, [selectedIds, maxSelection, onSelectionChange]);
+      
+      const handleRemove = useCallback((id: string) => {
+        onSelectionChange(selectedIds.filter(i => i !== id));
+      }, [selectedIds, onSelectionChange]);
+      
+      // Get selected prompt objects
+      const selectedPrompts = prompts.filter(p => selectedIds.includes(p.id));
+      
+      return (
+        <div className={cn('space-y-4', className)}>
+          {/* Selected Prompts */}
+          {selectedPrompts.length > 0 && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  {t('selected_prompts')} ({selectedPrompts.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {selectedPrompts.map((prompt, index) => (
+                    <Badge
+                      key={prompt.id}
+                      variant="secondary"
+                      className="px-3 py-1.5"
+                    >
+                      <span className="mr-1 text-xs text-muted-foreground">
+                        {index + 1}.
+                      </span>
+                      {prompt.title_en}
+                      <button
+                        onClick={() => handleRemove(prompt.id)}
+                        className="ml-2 hover:text-destructive"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
+          {/* Prompt List */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('available_prompts')}</CardTitle>
+              <CardDescription>
+                {maxSelection 
+                  ? t('select_up_to', { count: maxSelection })
+                  : t('select_prompts_hint')
+                }
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PromptList
+                prompts={prompts}
+                loading={loading}
+                selectable
+                selectedIds={selectedIds}
+                onSelect={handleSelect}
+                onPreview={setPreviewPrompt}
+              />
+            </CardContent>
+          </Card>
+          
+          {/* Preview Dialog */}
+          <PromptPreview
+            prompt={previewPrompt}
+            open={previewPrompt !== null}
+            onClose={() => setPreviewPrompt(null)}
+          />
+        </div>
+      );
+    }
+    ```
+
+13. Create prompts/loading.tsx:
+    ```typescript
+    // ============================================
+    // [F124] src/app/[locale]/prompts/loading.tsx
+    // ============================================
+    
+    import { Skeleton } from '@/components/ui/skeleton';
+    import { Card, CardContent, CardHeader } from '@/components/ui/card';
+    
+    export default function Loading() {
+      return (
+        <div className="container mx-auto p-6 space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-72" />
+            </div>
+            <Skeleton className="h-10 w-32" />
+          </div>
+          
+          {/* Search and filter */}
+          <Skeleton className="h-10 w-full" />
+          <div className="flex gap-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-6 w-20" />
+            ))}
+          </div>
+          
+          {/* Cards grid */}
+          <div className="grid gap-4 md:grid-cols-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i}>
+                <CardHeader>
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-full" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-8 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    ```
+
+14. Create prompts/page.tsx:
+    ```typescript
+    // ============================================
+    // [F015] src/app/[locale]/prompts/page.tsx
+    // ============================================
+    
+    'use client';
+    
+    import { useState } from 'react';
+    import { useTranslations } from 'next-intl';
+    import { AuthGuard } from '@/components/auth/AuthGuard';
+    import { usePrompts } from '@/hooks/usePrompts';
+    import { PromptList } from '@/components/prompts/PromptList';
+    import { PromptEditor } from '@/components/prompts/PromptEditor';
+    import { PromptPreview } from '@/components/prompts/PromptPreview';
+    import { Button } from '@/components/ui/button';
+    import { useToast } from '@/components/ui/use-toast';
+    import {
+      AlertDialog,
+      AlertDialogAction,
+      AlertDialogCancel,
+      AlertDialogContent,
+      AlertDialogDescription,
+      AlertDialogFooter,
+      AlertDialogHeader,
+      AlertDialogTitle,
+    } from '@/components/ui/alert-dialog';
+    import { Prompt } from '@/lib/types';
+    import { FileText, Plus, Loader2 } from 'lucide-react';
+    
+    export default function PromptsPage() {
+      const t = useTranslations('prompts');
+      const { toast } = useToast();
+      
+      const {
+        prompts,
+        loading,
+        error,
+        createPrompt,
+        updatePrompt,
+        deletePrompt,
+        togglePromptActive,
+        searchPrompts
+      } = usePrompts();
+      
+      // UI state
+      const [editorOpen, setEditorOpen] = useState(false);
+      const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
+      const [previewPrompt, setPreviewPrompt] = useState<Prompt | null>(null);
+      const [deletePrompt_, setDeletePrompt] = useState<Prompt | null>(null);
+      const [actionLoading, setActionLoading] = useState(false);
+      
+      // Handlers
+      const handleCreate = () => {
+        setEditingPrompt(null);
+        setEditorOpen(true);
+      };
+      
+      const handleEdit = (prompt: Prompt) => {
+        setEditingPrompt(prompt);
+        setEditorOpen(true);
+      };
+      
+      const handleSave = async (data: Omit<Prompt, 'id' | 'created_at' | 'updated_at'>) => {
+        try {
+          if (editingPrompt) {
+            await updatePrompt(editingPrompt.id, data);
+            toast({ title: t('prompt_updated') });
+          } else {
+            await createPrompt(data);
+            toast({ title: t('prompt_created') });
+          }
+        } catch (err: any) {
+          toast({
+            variant: 'destructive',
+            title: t('save_error'),
+            description: err.message
+          });
+          throw err;
+        }
+      };
+      
+      const handleDelete = async () => {
+        if (!deletePrompt_) return;
+        
+        setActionLoading(true);
+        try {
+          await deletePrompt(deletePrompt_.id);
+          toast({ title: t('prompt_deleted') });
+          setDeletePrompt(null);
+        } catch (err: any) {
+          toast({
+            variant: 'destructive',
+            title: t('delete_error'),
+            description: err.message
+          });
+        } finally {
+          setActionLoading(false);
+        }
+      };
+      
+      const handleToggleActive = async (prompt: Prompt) => {
+        try {
+          await togglePromptActive(prompt.id);
+          toast({
+            title: prompt.is_active ? t('prompt_deactivated') : t('prompt_activated')
+          });
+        } catch (err: any) {
+          toast({
+            variant: 'destructive',
+            title: t('toggle_error'),
+            description: err.message
+          });
+        }
+      };
+      
+      return (
+        <AuthGuard>
+          <div className="container mx-auto p-6 max-w-5xl">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h1 className="text-2xl font-bold flex items-center gap-2">
+                  <FileText className="h-6 w-6" />
+                  {t('title')}
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  {t('description')}
+                </p>
+              </div>
+              
+              <Button onClick={handleCreate}>
+                <Plus className="h-4 w-4 mr-2" />
+                {t('create_prompt')}
+              </Button>
+            </div>
+            
+            {/* Error State */}
+            {error && (
+              <div className="mb-6 p-4 bg-destructive/10 text-destructive rounded-lg">
+                {error}
+              </div>
+            )}
+            
+            {/* Prompt List */}
+            <PromptList
+              prompts={prompts}
+              loading={loading}
+              editable
+              onEdit={handleEdit}
+              onDelete={setDeletePrompt}
+              onPreview={setPreviewPrompt}
+              onToggleActive={handleToggleActive}
+              onSearch={searchPrompts}
+            />
+            
+            {/* Editor Dialog */}
+            <PromptEditor
+              prompt={editingPrompt}
+              open={editorOpen}
+              onClose={() => {
+                setEditorOpen(false);
+                setEditingPrompt(null);
+              }}
+              onSave={handleSave}
+            />
+            
+            {/* Preview Dialog */}
+            <PromptPreview
+              prompt={previewPrompt}
+              open={previewPrompt !== null}
+              onClose={() => setPreviewPrompt(null)}
+            />
+            
+            {/* Delete Confirmation */}
+            <AlertDialog 
+              open={deletePrompt_ !== null} 
+              onOpenChange={() => setDeletePrompt(null)}
+            >
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t('delete_confirm_title')}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t('delete_confirm_description', { 
+                      title: deletePrompt_?.title_en 
+                    })}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={actionLoading}>
+                    {t('cancel')}
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDelete}
+                    disabled={actionLoading}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {actionLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      t('delete')
+                    )}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </AuthGuard>
+      );
+    }
+    ```
+
+15. Add translations to en.json under "prompts" key:
+    ```json
+    {
+      "prompts": {
+        "title": "Prompt Management",
+        "description": "Create and manage prompts for CV tailoring",
+        "create_prompt": "Create Prompt",
+        "edit_prompt": "Edit Prompt",
+        "search_prompts": "Search prompts...",
+        "all_categories": "All",
+        "no_prompts_found": "No prompts found",
+        "active": "Active",
+        "inactive": "Inactive",
+        "preview": "Preview",
+        "edit": "Edit",
+        "delete": "Delete",
+        "activate": "Activate",
+        "deactivate": "Deactivate",
+        "title_label": "Title",
+        "description_label": "Description",
+        "category": "Category",
+        "prompt_text": "Prompt Text",
+        "prompt_text_hint": "This is the instruction sent to the AI. Use clear, detailed instructions.",
+        "active_status": "Active",
+        "active_status_hint": "Only active prompts are available for selection",
+        "save": "Save",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "prompt_created": "Prompt created successfully",
+        "prompt_updated": "Prompt updated successfully",
+        "prompt_deleted": "Prompt deleted successfully",
+        "prompt_activated": "Prompt activated",
+        "prompt_deactivated": "Prompt deactivated",
+        "save_error": "Failed to save prompt",
+        "delete_error": "Failed to delete prompt",
+        "toggle_error": "Failed to toggle prompt status",
+        "delete_confirm_title": "Delete Prompt?",
+        "delete_confirm_description": "Are you sure you want to delete \"{title}\"? This action cannot be undone.",
+        "selected_prompts": "Selected Prompts",
+        "available_prompts": "Available Prompts",
+        "select_prompts_hint": "Select one or more prompts to use",
+        "select_up_to": "Select up to {count} prompts"
+      }
+    }
+    ```
+
+16. Add translations to fa.json under "prompts" key:
+    ```json
+    {
+      "prompts": {
+        "title": "مدیریت پرامپت‌ها",
+        "description": "ایجاد و مدیریت پرامپت‌ها برای تنظیم سی‌وی",
+        "create_prompt": "ایجاد پرامپت",
+        "edit_prompt": "ویرایش پرامپت",
+        "search_prompts": "جستجوی پرامپت‌ها...",
+        "all_categories": "همه",
+        "no_prompts_found": "پرامپتی یافت نشد",
+        "active": "فعال",
+        "inactive": "غیرفعال",
+        "preview": "پیش‌نمایش",
+        "edit": "ویرایش",
+        "delete": "حذف",
+        "activate": "فعال‌سازی",
+        "deactivate": "غیرفعال‌سازی",
+        "title_label": "عنوان",
+        "description_label": "توضیحات",
+        "category": "دسته‌بندی",
+        "prompt_text": "متن پرامپت",
+        "prompt_text_hint": "این دستوری است که به هوش مصنوعی ارسال می‌شود. از دستورالعمل‌های واضح و دقیق استفاده کنید.",
+        "active_status": "فعال",
+        "active_status_hint": "فقط پرامپت‌های فعال برای انتخاب در دسترس هستند",
+        "save": "ذخیره",
+        "saving": "در حال ذخیره...",
+        "cancel": "انصراف",
+        "prompt_created": "پرامپت با موفقیت ایجاد شد",
+        "prompt_updated": "پرامپت با موفقیت به‌روزرسانی شد",
+        "prompt_deleted": "پرامپت با موفقیت حذف شد",
+        "prompt_activated": "پرامپت فعال شد",
+        "prompt_deactivated": "پرامپت غیرفعال شد",
+        "save_error": "ذخیره پرامپت ناموفق بود",
+        "delete_error": "حذف پرامپت ناموفق بود",
+        "toggle_error": "تغییر وضعیت پرامپت ناموفق بود",
+        "delete_confirm_title": "حذف پرامپت؟",
+        "delete_confirm_description": "آیا مطمئن هستید که می‌خواهید \"{title}\" را حذف کنید؟ این عمل قابل بازگشت نیست.",
+        "selected_prompts": "پرامپت‌های انتخاب‌شده",
+        "available_prompts": "پرامپت‌های موجود",
+        "select_prompts_hint": "یک یا چند پرامپت برای استفاده انتخاب کنید",
+        "select_up_to": "حداکثر {count} پرامپت انتخاب کنید"
+      }
+    }
+    ```
+
+
+## CHECKPOINT TESTS (verify ALL after completion)
+□ [T01] All prompt service files exist
+□ [T02] All prompt API route files exist
+□ [T03] usePrompts hook exists
+□ [T04] All prompt component files exist
+□ [T05] Prompts page exists
+□ [T06] TypeScript compiles without errors
+□ [T07] Prompt service has all CRUD methods
+□ [T08] API route has GET, POST methods
+□ [T09] Single prompt API has GET, PUT, DELETE, PATCH
+□ [T10] usePrompts exports all functions
+□ [T11] PromptEditor has bilingual support
+□ [T12] PromptSelector uses usePrompts hook
+□ [T13] Default prompts include seed data
+□ [T14] Prompts page uses AuthGuard
+□ [T15] English translations have all prompt keys
+□ [T16] Farsi translations have all prompt keys
+
+## MANDATORY RULES
+1. Create ONLY the files listed in "FILES TO CREATE"
+2. Modify ONLY the files listed in "FILES TO MODIFY"
+3. NEVER import from files not in "EXISTING FILES"
+4. NEVER reference files that don't exist
+5. After completion, list every file you created/modified with full path
+6. Mark each checkpoint test as ✅ PASS or ❌ FAIL
+7. If unsure about anything, ASK — don't guess
+8. Keep each file under 200 lines
+9. All user-facing text must use i18n (if i18n is set up)
+10. Handle errors gracefully

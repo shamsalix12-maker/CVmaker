@@ -1,0 +1,33 @@
+id: B30
+name: "Download & Preview Panel"
+phase: 5
+phase_name: "Core Workflow"
+
+goal: |
+  Create a panel for previewing and downloading generated documents.
+  Features:
+  - Preview CV, Cover Letter, and Email in separate tabs
+  - Download buttons for Word and Markdown formats
+
+dependencies: [B29]
+
+files_to_create:
+  - id: F058
+    path: "src/components/application/DocumentPreview.tsx"
+    description: "Component for previewing generated documents"
+  - id: F059
+    path: "src/components/application/DownloadPanel.tsx"
+    description: "Panel with download buttons"
+
+checkpoint_tests:
+  - id: T01
+    description: "All 3 documents are previewable in tabs"
+    type: "manual"
+  - id: T02
+    description: "Word and Markdown download buttons work"
+    type: "manual"
+  - id: T03
+    description: "Files are downloaded correctly"
+    type: "manual"
+
+max_retries: 3

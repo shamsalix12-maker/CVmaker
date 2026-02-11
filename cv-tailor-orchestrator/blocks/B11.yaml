@@ -1,0 +1,457 @@
+id: B11
+name: "API Key Encryption and Storage"
+phase: 1
+phase_name: "CV Management"
+
+goal: |
+  Create secure storage for AI API keys with encryption.
+  Users can add, validate, and manage their API keys for different AI providers.
+  Keys are encrypted before storing in Supabase.
+
+dependencies: [B01, B02, B03, B04, B05, B06, B07, B10]
+
+files_to_create:
+  - id: F077
+    path: "src/lib/encryption.ts"
+    description: "Encryption/decryption utilities for API keys"
+
+  - id: F105
+    path: "src/app/api/ai/keys/route.ts"
+    description: "API route for managing AI API keys"
+
+  - id: F106
+    path: "src/app/api/ai/validate/route.ts"
+    description: "API route to validate an AI API key"
+
+  - id: F081
+    path: "src/hooks/useAIKeys.ts"
+    description: "React hook for AI key management"
+
+files_to_modify:
+  - id: F087
+    path: "src/i18n/en.json"
+    description: "Add AI key management translations"
+
+  - id: F088
+    path: "src/i18n/fa.json"
+    description: "Add AI key management translations"
+
+files_available:
+  - id: F063
+    path: "src/lib/supabase/client.ts"
+    from_block: B06
+  - id: F064
+    path: "src/lib/supabase/server.ts"
+    from_block: B06
+  - id: F079
+    path: "src/lib/types.ts"
+    from_block: B03
+  - id: F078
+    path: "src/lib/constants.ts"
+    from_block: B04
+  - id: F090
+    path: "src/context/AuthContext.tsx"
+    from_block: B07
+  - id: F066
+    path: "src/lib/ai/ai-provider.ts"
+    from_block: B10
+  - id: F070
+    path: "src/lib/ai/ai-factory.ts"
+    from_block: B10
+
+commands: []
+
+instructions: |
+  1. Create encryption.ts:
+     ```typescript
+     // ============================================
+     // [F077] src/lib/encryption.ts
+     // ============================================
+     
+     import CryptoJS from 'crypto-js';
+     
+     const SECRET_KEY = process.env.ENCRYPTION_SECRET_KEY || 'default-dev-key-change-in-prod';
+     
+     export function encrypt(text: string): string {
+       return CryptoJS.AES.encrypt(text, SECRET_KEY).toString();
+     }
+     
+     export function decrypt(encryptedText: string): string {
+       const bytes = CryptoJS.AES.decrypt(encryptedText, SECRET_KEY);
+       return bytes.toString(CryptoJS.enc.Utf8);
+     }
+     
+     // For API keys, add extra validation
+     export function encryptApiKey(apiKey: string): string {
+       if (!apiKey || apiKey.trim().length === 0) {
+         throw new Error('API key cannot be empty');
+       }
+       return encrypt(apiKey.trim());
+     }
+     
+     export function decryptApiKey(encryptedKey: string): string {
+       try {
+         const decrypted = decrypt(encryptedKey);
+         if (!decrypted) {
+           throw new Error('Decryption failed');
+         }
+         return decrypted;
+       } catch (error) {
+         throw new Error('Failed to decrypt API key');
+       }
+     }
+     ```
+  
+  2. Create api/ai/keys/route.ts:
+     ```typescript
+     // ============================================
+     // [F105] src/app/api/ai/keys/route.ts
+     // ============================================
+     
+     import { NextRequest, NextResponse } from 'next/server';
+     import { createServerSupabaseClient } from '@/lib/supabase/server';
+     import { encryptApiKey, decryptApiKey } from '@/lib/encryption';
+     import { getAIProvider } from '@/lib/ai';
+     import { AIProviderName, AIApiKey } from '@/lib/types';
+     
+     // GET - List all API keys for current user (without decrypted keys)
+     export async function GET(request: NextRequest) {
+       const supabase = createServerSupabaseClient();
+       
+       // Get current user (from dev auth or session)
+       const userId = request.headers.get('x-user-id'); // Simplified for dev
+       if (!userId) {
+         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+       }
+       
+       const { data, error } = await supabase
+         .from('ai_api_keys')
+         .select('id, provider_name, is_valid, available_models, token_balance, last_validated_at')
+         .eq('user_id', userId);
+       
+       if (error) {
+         return NextResponse.json({ error: error.message }, { status: 500 });
+       }
+       
+       return NextResponse.json({ keys: data });
+     }
+     
+     // POST - Add or update an API key
+     export async function POST(request: NextRequest) {
+       const supabase = createServerSupabaseClient();
+       const userId = request.headers.get('x-user-id');
+       
+       if (!userId) {
+         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+       }
+       
+       const { provider_name, api_key } = await request.json();
+       
+       if (!provider_name || !api_key) {
+         return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+       }
+       
+       // Validate the key
+       const provider = getAIProvider(provider_name as AIProviderName);
+       const validation = await provider.validateKey(api_key);
+       
+       // Encrypt the key
+       const encryptedKey = encryptApiKey(api_key);
+       
+       // Upsert the key
+       const { data, error } = await supabase
+         .from('ai_api_keys')
+         .upsert({
+           user_id: userId,
+           provider_name,
+           api_key_encrypted: encryptedKey,
+           is_valid: validation.valid,
+           available_models: validation.models || [],
+           token_balance: validation.balance,
+           last_validated_at: new Date().toISOString()
+         }, {
+           onConflict: 'user_id,provider_name'
+         })
+         .select()
+         .single();
+       
+       if (error) {
+         return NextResponse.json({ error: error.message }, { status: 500 });
+       }
+       
+       // Don't return the encrypted key
+       const { api_key_encrypted, ...safeData } = data;
+       
+       return NextResponse.json({
+         key: safeData,
+         validation: {
+           valid: validation.valid,
+           error: validation.error,
+           models: validation.models
+         }
+       });
+     }
+     
+     // DELETE - Remove an API key
+     export async function DELETE(request: NextRequest) {
+       const supabase = createServerSupabaseClient();
+       const userId = request.headers.get('x-user-id');
+       const { searchParams } = new URL(request.url);
+       const provider = searchParams.get('provider');
+       
+       if (!userId) {
+         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+       }
+       
+       if (!provider) {
+         return NextResponse.json({ error: 'Provider required' }, { status: 400 });
+       }
+       
+       const { error } = await supabase
+         .from('ai_api_keys')
+         .delete()
+         .eq('user_id', userId)
+         .eq('provider_name', provider);
+       
+       if (error) {
+         return NextResponse.json({ error: error.message }, { status: 500 });
+       }
+       
+       return NextResponse.json({ success: true });
+     }
+     ```
+  
+  3. Create api/ai/validate/route.ts:
+     ```typescript
+     // ============================================
+     // [F106] src/app/api/ai/validate/route.ts
+     // ============================================
+     
+     import { NextRequest, NextResponse } from 'next/server';
+     import { getAIProvider } from '@/lib/ai';
+     import { AIProviderName } from '@/lib/types';
+     
+     // POST - Validate an API key without storing it
+     export async function POST(request: NextRequest) {
+       const { provider_name, api_key } = await request.json();
+       
+       if (!provider_name || !api_key) {
+         return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+       }
+       
+       try {
+         const provider = getAIProvider(provider_name as AIProviderName);
+         const validation = await provider.validateKey(api_key);
+         
+         return NextResponse.json(validation);
+       } catch (error: any) {
+         return NextResponse.json({
+           valid: false,
+           error: error.message
+         });
+       }
+     }
+     ```
+  
+  4. Create hooks/useAIKeys.ts:
+     ```typescript
+     // ============================================
+     // [F081] src/hooks/useAIKeys.ts
+     // ============================================
+     
+     import { useState, useEffect, useCallback } from 'react';
+     import { useAuth } from '@/context/AuthContext';
+     import { AIProviderName, AIApiKey, AIModel } from '@/lib/types';
+     
+     interface StoredKey {
+       id: string;
+       provider_name: AIProviderName;
+       is_valid: boolean;
+       available_models: AIModel[];
+       token_balance: string | null;
+       last_validated_at: string | null;
+     }
+     
+     export function useAIKeys() {
+       const { user } = useAuth();
+       const [keys, setKeys] = useState<StoredKey[]>([]);
+       const [loading, setLoading] = useState(true);
+       const [error, setError] = useState<string | null>(null);
+       
+       // Fetch keys on mount
+       useEffect(() => {
+         if (user) {
+           fetchKeys();
+         }
+       }, [user]);
+       
+       const fetchKeys = useCallback(async () => {
+         setLoading(true);
+         setError(null);
+         
+         try {
+           const res = await fetch('/api/ai/keys', {
+             headers: { 'x-user-id': user?.id || '' }
+           });
+           const data = await res.json();
+           
+           if (data.error) {
+             throw new Error(data.error);
+           }
+           
+           setKeys(data.keys || []);
+         } catch (err: any) {
+           setError(err.message);
+         } finally {
+           setLoading(false);
+         }
+       }, [user]);
+       
+       const addKey = useCallback(async (provider: AIProviderName, apiKey: string) => {
+         setError(null);
+         
+         try {
+           const res = await fetch('/api/ai/keys', {
+             method: 'POST',
+             headers: {
+               'Content-Type': 'application/json',
+               'x-user-id': user?.id || ''
+             },
+             body: JSON.stringify({
+               provider_name: provider,
+               api_key: apiKey
+             })
+           });
+           
+           const data = await res.json();
+           
+           if (data.error) {
+             throw new Error(data.error);
+           }
+           
+           await fetchKeys();
+           return data.validation;
+         } catch (err: any) {
+           setError(err.message);
+           throw err;
+         }
+       }, [user, fetchKeys]);
+       
+       const removeKey = useCallback(async (provider: AIProviderName) => {
+         try {
+           await fetch(`/api/ai/keys?provider=${provider}`, {
+             method: 'DELETE',
+             headers: { 'x-user-id': user?.id || '' }
+           });
+           await fetchKeys();
+         } catch (err: any) {
+           setError(err.message);
+         }
+       }, [user, fetchKeys]);
+       
+       const validateKey = useCallback(async (provider: AIProviderName, apiKey: string) => {
+         const res = await fetch('/api/ai/validate', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({
+             provider_name: provider,
+             api_key: apiKey
+           })
+         });
+         return res.json();
+       }, []);
+       
+       const getModelsForProvider = useCallback((provider: AIProviderName): AIModel[] => {
+         const key = keys.find(k => k.provider_name === provider);
+         return key?.available_models || [];
+       }, [keys]);
+       
+       const hasValidKey = useCallback((provider: AIProviderName): boolean => {
+         const key = keys.find(k => k.provider_name === provider);
+         return key?.is_valid || false;
+       }, [keys]);
+       
+       const getValidProviders = useCallback((): AIProviderName[] => {
+         return keys.filter(k => k.is_valid).map(k => k.provider_name);
+       }, [keys]);
+       
+       return {
+         keys,
+         loading,
+         error,
+         fetchKeys,
+         addKey,
+         removeKey,
+         validateKey,
+         getModelsForProvider,
+         hasValidKey,
+         getValidProviders
+       };
+     }
+     ```
+  
+  5. Add translations to en.json under "ai_keys":
+     - title, add_key, provider, api_key, validate, save, delete
+     - status_valid, status_invalid, status_checking
+     - key_saved, key_deleted, validation_failed
+     - enter_api_key_placeholder
+  
+  6. Add same translations to fa.json
+
+checkpoint_tests:
+  - id: T01
+    description: "All API key management files exist"
+    type: "files_exist"
+    files:
+      - "src/lib/encryption.ts"
+      - "src/app/api/ai/keys/route.ts"
+      - "src/app/api/ai/validate/route.ts"
+      - "src/hooks/useAIKeys.ts"
+
+  - id: T02
+    description: "TypeScript compiles without errors"
+    type: "command"
+    command: "npx tsc --noEmit"
+    expected_exit_code: 0
+
+  - id: T03
+    description: "encryption.ts exports encrypt/decrypt functions"
+    type: "grep"
+    file: "src/lib/encryption.ts"
+    patterns:
+      - "export function encrypt"
+      - "export function decrypt"
+      - "encryptApiKey"
+      - "decryptApiKey"
+      - "CryptoJS"
+
+  - id: T04
+    description: "Keys API route has all CRUD methods"
+    type: "grep"
+    file: "src/app/api/ai/keys/route.ts"
+    patterns:
+      - "export async function GET"
+      - "export async function POST"
+      - "export async function DELETE"
+      - "encryptApiKey"
+
+  - id: T05
+    description: "useAIKeys hook exports all functions"
+    type: "grep"
+    file: "src/hooks/useAIKeys.ts"
+    patterns:
+      - "export function useAIKeys"
+      - "addKey"
+      - "removeKey"
+      - "validateKey"
+      - "getModelsForProvider"
+      - "hasValidKey"
+
+  - id: T06
+    description: "English translations have ai_keys section"
+    type: "grep"
+    file: "src/i18n/en.json"
+    patterns:
+      - "ai_keys"
+
+max_retries: 3

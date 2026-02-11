@@ -1,0 +1,25 @@
+id: B37
+name: "RLS Policies Update"
+phase: 8
+phase_name: "Final Authentication"
+
+goal: |
+  Apply secure Row Level Security (RLS) policies in Supabase.
+  Features:
+  - Ensure each user can only see their own data
+  - Secure and production-ready policies
+
+dependencies: [B36]
+
+commands:
+  - "Apply SQL script for production RLS policies in Supabase Dashboard"
+
+checkpoint_tests:
+  - id: T01
+    description: "User A cannot see User B's data"
+    type: "manual"
+  - id: T02
+    description: "Unauthorized users cannot access API routes"
+    type: "manual"
+
+max_retries: 3

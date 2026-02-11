@@ -1,0 +1,43 @@
+id: B29
+name: "Output File Generator"
+phase: 5
+phase_name: "Core Workflow"
+
+goal: |
+  Create logic to generate Word (.docx) and Markdown (.md) files from plain text or HTML.
+  Features:
+  - DOCX generation with professional formatting
+  - Markdown generation
+  - API routes for exporting files
+
+dependencies: [B04, B28]
+
+files_to_create:
+  - id: F075
+    path: "src/lib/generators/docx-generator.ts"
+    description: "Core DOCX generation logic"
+  - id: F076
+    path: "src/lib/generators/markdown-generator.ts"
+    description: "Markdown generation and conversion"
+  - id: F025
+    path: "src/app/api/export/docx/route.ts"
+    description: "API route for DOCX export"
+  - id: F026
+    path: "src/app/api/export/markdown/route.ts"
+    description: "API route for Markdown export"
+
+checkpoint_tests:
+  - id: T01
+    description: "Generate formatted .docx from text"
+    type: "manual"
+  - id: T02
+    description: "Generate .md from text"
+    type: "manual"
+  - id: T03
+    description: "Word file is readable in MS Word"
+    type: "manual"
+  - id: T04
+    description: "Formatting (headings, lists) is preserved"
+    type: "manual"
+
+max_retries: 3

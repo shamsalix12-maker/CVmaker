@@ -1,0 +1,4236 @@
+id: B18
+name: "New Application Wizard - Core Workflow"
+phase: 3
+phase_name: "Core Application Flow"
+
+goal: |
+  Create the complete job application workflow - the core feature of the app.
+  This is a multi-step wizard that:
+  1. Collects job description
+  2. Lets user select prompts
+  3. Configures AI (provider/model for draft and final)
+  4. Sets output language and tone
+  5. Processes with AI (with clarification loop if needed)
+  6. Shows editable draft output
+  7. Generates 3 final documents (Tailored CV, Cover Letter, Application Email)
+  8. Allows download in Word and Markdown formats
+
+dependencies: [B01, B02, B03, B04, B05, B06, B07, B08, B09, B10, B11, B12, B13, B14, B15, B16, B17]
+
+files_to_create:
+  # Service Layer
+  - id: F125
+    path: "src/lib/applications/application-service.ts"
+    description: "Service for job application CRUD and workflow"
+
+  - id: F126
+    path: "src/lib/applications/application-processor.ts"
+    description: "AI processing logic for applications"
+
+  - id: F127
+    path: "src/lib/applications/application-prompts.ts"
+    description: "Prompt templates for application processing"
+
+  - id: F128
+    path: "src/lib/applications/index.ts"
+    description: "Export all application modules"
+
+  # API Routes
+  - id: F129
+    path: "src/app/api/applications/route.ts"
+    description: "API for applications list and create"
+
+  - id: F130
+    path: "src/app/api/applications/[id]/route.ts"
+    description: "API for single application CRUD"
+
+  - id: F131
+    path: "src/app/api/applications/[id]/process/route.ts"
+    description: "API to start AI processing"
+
+  - id: F132
+    path: "src/app/api/applications/[id]/clarify/route.ts"
+    description: "API for clarification responses"
+
+  - id: F133
+    path: "src/app/api/applications/[id]/finalize/route.ts"
+    description: "API to generate final documents"
+
+  # React Hook
+  - id: F084
+    path: "src/hooks/useApplication.ts"
+    description: "React hook for application workflow"
+
+  # Wizard Components
+  - id: F134
+    path: "src/components/application/ApplicationWizard.tsx"
+    description: "Main wizard container with step navigation"
+
+  - id: F135
+    path: "src/components/application/WizardProgress.tsx"
+    description: "Progress indicator for wizard steps"
+
+  - id: F054
+    path: "src/components/application/JobDescriptionInput.tsx"
+    description: "Step 1: Job description input"
+
+  - id: F136
+    path: "src/components/application/PromptSelectionStep.tsx"
+    description: "Step 2: Select prompts"
+
+  - id: F137
+    path: "src/components/application/AIConfigurationStep.tsx"
+    description: "Step 3: Configure AI models"
+
+  - id: F056
+    path: "src/components/application/LanguageSelector.tsx"
+    description: "Output language selection"
+
+  - id: F055
+    path: "src/components/application/ToneSelector.tsx"
+    description: "Tone selection (preset or custom)"
+
+  - id: F138
+    path: "src/components/application/OutputSettingsStep.tsx"
+    description: "Step 4: Language and tone settings"
+
+  - id: F139
+    path: "src/components/application/ProcessingStep.tsx"
+    description: "Step 5: AI processing with clarification"
+
+  - id: F052
+    path: "src/components/ai/AIChatInterface.tsx"
+    description: "Chat interface for AI clarification"
+
+  - id: F057
+    path: "src/components/application/OutputEditor.tsx"
+    description: "Step 6: Edit draft output"
+
+  - id: F140
+    path: "src/components/application/FinalDocumentsStep.tsx"
+    description: "Step 7: View and download final documents"
+
+  - id: F058
+    path: "src/components/application/DocumentPreview.tsx"
+    description: "Preview a single document"
+
+  - id: F059
+    path: "src/components/application/DownloadPanel.tsx"
+    description: "Download buttons for all formats"
+
+  # Page
+  - id: F014
+    path: "src/app/[locale]/new-application/page.tsx"
+    description: "New application page"
+
+  - id: F141
+    path: "src/app/[locale]/new-application/loading.tsx"
+    description: "Loading state"
+
+files_to_modify:
+  - id: F079
+    path: "src/lib/types.ts"
+    description: "Add application workflow types"
+
+  - id: F087
+    path: "src/i18n/en.json"
+    description: "Add application translations"
+
+  - id: F088
+    path: "src/i18n/fa.json"
+    description: "Add application translations"
+
+files_available:
+  - id: F027
+    path: "src/components/ui/button.tsx"
+    from_block: B02
+  - id: F028
+    path: "src/components/ui/input.tsx"
+    from_block: B02
+  - id: F029
+    path: "src/components/ui/card.tsx"
+    from_block: B02
+  - id: F030
+    path: "src/components/ui/dialog.tsx"
+    from_block: B02
+  - id: F031
+    path: "src/components/ui/select.tsx"
+    from_block: B02
+  - id: F032
+    path: "src/components/ui/textarea.tsx"
+    from_block: B02
+  - id: F033
+    path: "src/components/ui/tabs.tsx"
+    from_block: B02
+  - id: F034
+    path: "src/components/ui/badge.tsx"
+    from_block: B02
+  - id: F063
+    path: "src/lib/supabase/client.ts"
+    from_block: B06
+  - id: F064
+    path: "src/lib/supabase/server.ts"
+    from_block: B06
+  - id: F079
+    path: "src/lib/types.ts"
+    from_block: B03
+  - id: F078
+    path: "src/lib/constants.ts"
+    from_block: B04
+  - id: F066
+    path: "src/lib/ai/ai-provider.ts"
+    from_block: B10
+  - id: F070
+    path: "src/lib/ai/ai-factory.ts"
+    from_block: B10
+  - id: F077
+    path: "src/lib/encryption.ts"
+    from_block: B11
+  - id: F081
+    path: "src/hooks/useAIKeys.ts"
+    from_block: B11
+  - id: F082
+    path: "src/hooks/useCV.ts"
+    from_block: B15
+  - id: F047
+    path: "src/components/prompts/PromptSelector.tsx"
+    from_block: B17
+  - id: F083
+    path: "src/hooks/usePrompts.ts"
+    from_block: B17
+  - id: F090
+    path: "src/context/AuthContext.tsx"
+    from_block: B07
+  - id: F092
+    path: "src/components/auth/AuthGuard.tsx"
+    from_block: B07
+
+commands: []
+
+instructions: |
+  1. First, add new types to types.ts:
+     ```typescript
+     // Add to existing types.ts file
+     
+     // ============================================
+     // Application Workflow Types
+     // ============================================
+     
+     export type ApplicationStatus = 
+       | 'draft'           // Initial state, collecting inputs
+       | 'processing'      // AI is processing
+       | 'clarification'   // AI needs more info
+       | 'draft_ready'     // Draft output ready for review
+       | 'editing'         // User is editing draft
+       | 'finalizing'      // Generating final documents
+       | 'completed'       // All done
+       | 'error';          // Something went wrong
+     
+     export type WizardStep = 
+       | 'job_description'
+       | 'prompts'
+       | 'ai_config'
+       | 'settings'
+       | 'processing'
+       | 'editing'
+       | 'final';
+     
+     export interface AIModelSelection {
+       provider: AIProviderName;
+       model: string;
+       role: 'draft' | 'final';
+     }
+     
+     export interface ClarificationMessage {
+       id: string;
+       role: 'assistant' | 'user';
+       content: string;
+       timestamp: string;
+     }
+     
+     export interface DraftDocument {
+       type: 'cv' | 'cover_letter' | 'email';
+       content: string;
+       generatedAt: string;
+       aiProvider: AIProviderName;
+       aiModel: string;
+     }
+     
+     export interface FinalDocuments {
+       tailored_cv: string;
+       cover_letter: string;
+       application_email: string;
+       generatedAt: string;
+     }
+     
+     export interface JobApplication {
+       id: string;
+       user_id: string;
+       
+       // Inputs
+       job_description: string;
+       selected_prompt_ids: string[];
+       ai_selections: AIModelSelection[];
+       output_language: OutputLanguage;
+       tone_setting: ToneSetting;
+       
+       // Processing state
+       status: ApplicationStatus;
+       current_step: WizardStep;
+       clarification_messages: ClarificationMessage[];
+       
+       // Outputs
+       draft_content: string | null;
+       draft_documents: DraftDocument[] | null;
+       edited_content: string | null;
+       final_documents: FinalDocuments | null;
+       
+       // Metadata
+       error_message: string | null;
+       created_at: string;
+       updated_at: string;
+     }
+     
+     export interface CreateApplicationInput {
+       job_description: string;
+       selected_prompt_ids: string[];
+       ai_selections: AIModelSelection[];
+       output_language: OutputLanguage;
+       tone_setting: ToneSetting;
+     }
+     ```
+
+  2. Create application-prompts.ts:
+     ```typescript
+     // ============================================
+     // [F127] src/lib/applications/application-prompts.ts
+     // ============================================
+     
+     import { OutputLanguage, ToneSetting } from '@/lib/types';
+     import { SUPPORTED_OUTPUT_LANGUAGES } from '@/lib/constants';
+     
+     export function buildSystemPrompt(
+       selectedPromptTexts: string[],
+       outputLanguage: OutputLanguage,
+       toneSetting: ToneSetting
+     ): string {
+       const languageInfo = SUPPORTED_OUTPUT_LANGUAGES.find(l => l.code === outputLanguage);
+       const languageName = languageInfo?.label_en || 'English';
+       
+       const toneInstruction = toneSetting.mode === 'preset'
+         ? `Use a ${toneSetting.preset_value} tone.`
+         : `Use the following tone: ${toneSetting.custom_text}`;
+       
+       return `You are an expert career consultant and professional CV writer.
+
+     YOUR TASK:
+     Analyze the candidate's CV and the target job description to create tailored application documents.
+
+     SELECTED APPROACH(ES):
+     ${selectedPromptTexts.map((text, i) => `--- Approach ${i + 1} ---\n${text}`).join('\n\n')}
+
+     OUTPUT REQUIREMENTS:
+     - Language: ${languageName}
+     - ${toneInstruction}
+     - Be professional, accurate, and compelling
+     - Do not fabricate information - only use what's in the CV
+     - Highlight relevant experience and skills for the specific job
+
+     PROCESS:
+     1. First, analyze both documents carefully
+     2. If you need clarification about anything, ASK before proceeding
+     3. Once you have all information, create the tailored content
+
+     When ready to produce output, format it clearly with sections marked.`;
+     }
+     
+     export function buildUserPrompt(
+       cvContent: string,
+       jobDescription: string
+     ): string {
+       return `Please analyze the following and create tailored application documents:
+
+     ===== CANDIDATE'S CV =====
+     ${cvContent}
+
+     ===== TARGET JOB DESCRIPTION =====
+     ${jobDescription}
+
+     ===== INSTRUCTIONS =====
+     1. First, tell me if you need any clarification
+     2. If not, proceed to create:
+        - A tailored CV for this specific job
+        - A compelling cover letter
+        - A professional application email
+
+     Please begin your analysis.`;
+     }
+     
+     export function buildClarificationPrompt(
+       previousContext: string,
+       userResponse: string
+     ): string {
+       return `${previousContext}
+
+     User's response to your question:
+     ${userResponse}
+
+     Please continue with the analysis. If you need more clarification, ask. Otherwise, proceed to create the documents.`;
+     }
+     
+     export function buildFinalizationPrompt(
+       draftContent: string,
+       userEdits: string | null,
+       outputLanguage: OutputLanguage
+     ): string {
+       const languageInfo = SUPPORTED_OUTPUT_LANGUAGES.find(l => l.code === outputLanguage);
+       const languageName = languageInfo?.label_en || 'English';
+       
+       const editNote = userEdits 
+         ? `\n\nThe user has made the following edits/notes:\n${userEdits}`
+         : '';
+       
+       return `Based on the analysis and draft below, please create the final polished documents.
+     
+     Output language: ${languageName}
+     ${editNote}
+
+     ===== DRAFT CONTENT =====
+     ${draftContent}
+
+     ===== REQUIRED OUTPUT FORMAT =====
+     Please provide the final documents in this exact format:
+
+     <<<TAILORED_CV>>>
+     [The complete tailored CV here]
+     <<<END_TAILORED_CV>>>
+
+     <<<COVER_LETTER>>>
+     [The complete cover letter here]
+     <<<END_COVER_LETTER>>>
+
+     <<<APPLICATION_EMAIL>>>
+     [The complete application email here]
+     <<<END_APPLICATION_EMAIL>>>
+
+     Make sure each document is complete, professional, and ready to use.`;
+     }
+     
+     export function parseFinalizationResponse(response: string): {
+       tailored_cv: string;
+       cover_letter: string;
+       application_email: string;
+     } | null {
+       try {
+         const cvMatch = response.match(/<<<TAILORED_CV>>>([\s\S]*?)<<<END_TAILORED_CV>>>/);
+         const coverMatch = response.match(/<<<COVER_LETTER>>>([\s\S]*?)<<<END_COVER_LETTER>>>/);
+         const emailMatch = response.match(/<<<APPLICATION_EMAIL>>>([\s\S]*?)<<<END_APPLICATION_EMAIL>>>/);
+         
+         if (!cvMatch || !coverMatch || !emailMatch) {
+           return null;
+         }
+         
+         return {
+           tailored_cv: cvMatch[1].trim(),
+           cover_letter: coverMatch[1].trim(),
+           application_email: emailMatch[1].trim()
+         };
+       } catch {
+         return null;
+       }
+     }
+     
+     export function detectClarificationNeeded(response: string): boolean {
+       const clarificationIndicators = [
+         /\?$/m,  // Ends with question mark
+         /could you (please )?(clarify|explain|provide|tell)/i,
+         /I need (more |additional )?(information|details|clarification)/i,
+         /can you (please )?(specify|elaborate|describe)/i,
+         /what (do you mean|is|are|would)/i,
+         /which (one|option|role|position)/i,
+         /please (clarify|explain|provide|specify)/i,
+       ];
+       
+       return clarificationIndicators.some(pattern => pattern.test(response));
+     }
+     ```
+
+  3. Create application-service.ts:
+     ```typescript
+     // ============================================
+     // [F125] src/lib/applications/application-service.ts
+     // ============================================
+     
+     import { SupabaseClient } from '@supabase/supabase-js';
+     import { 
+       JobApplication, 
+       CreateApplicationInput,
+       ApplicationStatus,
+       WizardStep,
+       ClarificationMessage 
+     } from '@/lib/types';
+     import { generateId } from '@/lib/utils';
+     
+     export class ApplicationService {
+       constructor(private supabase: SupabaseClient) {}
+       
+       async createApplication(
+         userId: string, 
+         input: CreateApplicationInput
+       ): Promise<JobApplication> {
+         const application = {
+           user_id: userId,
+           job_description: input.job_description,
+           selected_prompt_ids: input.selected_prompt_ids,
+           ai_selections: input.ai_selections,
+           output_language: input.output_language,
+           tone_setting: input.tone_setting,
+           status: 'draft' as ApplicationStatus,
+           current_step: 'job_description' as WizardStep,
+           clarification_messages: [],
+           draft_content: null,
+           draft_documents: null,
+           edited_content: null,
+           final_documents: null,
+           error_message: null
+         };
+         
+         const { data, error } = await this.supabase
+           .from('job_applications')
+           .insert(application)
+           .select()
+           .single();
+         
+         if (error) throw error;
+         return this.mapToJobApplication(data);
+       }
+       
+       async getApplication(id: string, userId: string): Promise<JobApplication | null> {
+         const { data, error } = await this.supabase
+           .from('job_applications')
+           .select('*')
+           .eq('id', id)
+           .eq('user_id', userId)
+           .single();
+         
+         if (error) {
+           if (error.code === 'PGRST116') return null;
+           throw error;
+         }
+         
+         return this.mapToJobApplication(data);
+       }
+       
+       async getUserApplications(userId: string): Promise<JobApplication[]> {
+         const { data, error } = await this.supabase
+           .from('job_applications')
+           .select('*')
+           .eq('user_id', userId)
+           .order('created_at', { ascending: false });
+         
+         if (error) throw error;
+         return (data || []).map(this.mapToJobApplication);
+       }
+       
+       async updateApplication(
+         id: string, 
+         userId: string, 
+         updates: Partial<JobApplication>
+       ): Promise<JobApplication> {
+         // Remove fields that shouldn't be updated directly
+         const { id: _, user_id, created_at, ...validUpdates } = updates as any;
+         
+         const { data, error } = await this.supabase
+           .from('job_applications')
+           .update(validUpdates)
+           .eq('id', id)
+           .eq('user_id', userId)
+           .select()
+           .single();
+         
+         if (error) throw error;
+         return this.mapToJobApplication(data);
+       }
+       
+       async updateStatus(
+         id: string, 
+         userId: string, 
+         status: ApplicationStatus,
+         step?: WizardStep
+       ): Promise<JobApplication> {
+         const updates: any = { status };
+         if (step) updates.current_step = step;
+         
+         return this.updateApplication(id, userId, updates);
+       }
+       
+       async addClarificationMessage(
+         id: string,
+         userId: string,
+         role: 'assistant' | 'user',
+         content: string
+       ): Promise<JobApplication> {
+         const app = await this.getApplication(id, userId);
+         if (!app) throw new Error('Application not found');
+         
+         const message: ClarificationMessage = {
+           id: generateId(),
+           role,
+           content,
+           timestamp: new Date().toISOString()
+         };
+         
+         const messages = [...(app.clarification_messages || []), message];
+         
+         return this.updateApplication(id, userId, { 
+           clarification_messages: messages,
+           status: role === 'assistant' ? 'clarification' : 'processing'
+         });
+       }
+       
+       async saveDraftContent(
+         id: string,
+         userId: string,
+         content: string
+       ): Promise<JobApplication> {
+         return this.updateApplication(id, userId, {
+           draft_content: content,
+           status: 'draft_ready',
+           current_step: 'editing'
+         });
+       }
+       
+       async saveEditedContent(
+         id: string,
+         userId: string,
+         content: string
+       ): Promise<JobApplication> {
+         return this.updateApplication(id, userId, {
+           edited_content: content,
+           status: 'editing'
+         });
+       }
+       
+       async saveFinalDocuments(
+         id: string,
+         userId: string,
+         documents: {
+           tailored_cv: string;
+           cover_letter: string;
+           application_email: string;
+         }
+       ): Promise<JobApplication> {
+         return this.updateApplication(id, userId, {
+           final_documents: {
+             ...documents,
+             generatedAt: new Date().toISOString()
+           },
+           status: 'completed',
+           current_step: 'final'
+         });
+       }
+       
+       async setError(
+         id: string,
+         userId: string,
+         errorMessage: string
+       ): Promise<JobApplication> {
+         return this.updateApplication(id, userId, {
+           status: 'error',
+           error_message: errorMessage
+         });
+       }
+       
+       async deleteApplication(id: string, userId: string): Promise<void> {
+         const { error } = await this.supabase
+           .from('job_applications')
+           .delete()
+           .eq('id', id)
+           .eq('user_id', userId);
+         
+         if (error) throw error;
+       }
+       
+       private mapToJobApplication(data: any): JobApplication {
+         return {
+           id: data.id,
+           user_id: data.user_id,
+           job_description: data.job_description,
+           selected_prompt_ids: data.selected_prompt_ids || [],
+           ai_selections: data.ai_selections || [],
+           output_language: data.output_language,
+           tone_setting: data.tone_setting,
+           status: data.status,
+           current_step: data.current_step,
+           clarification_messages: data.clarification_messages || [],
+           draft_content: data.draft_content,
+           draft_documents: data.draft_documents,
+           edited_content: data.edited_content,
+           final_documents: data.final_documents,
+           error_message: data.error_message,
+           created_at: data.created_at,
+           updated_at: data.updated_at
+         };
+       }
+     }
+     
+     export function createApplicationService(supabase: SupabaseClient): ApplicationService {
+       return new ApplicationService(supabase);
+     }
+     ```
+
+  4. Create application-processor.ts:
+     ```typescript
+     // ============================================
+     // [F126] src/lib/applications/application-processor.ts
+     // ============================================
+     
+     import { getAIProvider } from '@/lib/ai';
+     import { AIProviderConfig, AICompletionOptions } from '@/lib/ai/ai-provider';
+     import { 
+       JobApplication, 
+       AIModelSelection, 
+       ComprehensiveCV,
+       Prompt,
+       OutputLanguage,
+       ToneSetting
+     } from '@/lib/types';
+     import {
+       buildSystemPrompt,
+       buildUserPrompt,
+       buildClarificationPrompt,
+       buildFinalizationPrompt,
+       parseFinalizationResponse,
+       detectClarificationNeeded
+     } from './application-prompts';
+     
+     export interface ProcessingContext {
+       application: JobApplication;
+       cv: ComprehensiveCV;
+       prompts: Prompt[];
+       apiKeys: Record<string, string>;  // provider -> decrypted key
+     }
+     
+     export interface ProcessingResult {
+       success: boolean;
+       needsClarification: boolean;
+       content: string;
+       error?: string;
+     }
+     
+     export async function processApplication(
+       context: ProcessingContext,
+       onStream?: (chunk: string) => void
+     ): Promise<ProcessingResult> {
+       const { application, cv, prompts, apiKeys } = context;
+       
+       // Get the AI selection for draft (or first selection)
+       const draftSelection = application.ai_selections.find(s => s.role === 'draft')
+         || application.ai_selections[0];
+       
+       if (!draftSelection) {
+         return { success: false, needsClarification: false, content: '', error: 'No AI model selected' };
+       }
+       
+       const apiKey = apiKeys[draftSelection.provider];
+       if (!apiKey) {
+         return { success: false, needsClarification: false, content: '', error: `No API key for ${draftSelection.provider}` };
+       }
+       
+       try {
+         const provider = getAIProvider(draftSelection.provider);
+         
+         // Build prompts
+         const promptTexts = prompts.map(p => p.prompt_text);
+         const systemPrompt = buildSystemPrompt(
+           promptTexts,
+           application.output_language,
+           application.tone_setting
+         );
+         
+         // Build CV content string
+         const cvContent = formatCVForPrompt(cv);
+         const userPrompt = buildUserPrompt(cvContent, application.job_description);
+         
+         // Include any previous clarification context
+         let messages = [
+           { role: 'system' as const, content: systemPrompt },
+           { role: 'user' as const, content: userPrompt }
+         ];
+         
+         // Add clarification history if exists
+         if (application.clarification_messages && application.clarification_messages.length > 0) {
+           for (const msg of application.clarification_messages) {
+             messages.push({
+               role: msg.role as 'assistant' | 'user',
+               content: msg.content
+             });
+           }
+         }
+         
+         const config: AIProviderConfig = {
+           apiKey,
+           temperature: 0.7,
+           maxTokens: 4096
+         };
+         
+         const options: AICompletionOptions = {
+           model: draftSelection.model,
+           messages
+         };
+         
+         let response: string;
+         
+         if (onStream) {
+           response = await provider.streamComplete(config, options, onStream);
+         } else {
+           response = await provider.complete(config, options);
+         }
+         
+         const needsClarification = detectClarificationNeeded(response);
+         
+         return {
+           success: true,
+           needsClarification,
+           content: response
+         };
+         
+       } catch (error: any) {
+         return {
+           success: false,
+           needsClarification: false,
+           content: '',
+           error: error.message || 'Processing failed'
+         };
+       }
+     }
+     
+     export async function generateFinalDocuments(
+       context: ProcessingContext,
+       draftContent: string,
+       userEdits: string | null,
+       onStream?: (chunk: string) => void
+     ): Promise<{
+       success: boolean;
+       documents?: {
+         tailored_cv: string;
+         cover_letter: string;
+         application_email: string;
+       };
+       error?: string;
+     }> {
+       const { application, apiKeys } = context;
+       
+       // Get the AI selection for final (or draft selection)
+       const finalSelection = application.ai_selections.find(s => s.role === 'final')
+         || application.ai_selections.find(s => s.role === 'draft')
+         || application.ai_selections[0];
+       
+       if (!finalSelection) {
+         return { success: false, error: 'No AI model selected for finalization' };
+       }
+       
+       const apiKey = apiKeys[finalSelection.provider];
+       if (!apiKey) {
+         return { success: false, error: `No API key for ${finalSelection.provider}` };
+       }
+       
+       try {
+         const provider = getAIProvider(finalSelection.provider);
+         
+         const finalizationPrompt = buildFinalizationPrompt(
+           draftContent,
+           userEdits,
+           application.output_language
+         );
+         
+         const config: AIProviderConfig = {
+           apiKey,
+           temperature: 0.3,  // Lower temperature for consistent output
+           maxTokens: 8192
+         };
+         
+         const options: AICompletionOptions = {
+           model: finalSelection.model,
+           messages: [
+             { role: 'user', content: finalizationPrompt }
+           ]
+         };
+         
+         let response: string;
+         
+         if (onStream) {
+           response = await provider.streamComplete(config, options, onStream);
+         } else {
+           response = await provider.complete(config, options);
+         }
+         
+         const documents = parseFinalizationResponse(response);
+         
+         if (!documents) {
+           return { 
+             success: false, 
+             error: 'Failed to parse AI response into documents. The AI may not have followed the required format.'
+           };
+         }
+         
+         return { success: true, documents };
+         
+       } catch (error: any) {
+         return {
+           success: false,
+           error: error.message || 'Finalization failed'
+         };
+       }
+     }
+     
+     function formatCVForPrompt(cv: ComprehensiveCV): string {
+       const sections: string[] = [];
+       
+       // Personal Info
+       if (cv.personal_info) {
+         const pi = cv.personal_info;
+         sections.push(`PERSONAL INFORMATION:
+     Name: ${pi.full_name || 'N/A'}
+     Email: ${pi.email || 'N/A'}
+     Phone: ${pi.phone || 'N/A'}
+     Location: ${pi.location || 'N/A'}
+     LinkedIn: ${pi.linkedin_url || 'N/A'}
+     Website: ${pi.website_url || 'N/A'}
+
+     Summary:
+     ${pi.summary || 'N/A'}`);
+       }
+       
+       // Work Experience
+       if (cv.work_experience && cv.work_experience.length > 0) {
+         const exp = cv.work_experience.map(e => 
+           `- ${e.job_title} at ${e.company}
+        ${e.location || ''} | ${e.start_date} - ${e.is_current ? 'Present' : e.end_date}
+        ${e.description || ''}
+        ${e.achievements?.length ? 'Achievements:\n' + e.achievements.map(a => `  • ${a}`).join('\n') : ''}`
+         ).join('\n\n');
+         sections.push(`WORK EXPERIENCE:\n${exp}`);
+       }
+       
+       // Education
+       if (cv.education && cv.education.length > 0) {
+         const edu = cv.education.map(e =>
+           `- ${e.degree} from ${e.institution}
+        ${e.location || ''} | ${e.start_date} - ${e.end_date}${e.gpa ? ` | GPA: ${e.gpa}` : ''}
+        ${e.description || ''}`
+         ).join('\n\n');
+         sections.push(`EDUCATION:\n${edu}`);
+       }
+       
+       // Skills
+       if (cv.skills && cv.skills.length > 0) {
+         sections.push(`SKILLS:\n${cv.skills.join(', ')}`);
+       }
+       
+       // Certifications
+       if (cv.certifications && cv.certifications.length > 0) {
+         const certs = cv.certifications.map(c =>
+           `- ${c.name} by ${c.issuer} (${c.date_obtained})`
+         ).join('\n');
+         sections.push(`CERTIFICATIONS:\n${certs}`);
+       }
+       
+       // Languages
+       if (cv.languages && cv.languages.length > 0) {
+         const langs = cv.languages.map(l =>
+           `- ${l.language}: ${l.proficiency}`
+         ).join('\n');
+         sections.push(`LANGUAGES:\n${langs}`);
+       }
+       
+       // Projects
+       if (cv.projects && cv.projects.length > 0) {
+         const projs = cv.projects.map(p =>
+           `- ${p.name}: ${p.description}${p.url ? ` (${p.url})` : ''}`
+         ).join('\n');
+         sections.push(`PROJECTS:\n${projs}`);
+       }
+       
+       return sections.join('\n\n---\n\n');
+     }
+     ```
+
+  5. Create src/lib/applications/index.ts:
+     ```typescript
+     // ============================================
+     // [F128] src/lib/applications/index.ts
+     // ============================================
+     
+     export * from './application-service';
+     export * from './application-processor';
+     export * from './application-prompts';
+     ```
+
+  6. Create API route for applications list and create:
+     ```typescript
+     // ============================================
+     // [F129] src/app/api/applications/route.ts
+     // ============================================
+     
+     import { NextRequest, NextResponse } from 'next/server';
+     import { createServerSupabaseClient } from '@/lib/supabase/server';
+     import { createApplicationService } from '@/lib/applications';
+     
+     // GET - List user's applications
+     export async function GET(request: NextRequest) {
+       try {
+         const userId = request.headers.get('x-user-id');
+         if (!userId) {
+           return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+         }
+         
+         const supabase = createServerSupabaseClient();
+         const service = createApplicationService(supabase);
+         
+         const applications = await service.getUserApplications(userId);
+         
+         return NextResponse.json({ applications });
+         
+       } catch (error: any) {
+         console.error('GET /api/applications error:', error);
+         return NextResponse.json(
+           { error: error.message || 'Failed to fetch applications' },
+           { status: 500 }
+         );
+       }
+     }
+     
+     // POST - Create new application
+     export async function POST(request: NextRequest) {
+       try {
+         const userId = request.headers.get('x-user-id');
+         if (!userId) {
+           return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+         }
+         
+         const body = await request.json();
+         
+         const {
+           job_description,
+           selected_prompt_ids,
+           ai_selections,
+           output_language,
+           tone_setting
+         } = body;
+         
+         // Validation
+         if (!job_description || !selected_prompt_ids?.length || !ai_selections?.length) {
+           return NextResponse.json(
+             { error: 'Missing required fields' },
+             { status: 400 }
+           );
+         }
+         
+         const supabase = createServerSupabaseClient();
+         const service = createApplicationService(supabase);
+         
+         const application = await service.createApplication(userId, {
+           job_description,
+           selected_prompt_ids,
+           ai_selections,
+           output_language: output_language || 'en',
+           tone_setting: tone_setting || { mode: 'preset', preset_value: 'professional', custom_text: null }
+         });
+         
+         return NextResponse.json({ application, success: true });
+         
+       } catch (error: any) {
+         console.error('POST /api/applications error:', error);
+         return NextResponse.json(
+           { error: error.message || 'Failed to create application' },
+           { status: 500 }
+         );
+       }
+     }
+     ```
+
+  7. Create API route for single application:
+     ```typescript
+     // ============================================
+     // [F130] src/app/api/applications/[id]/route.ts
+     // ============================================
+     
+     import { NextRequest, NextResponse } from 'next/server';
+     import { createServerSupabaseClient } from '@/lib/supabase/server';
+     import { createApplicationService } from '@/lib/applications';
+     
+     interface RouteParams {
+       params: { id: string };
+     }
+     
+     // GET - Get single application
+     export async function GET(request: NextRequest, { params }: RouteParams) {
+       try {
+         const userId = request.headers.get('x-user-id');
+         if (!userId) {
+           return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+         }
+         
+         const supabase = createServerSupabaseClient();
+         const service = createApplicationService(supabase);
+         
+         const application = await service.getApplication(params.id, userId);
+         
+         if (!application) {
+           return NextResponse.json({ error: 'Not found' }, { status: 404 });
+         }
+         
+         return NextResponse.json({ application });
+         
+       } catch (error: any) {
+         return NextResponse.json(
+           { error: error.message || 'Failed to fetch application' },
+           { status: 500 }
+         );
+       }
+     }
+     
+     // PUT - Update application
+     export async function PUT(request: NextRequest, { params }: RouteParams) {
+       try {
+         const userId = request.headers.get('x-user-id');
+         if (!userId) {
+           return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+         }
+         
+         const body = await request.json();
+         
+         const supabase = createServerSupabaseClient();
+         const service = createApplicationService(supabase);
+         
+         const application = await service.updateApplication(params.id, userId, body);
+         
+         return NextResponse.json({ application, success: true });
+         
+       } catch (error: any) {
+         return NextResponse.json(
+           { error: error.message || 'Failed to update application' },
+           { status: 500 }
+         );
+       }
+     }
+     
+     // DELETE - Delete application
+     export async function DELETE(request: NextRequest, { params }: RouteParams) {
+       try {
+         const userId = request.headers.get('x-user-id');
+         if (!userId) {
+           return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+         }
+         
+         const supabase = createServerSupabaseClient();
+         const service = createApplicationService(supabase);
+         
+         await service.deleteApplication(params.id, userId);
+         
+         return NextResponse.json({ success: true });
+         
+       } catch (error: any) {
+         return NextResponse.json(
+           { error: error.message || 'Failed to delete application' },
+           { status: 500 }
+         );
+       }
+     }
+     ```
+
+  8. Create API route for processing:
+     ```typescript
+     // ============================================
+     // [F131] src/app/api/applications/[id]/process/route.ts
+     // ============================================
+     
+     import { NextRequest, NextResponse } from 'next/server';
+     import { createServerSupabaseClient } from '@/lib/supabase/server';
+     import { createApplicationService, processApplication } from '@/lib/applications';
+     import { createPromptService } from '@/lib/prompts';
+     import { createCVService } from '@/lib/cv';
+     import { decryptApiKey } from '@/lib/encryption';
+     
+     interface RouteParams {
+       params: { id: string };
+     }
+     
+     export async function POST(request: NextRequest, { params }: RouteParams) {
+       try {
+         const userId = request.headers.get('x-user-id');
+         if (!userId) {
+           return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+         }
+         
+         const supabase = createServerSupabaseClient();
+         const appService = createApplicationService(supabase);
+         const promptService = createPromptService(supabase);
+         const cvService = createCVService(supabase);
+         
+         // Get application
+         const application = await appService.getApplication(params.id, userId);
+         if (!application) {
+           return NextResponse.json({ error: 'Application not found' }, { status: 404 });
+         }
+         
+         // Get user's CV
+         const cv = await cvService.getCV(userId);
+         if (!cv) {
+           return NextResponse.json({ 
+             error: 'No CV found. Please upload your CV first.' 
+           }, { status: 400 });
+         }
+         
+         // Get selected prompts
+         const prompts = await promptService.getPromptsByIds(application.selected_prompt_ids);
+         if (prompts.length === 0) {
+           return NextResponse.json({ 
+             error: 'No prompts selected' 
+           }, { status: 400 });
+         }
+         
+         // Get API keys
+         const { data: keys } = await supabase
+           .from('ai_api_keys')
+           .select('provider_name, api_key_encrypted')
+           .eq('user_id', userId);
+         
+         const apiKeys: Record<string, string> = {};
+         for (const key of keys || []) {
+           try {
+             apiKeys[key.provider_name] = decryptApiKey(key.api_key_encrypted);
+           } catch {}
+         }
+         
+         // Update status to processing
+         await appService.updateStatus(params.id, userId, 'processing', 'processing');
+         
+         // Process with AI
+         const result = await processApplication({
+           application,
+           cv,
+           prompts,
+           apiKeys
+         });
+         
+         if (!result.success) {
+           await appService.setError(params.id, userId, result.error || 'Processing failed');
+           return NextResponse.json({ error: result.error }, { status: 500 });
+         }
+         
+         // Handle result
+         if (result.needsClarification) {
+           // Save AI's question
+           await appService.addClarificationMessage(
+             params.id, userId, 'assistant', result.content
+           );
+           
+           return NextResponse.json({
+             status: 'clarification',
+             message: result.content,
+             success: true
+           });
+         } else {
+           // Save draft
+           await appService.saveDraftContent(params.id, userId, result.content);
+           
+           return NextResponse.json({
+             status: 'draft_ready',
+             content: result.content,
+             success: true
+           });
+         }
+         
+       } catch (error: any) {
+         console.error('POST /api/applications/[id]/process error:', error);
+         return NextResponse.json(
+           { error: error.message || 'Processing failed' },
+           { status: 500 }
+         );
+       }
+     }
+     ```
+
+  9. Create API route for clarification:
+     ```typescript
+     // ============================================
+     // [F132] src/app/api/applications/[id]/clarify/route.ts
+     // ============================================
+     
+     import { NextRequest, NextResponse } from 'next/server';
+     import { createServerSupabaseClient } from '@/lib/supabase/server';
+     import { createApplicationService, processApplication } from '@/lib/applications';
+     import { createPromptService } from '@/lib/prompts';
+     import { createCVService } from '@/lib/cv';
+     import { decryptApiKey } from '@/lib/encryption';
+     
+     interface RouteParams {
+       params: { id: string };
+     }
+     
+     export async function POST(request: NextRequest, { params }: RouteParams) {
+       try {
+         const userId = request.headers.get('x-user-id');
+         if (!userId) {
+           return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+         }
+         
+         const { response: userResponse } = await request.json();
+         if (!userResponse) {
+           return NextResponse.json({ error: 'Response is required' }, { status: 400 });
+         }
+         
+         const supabase = createServerSupabaseClient();
+         const appService = createApplicationService(supabase);
+         const promptService = createPromptService(supabase);
+         const cvService = createCVService(supabase);
+         
+         // Add user's response
+         let application = await appService.addClarificationMessage(
+           params.id, userId, 'user', userResponse
+         );
+         
+         // Get updated application with all messages
+         application = await appService.getApplication(params.id, userId);
+         if (!application) {
+           return NextResponse.json({ error: 'Application not found' }, { status: 404 });
+         }
+         
+         // Get CV and prompts
+         const cv = await cvService.getCV(userId);
+         if (!cv) {
+           return NextResponse.json({ error: 'CV not found' }, { status: 400 });
+         }
+         
+         const prompts = await promptService.getPromptsByIds(application.selected_prompt_ids);
+         
+         // Get API keys
+         const { data: keys } = await supabase
+           .from('ai_api_keys')
+           .select('provider_name, api_key_encrypted')
+           .eq('user_id', userId);
+         
+         const apiKeys: Record<string, string> = {};
+         for (const key of keys || []) {
+           try {
+             apiKeys[key.provider_name] = decryptApiKey(key.api_key_encrypted);
+           } catch {}
+         }
+         
+         // Continue processing
+         const result = await processApplication({
+           application,
+           cv,
+           prompts,
+           apiKeys
+         });
+         
+         if (!result.success) {
+           await appService.setError(params.id, userId, result.error || 'Processing failed');
+           return NextResponse.json({ error: result.error }, { status: 500 });
+         }
+         
+         if (result.needsClarification) {
+           await appService.addClarificationMessage(
+             params.id, userId, 'assistant', result.content
+           );
+           
+           return NextResponse.json({
+             status: 'clarification',
+             message: result.content,
+             success: true
+           });
+         } else {
+           await appService.saveDraftContent(params.id, userId, result.content);
+           
+           return NextResponse.json({
+             status: 'draft_ready',
+             content: result.content,
+             success: true
+           });
+         }
+         
+       } catch (error: any) {
+         console.error('POST /api/applications/[id]/clarify error:', error);
+         return NextResponse.json(
+           { error: error.message || 'Clarification failed' },
+           { status: 500 }
+         );
+       }
+     }
+     ```
+
+  10. Create API route for finalization:
+      ```typescript
+      // ============================================
+      // [F133] src/app/api/applications/[id]/finalize/route.ts
+      // ============================================
+      
+      import { NextRequest, NextResponse } from 'next/server';
+      import { createServerSupabaseClient } from '@/lib/supabase/server';
+      import { createApplicationService, generateFinalDocuments } from '@/lib/applications';
+      import { createPromptService } from '@/lib/prompts';
+      import { createCVService } from '@/lib/cv';
+      import { decryptApiKey } from '@/lib/encryption';
+      
+      interface RouteParams {
+        params: { id: string };
+      }
+      
+      export async function POST(request: NextRequest, { params }: RouteParams) {
+        try {
+          const userId = request.headers.get('x-user-id');
+          if (!userId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+          }
+          
+          const { edited_content } = await request.json();
+          
+          const supabase = createServerSupabaseClient();
+          const appService = createApplicationService(supabase);
+          const promptService = createPromptService(supabase);
+          const cvService = createCVService(supabase);
+          
+          // Get application
+          const application = await appService.getApplication(params.id, userId);
+          if (!application) {
+            return NextResponse.json({ error: 'Application not found' }, { status: 404 });
+          }
+          
+          if (!application.draft_content) {
+            return NextResponse.json({ error: 'No draft content to finalize' }, { status: 400 });
+          }
+          
+          // Update status
+          await appService.updateStatus(params.id, userId, 'finalizing');
+          
+          // Save edited content if provided
+          if (edited_content) {
+            await appService.saveEditedContent(params.id, userId, edited_content);
+          }
+          
+          // Get CV
+          const cv = await cvService.getCV(userId);
+          if (!cv) {
+            return NextResponse.json({ error: 'CV not found' }, { status: 400 });
+          }
+          
+          // Get prompts
+          const prompts = await promptService.getPromptsByIds(application.selected_prompt_ids);
+          
+          // Get API keys
+          const { data: keys } = await supabase
+            .from('ai_api_keys')
+            .select('provider_name, api_key_encrypted')
+            .eq('user_id', userId);
+          
+          const apiKeys: Record<string, string> = {};
+          for (const key of keys || []) {
+            try {
+              apiKeys[key.provider_name] = decryptApiKey(key.api_key_encrypted);
+            } catch {}
+          }
+          
+          // Generate final documents
+          const result = await generateFinalDocuments(
+            { application, cv, prompts, apiKeys },
+            application.draft_content,
+            edited_content || application.edited_content
+          );
+          
+          if (!result.success) {
+            await appService.setError(params.id, userId, result.error || 'Finalization failed');
+            return NextResponse.json({ error: result.error }, { status: 500 });
+          }
+          
+          // Save final documents
+          await appService.saveFinalDocuments(params.id, userId, result.documents!);
+          
+          return NextResponse.json({
+            status: 'completed',
+            documents: result.documents,
+            success: true
+          });
+          
+        } catch (error: any) {
+          console.error('POST /api/applications/[id]/finalize error:', error);
+          return NextResponse.json(
+            { error: error.message || 'Finalization failed' },
+            { status: 500 }
+          );
+        }
+      }
+      ```
+
+  11. Create useApplication hook:
+      ```typescript
+      // ============================================
+      // [F084] src/hooks/useApplication.ts
+      // ============================================
+      
+      'use client';
+      
+      import { useState, useCallback } from 'react';
+      import { useAuth } from '@/context/AuthContext';
+      import {
+        JobApplication,
+        CreateApplicationInput,
+        WizardStep,
+        AIModelSelection,
+        OutputLanguage,
+        ToneSetting
+      } from '@/lib/types';
+      
+      interface UseApplicationReturn {
+        application: JobApplication | null;
+        loading: boolean;
+        processing: boolean;
+        error: string | null;
+        
+        // Wizard state
+        currentStep: WizardStep;
+        setCurrentStep: (step: WizardStep) => void;
+        
+        // Form state
+        jobDescription: string;
+        setJobDescription: (value: string) => void;
+        selectedPromptIds: string[];
+        setSelectedPromptIds: (ids: string[]) => void;
+        aiSelections: AIModelSelection[];
+        setAISelections: (selections: AIModelSelection[]) => void;
+        outputLanguage: OutputLanguage;
+        setOutputLanguage: (lang: OutputLanguage) => void;
+        toneSetting: ToneSetting;
+        setToneSetting: (tone: ToneSetting) => void;
+        
+        // Actions
+        createApplication: () => Promise<JobApplication>;
+        loadApplication: (id: string) => Promise<void>;
+        startProcessing: () => Promise<void>;
+        sendClarification: (response: string) => Promise<void>;
+        updateDraft: (content: string) => void;
+        finalize: () => Promise<void>;
+        reset: () => void;
+        
+        // Computed
+        canProceedToNext: boolean;
+        draftContent: string | null;
+        clarificationMessages: Array<{ role: string; content: string }>;
+        finalDocuments: {
+          tailored_cv: string;
+          cover_letter: string;
+          application_email: string;
+        } | null;
+      }
+      
+      const initialToneSetting: ToneSetting = {
+        mode: 'preset',
+        preset_value: 'professional',
+        custom_text: null
+      };
+      
+      export function useApplication(): UseApplicationReturn {
+        const { user } = useAuth();
+        
+        // Application state
+        const [application, setApplication] = useState<JobApplication | null>(null);
+        const [loading, setLoading] = useState(false);
+        const [processing, setProcessing] = useState(false);
+        const [error, setError] = useState<string | null>(null);
+        
+        // Wizard state
+        const [currentStep, setCurrentStep] = useState<WizardStep>('job_description');
+        
+        // Form state
+        const [jobDescription, setJobDescription] = useState('');
+        const [selectedPromptIds, setSelectedPromptIds] = useState<string[]>([]);
+        const [aiSelections, setAISelections] = useState<AIModelSelection[]>([]);
+        const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>('en');
+        const [toneSetting, setToneSetting] = useState<ToneSetting>(initialToneSetting);
+        
+        // Draft state (local)
+        const [localDraftContent, setLocalDraftContent] = useState<string | null>(null);
+        
+        const createApplication = useCallback(async (): Promise<JobApplication> => {
+          if (!user) throw new Error('Not authenticated');
+          
+          setLoading(true);
+          setError(null);
+          
+          try {
+            const res = await fetch('/api/applications', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-user-id': user.id
+              },
+              body: JSON.stringify({
+                job_description: jobDescription,
+                selected_prompt_ids: selectedPromptIds,
+                ai_selections: aiSelections,
+                output_language: outputLanguage,
+                tone_setting: toneSetting
+              })
+            });
+            
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            
+            setApplication(data.application);
+            return data.application;
+            
+          } catch (err: any) {
+            setError(err.message);
+            throw err;
+          } finally {
+            setLoading(false);
+          }
+        }, [user, jobDescription, selectedPromptIds, aiSelections, outputLanguage, toneSetting]);
+        
+        const loadApplication = useCallback(async (id: string) => {
+          if (!user) return;
+          
+          setLoading(true);
+          setError(null);
+          
+          try {
+            const res = await fetch(`/api/applications/${id}`, {
+              headers: { 'x-user-id': user.id }
+            });
+            
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            
+            const app = data.application;
+            setApplication(app);
+            
+            // Restore form state from application
+            setJobDescription(app.job_description);
+            setSelectedPromptIds(app.selected_prompt_ids);
+            setAISelections(app.ai_selections);
+            setOutputLanguage(app.output_language);
+            setToneSetting(app.tone_setting);
+            setCurrentStep(app.current_step);
+            setLocalDraftContent(app.draft_content);
+            
+          } catch (err: any) {
+            setError(err.message);
+          } finally {
+            setLoading(false);
+          }
+        }, [user]);
+        
+        const startProcessing = useCallback(async () => {
+          if (!user || !application) return;
+          
+          setProcessing(true);
+          setError(null);
+          setCurrentStep('processing');
+          
+          try {
+            const res = await fetch(`/api/applications/${application.id}/process`, {
+              method: 'POST',
+              headers: { 'x-user-id': user.id }
+            });
+            
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            
+            if (data.status === 'clarification') {
+              setApplication(prev => prev ? {
+                ...prev,
+                status: 'clarification',
+                clarification_messages: [
+                  ...(prev.clarification_messages || []),
+                  { id: Date.now().toString(), role: 'assistant', content: data.message, timestamp: new Date().toISOString() }
+                ]
+              } : null);
+            } else if (data.status === 'draft_ready') {
+              setLocalDraftContent(data.content);
+              setApplication(prev => prev ? {
+                ...prev,
+                status: 'draft_ready',
+                draft_content: data.content,
+                current_step: 'editing'
+              } : null);
+              setCurrentStep('editing');
+            }
+            
+          } catch (err: any) {
+            setError(err.message);
+          } finally {
+            setProcessing(false);
+          }
+        }, [user, application]);
+        
+        const sendClarification = useCallback(async (response: string) => {
+          if (!user || !application) return;
+          
+          setProcessing(true);
+          setError(null);
+          
+          // Optimistically add user message
+          setApplication(prev => prev ? {
+            ...prev,
+            clarification_messages: [
+              ...(prev.clarification_messages || []),
+              { id: Date.now().toString(), role: 'user', content: response, timestamp: new Date().toISOString() }
+            ]
+          } : null);
+          
+          try {
+            const res = await fetch(`/api/applications/${application.id}/clarify`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-user-id': user.id
+              },
+              body: JSON.stringify({ response })
+            });
+            
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            
+            if (data.status === 'clarification') {
+              setApplication(prev => prev ? {
+                ...prev,
+                clarification_messages: [
+                  ...(prev.clarification_messages || []),
+                  { id: Date.now().toString(), role: 'assistant', content: data.message, timestamp: new Date().toISOString() }
+                ]
+              } : null);
+            } else if (data.status === 'draft_ready') {
+              setLocalDraftContent(data.content);
+              setApplication(prev => prev ? {
+                ...prev,
+                status: 'draft_ready',
+                draft_content: data.content,
+                current_step: 'editing'
+              } : null);
+              setCurrentStep('editing');
+            }
+            
+          } catch (err: any) {
+            setError(err.message);
+          } finally {
+            setProcessing(false);
+          }
+        }, [user, application]);
+        
+        const updateDraft = useCallback((content: string) => {
+          setLocalDraftContent(content);
+        }, []);
+        
+        const finalize = useCallback(async () => {
+          if (!user || !application) return;
+          
+          setProcessing(true);
+          setError(null);
+          
+          try {
+            const res = await fetch(`/api/applications/${application.id}/finalize`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-user-id': user.id
+              },
+              body: JSON.stringify({
+                edited_content: localDraftContent
+              })
+            });
+            
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            
+            setApplication(prev => prev ? {
+              ...prev,
+              status: 'completed',
+              current_step: 'final',
+              final_documents: {
+                ...data.documents,
+                generatedAt: new Date().toISOString()
+              }
+            } : null);
+            setCurrentStep('final');
+            
+          } catch (err: any) {
+            setError(err.message);
+          } finally {
+            setProcessing(false);
+          }
+        }, [user, application, localDraftContent]);
+        
+        const reset = useCallback(() => {
+          setApplication(null);
+          setCurrentStep('job_description');
+          setJobDescription('');
+          setSelectedPromptIds([]);
+          setAISelections([]);
+          setOutputLanguage('en');
+          setToneSetting(initialToneSetting);
+          setLocalDraftContent(null);
+          setError(null);
+        }, []);
+        
+        // Computed
+        const canProceedToNext = (() => {
+          switch (currentStep) {
+            case 'job_description':
+              return jobDescription.trim().length > 50;
+            case 'prompts':
+              return selectedPromptIds.length > 0;
+            case 'ai_config':
+              return aiSelections.length > 0;
+            case 'settings':
+              return true;
+            default:
+              return false;
+          }
+        })();
+        
+        return {
+          application,
+          loading,
+          processing,
+          error,
+          currentStep,
+          setCurrentStep,
+          jobDescription,
+          setJobDescription,
+          selectedPromptIds,
+          setSelectedPromptIds,
+          aiSelections,
+          setAISelections,
+          outputLanguage,
+          setOutputLanguage,
+          toneSetting,
+          setToneSetting,
+          createApplication,
+          loadApplication,
+          startProcessing,
+          sendClarification,
+          updateDraft,
+          finalize,
+          reset,
+          canProceedToNext,
+          draftContent: localDraftContent,
+          clarificationMessages: application?.clarification_messages || [],
+          finalDocuments: application?.final_documents || null
+        };
+      }
+      ```
+
+  12. Create WizardProgress.tsx:
+      ```typescript
+      // ============================================
+      // [F135] src/components/application/WizardProgress.tsx
+      // ============================================
+      
+      'use client';
+      
+      import { useTranslations } from 'next-intl';
+      import { WizardStep } from '@/lib/types';
+      import { cn } from '@/lib/utils';
+      import { Check, FileText, Sparkles, Settings, Loader2, Edit, Download } from 'lucide-react';
+      
+      interface WizardProgressProps {
+        currentStep: WizardStep;
+        completedSteps: WizardStep[];
+        onStepClick?: (step: WizardStep) => void;
+        className?: string;
+      }
+      
+      const STEPS: { key: WizardStep; icon: React.ElementType }[] = [
+        { key: 'job_description', icon: FileText },
+        { key: 'prompts', icon: Sparkles },
+        { key: 'ai_config', icon: Settings },
+        { key: 'settings', icon: Settings },
+        { key: 'processing', icon: Loader2 },
+        { key: 'editing', icon: Edit },
+        { key: 'final', icon: Download }
+      ];
+      
+      export function WizardProgress({
+        currentStep,
+        completedSteps,
+        onStepClick,
+        className
+      }: WizardProgressProps) {
+        const t = useTranslations('application');
+        
+        const currentIndex = STEPS.findIndex(s => s.key === currentStep);
+        
+        return (
+          <div className={cn('flex items-center justify-between', className)}>
+            {STEPS.map((step, index) => {
+              const Icon = step.icon;
+              const isCompleted = completedSteps.includes(step.key);
+              const isCurrent = step.key === currentStep;
+              const isClickable = isCompleted && onStepClick;
+              
+              return (
+                <div key={step.key} className="flex items-center">
+                  {/* Step circle */}
+                  <button
+                    onClick={() => isClickable && onStepClick(step.key)}
+                    disabled={!isClickable}
+                    className={cn(
+                      'flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all',
+                      isCompleted && 'bg-primary border-primary text-primary-foreground',
+                      isCurrent && !isCompleted && 'border-primary text-primary',
+                      !isCompleted && !isCurrent && 'border-muted-foreground/30 text-muted-foreground',
+                      isClickable && 'cursor-pointer hover:scale-105'
+                    )}
+                  >
+                    {isCompleted ? (
+                      <Check className="h-5 w-5" />
+                    ) : (
+                      <Icon className={cn('h-5 w-5', isCurrent && step.key === 'processing' && 'animate-spin')} />
+                    )}
+                  </button>
+                  
+                  {/* Connector line */}
+                  {index < STEPS.length - 1 && (
+                    <div className={cn(
+                      'w-full h-0.5 mx-2 min-w-[20px] max-w-[60px]',
+                      index < currentIndex ? 'bg-primary' : 'bg-muted-foreground/30'
+                    )} />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        );
+      }
+      ```
+
+  13. Create JobDescriptionInput.tsx:
+      ```typescript
+      // ============================================
+      // [F054] src/components/application/JobDescriptionInput.tsx
+      // ============================================
+      
+      'use client';
+      
+      import { useTranslations } from 'next-intl';
+      import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+      import { Textarea } from '@/components/ui/textarea';
+      import { Badge } from '@/components/ui/badge';
+      import { FileText, AlertCircle } from 'lucide-react';
+      import { cn } from '@/lib/utils';
+      
+      interface JobDescriptionInputProps {
+        value: string;
+        onChange: (value: string) => void;
+        minLength?: number;
+        disabled?: boolean;
+        className?: string;
+      }
+      
+      export function JobDescriptionInput({
+        value,
+        onChange,
+        minLength = 50,
+        disabled = false,
+        className
+      }: JobDescriptionInputProps) {
+        const t = useTranslations('application');
+        
+        const charCount = value.length;
+        const wordCount = value.trim().split(/\s+/).filter(Boolean).length;
+        const isValid = charCount >= minLength;
+        
+        return (
+          <Card className={className}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                {t('job_description_title')}
+              </CardTitle>
+              <CardDescription>
+                {t('job_description_hint')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Textarea
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder={t('job_description_placeholder')}
+                rows={12}
+                disabled={disabled}
+                className="resize-none font-mono text-sm"
+                dir="auto"
+              />
+              
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-4 text-muted-foreground">
+                  <span>{t('characters')}: {charCount}</span>
+                  <span>{t('words')}: {wordCount}</span>
+                </div>
+                
+                {!isValid && charCount > 0 && (
+                  <Badge variant="outline" className="text-yellow-600 border-yellow-300">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    {t('min_chars_required', { count: minLength })}
+                  </Badge>
+                )}
+                
+                {isValid && (
+                  <Badge variant="outline" className="text-green-600 border-green-300">
+                    {t('ready')}
+                  </Badge>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        );
+      }
+      ```
+
+  14. Create LanguageSelector.tsx:
+      ```typescript
+      // ============================================
+      // [F056] src/components/application/LanguageSelector.tsx
+      // ============================================
+      
+      'use client';
+      
+      import { useTranslations } from 'next-intl';
+      import { useParams } from 'next/navigation';
+      import { OutputLanguage } from '@/lib/types';
+      import { SUPPORTED_OUTPUT_LANGUAGES } from '@/lib/constants';
+      import { Label } from '@/components/ui/label';
+      import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+      import { cn } from '@/lib/utils';
+      
+      interface LanguageSelectorProps {
+        value: OutputLanguage;
+        onChange: (value: OutputLanguage) => void;
+        disabled?: boolean;
+        className?: string;
+      }
+      
+      export function LanguageSelector({
+        value,
+        onChange,
+        disabled = false,
+        className
+      }: LanguageSelectorProps) {
+        const t = useTranslations('application');
+        const params = useParams();
+        const locale = params.locale as 'en' | 'fa';
+        
+        return (
+          <div className={cn('space-y-3', className)}>
+            <Label>{t('output_language')}</Label>
+            <RadioGroup
+              value={value}
+              onValueChange={(v) => onChange(v as OutputLanguage)}
+              disabled={disabled}
+              className="grid grid-cols-2 md:grid-cols-4 gap-3"
+            >
+              {SUPPORTED_OUTPUT_LANGUAGES.map((lang) => (
+                <div key={lang.code}>
+                  <RadioGroupItem
+                    value={lang.code}
+                    id={`lang-${lang.code}`}
+                    className="peer sr-only"
+                  />
+                  <Label
+                    htmlFor={`lang-${lang.code}`}
+                    className={cn(
+                      'flex items-center justify-center px-3 py-2 border rounded-lg cursor-pointer',
+                      'peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5',
+                      'hover:bg-muted transition-colors',
+                      disabled && 'opacity-50 cursor-not-allowed'
+                    )}
+                  >
+                    {locale === 'fa' ? lang.label_fa : lang.label_en}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          </div>
+        );
+      }
+      ```
+
+  15. Create ToneSelector.tsx:
+      ```typescript
+      // ============================================
+      // [F055] src/components/application/ToneSelector.tsx
+      // ============================================
+      
+      'use client';
+      
+      import { useTranslations } from 'next-intl';
+      import { useParams } from 'next/navigation';
+      import { ToneSetting } from '@/lib/types';
+      import { TONE_PRESETS } from '@/lib/constants';
+      import { Label } from '@/components/ui/label';
+      import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+      import { Textarea } from '@/components/ui/textarea';
+      import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+      import { cn } from '@/lib/utils';
+      
+      interface ToneSelectorProps {
+        value: ToneSetting;
+        onChange: (value: ToneSetting) => void;
+        disabled?: boolean;
+        className?: string;
+      }
+      
+      export function ToneSelector({
+        value,
+        onChange,
+        disabled = false,
+        className
+      }: ToneSelectorProps) {
+        const t = useTranslations('application');
+        const params = useParams();
+        const locale = params.locale as 'en' | 'fa';
+        
+        const handleModeChange = (mode: 'preset' | 'custom') => {
+          onChange({
+            mode,
+            preset_value: mode === 'preset' ? (value.preset_value || 'professional') : null,
+            custom_text: mode === 'custom' ? (value.custom_text || '') : null
+          });
+        };
+        
+        const handlePresetChange = (preset: string) => {
+          onChange({
+            ...value,
+            mode: 'preset',
+            preset_value: preset
+          });
+        };
+        
+        const handleCustomChange = (text: string) => {
+          onChange({
+            ...value,
+            mode: 'custom',
+            custom_text: text
+          });
+        };
+        
+        return (
+          <div className={cn('space-y-3', className)}>
+            <Label>{t('response_tone')}</Label>
+            
+            <Tabs 
+              value={value.mode} 
+              onValueChange={(v) => handleModeChange(v as 'preset' | 'custom')}
+            >
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="preset" disabled={disabled}>
+                  {t('tone_preset')}
+                </TabsTrigger>
+                <TabsTrigger value="custom" disabled={disabled}>
+                  {t('tone_custom')}
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="preset" className="mt-4">
+                <RadioGroup
+                  value={value.preset_value || 'professional'}
+                  onValueChange={handlePresetChange}
+                  disabled={disabled}
+                  className="grid grid-cols-2 md:grid-cols-3 gap-3"
+                >
+                  {TONE_PRESETS.map((tone) => (
+                    <div key={tone.value}>
+                      <RadioGroupItem
+                        value={tone.value}
+                        id={`tone-${tone.value}`}
+                        className="peer sr-only"
+                      />
+                      <Label
+                        htmlFor={`tone-${tone.value}`}
+                        className={cn(
+                          'flex items-center justify-center px-3 py-2 border rounded-lg cursor-pointer',
+                          'peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5',
+                          'hover:bg-muted transition-colors',
+                          disabled && 'opacity-50 cursor-not-allowed'
+                        )}
+                      >
+                        {locale === 'fa' ? tone.label_fa : tone.label_en}
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              </TabsContent>
+              
+              <TabsContent value="custom" className="mt-4">
+                <Textarea
+                  value={value.custom_text || ''}
+                  onChange={(e) => handleCustomChange(e.target.value)}
+                  placeholder={t('tone_custom_placeholder')}
+                  rows={3}
+                  disabled={disabled}
+                  dir="auto"
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  {t('tone_custom_hint')}
+                </p>
+              </TabsContent>
+            </Tabs>
+          </div>
+        );
+      }
+      ```
+
+  (ادامه در پیام بعدی به دلیل محدودیت طول...)
+  # ادامه B18.yaml - فایل‌های باقیمانده
+
+  16. Create PromptSelectionStep.tsx:
+      ```typescript
+      // ============================================
+      // [F136] src/components/application/PromptSelectionStep.tsx
+      // ============================================
+      
+      'use client';
+      
+      import { useTranslations } from 'next-intl';
+      import { PromptSelector } from '@/components/prompts/PromptSelector';
+      import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+      import { Sparkles } from 'lucide-react';
+      
+      interface PromptSelectionStepProps {
+        selectedIds: string[];
+        onSelectionChange: (ids: string[]) => void;
+        disabled?: boolean;
+        className?: string;
+      }
+      
+      export function PromptSelectionStep({
+        selectedIds,
+        onSelectionChange,
+        disabled = false,
+        className
+      }: PromptSelectionStepProps) {
+        const t = useTranslations('application');
+        
+        return (
+          <Card className={className}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5" />
+                {t('select_prompts_title')}
+              </CardTitle>
+              <CardDescription>
+                {t('select_prompts_description')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PromptSelector
+                selectedIds={selectedIds}
+                onSelectionChange={onSelectionChange}
+                maxSelection={null}
+              />
+            </CardContent>
+          </Card>
+        );
+      }
+      ```
+
+  17. Create AIConfigurationStep.tsx:
+      ```typescript
+      // ============================================
+      // [F137] src/components/application/AIConfigurationStep.tsx
+      // ============================================
+      
+      'use client';
+      
+      import { useState } from 'react';
+      import { useTranslations } from 'next-intl';
+      import { useParams } from 'next/navigation';
+      import { useAIKeys } from '@/hooks/useAIKeys';
+      import { AIModelSelection, AIProviderName } from '@/lib/types';
+      import { SUPPORTED_AI_PROVIDERS } from '@/lib/constants';
+      import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+      import { Label } from '@/components/ui/label';
+      import { Badge } from '@/components/ui/badge';
+      import { Button } from '@/components/ui/button';
+      import {
+        Select,
+        SelectContent,
+        SelectItem,
+        SelectTrigger,
+        SelectValue,
+      } from '@/components/ui/select';
+      import { Switch } from '@/components/ui/switch';
+      import { 
+        Settings, CheckCircle, AlertCircle, Plus, Trash2, Cpu 
+      } from 'lucide-react';
+      import { cn } from '@/lib/utils';
+      import Link from 'next/link';
+      
+      interface AIConfigurationStepProps {
+        selections: AIModelSelection[];
+        onSelectionsChange: (selections: AIModelSelection[]) => void;
+        disabled?: boolean;
+        className?: string;
+      }
+      
+      export function AIConfigurationStep({
+        selections,
+        onSelectionsChange,
+        disabled = false,
+        className
+      }: AIConfigurationStepProps) {
+        const t = useTranslations('application');
+        const params = useParams();
+        const locale = params.locale as 'en' | 'fa';
+        
+        const { keys, loading, hasValidKey, getModelsForProvider, getValidProviders } = useAIKeys();
+        
+        const [useSeparateFinal, setUseSeparateFinal] = useState(
+          selections.some(s => s.role === 'final')
+        );
+        
+        const validProviders = getValidProviders();
+        const hasAnyValidKey = validProviders.length > 0;
+        
+        // Get current draft and final selections
+        const draftSelection = selections.find(s => s.role === 'draft');
+        const finalSelection = selections.find(s => s.role === 'final');
+        
+        const updateSelection = (role: 'draft' | 'final', provider: AIProviderName | null, model: string | null) => {
+          let newSelections = selections.filter(s => s.role !== role);
+          
+          if (provider && model) {
+            newSelections.push({ provider, model, role });
+          }
+          
+          onSelectionsChange(newSelections);
+        };
+        
+        const handleUseSeparateFinalChange = (checked: boolean) => {
+          setUseSeparateFinal(checked);
+          if (!checked) {
+            // Remove final selection
+            onSelectionsChange(selections.filter(s => s.role !== 'final'));
+          }
+        };
+        
+        if (loading) {
+          return (
+            <Card className={className}>
+              <CardContent className="py-8">
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
+                </div>
+              </CardContent>
+            </Card>
+          );
+        }
+        
+        if (!hasAnyValidKey) {
+          return (
+            <Card className={className}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  {t('ai_config_title')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <AlertCircle className="h-12 w-12 text-yellow-500 mb-4" />
+                  <h3 className="text-lg font-medium mb-2">{t('no_ai_keys')}</h3>
+                  <p className="text-muted-foreground mb-4">{t('no_ai_keys_hint')}</p>
+                  <Link href={`/${locale}/settings`}>
+                    <Button>
+                      <Settings className="h-4 w-4 mr-2" />
+                      {t('go_to_settings')}
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        }
+        
+        return (
+          <Card className={className}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Cpu className="h-5 w-5" />
+                {t('ai_config_title')}
+              </CardTitle>
+              <CardDescription>
+                {t('ai_config_description')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              
+              {/* Draft AI Selection */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label className="text-base font-medium">
+                    {t('draft_ai')}
+                  </Label>
+                  <Badge variant="outline">{t('required')}</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {t('draft_ai_hint')}
+                </p>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>{t('provider')}</Label>
+                    <Select
+                      value={draftSelection?.provider || ''}
+                      onValueChange={(v) => {
+                        updateSelection('draft', v as AIProviderName, '');
+                      }}
+                      disabled={disabled}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('select_provider')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SUPPORTED_AI_PROVIDERS.map((provider) => {
+                          const isValid = hasValidKey(provider.name);
+                          return (
+                            <SelectItem
+                              key={provider.name}
+                              value={provider.name}
+                              disabled={!isValid}
+                            >
+                              <div className="flex items-center gap-2">
+                                {isValid ? (
+                                  <CheckCircle className="h-3 w-3 text-green-500" />
+                                ) : (
+                                  <AlertCircle className="h-3 w-3 text-muted-foreground" />
+                                )}
+                                {provider.label}
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>{t('model')}</Label>
+                    <Select
+                      value={draftSelection?.model || ''}
+                      onValueChange={(v) => {
+                        if (draftSelection?.provider) {
+                          updateSelection('draft', draftSelection.provider, v);
+                        }
+                      }}
+                      disabled={disabled || !draftSelection?.provider}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('select_model')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {draftSelection?.provider && 
+                          getModelsForProvider(draftSelection.provider).map((model) => (
+                            <SelectItem key={model.model_id} value={model.model_id}>
+                              {model.model_name}
+                            </SelectItem>
+                          ))
+                        }
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Separator */}
+              <div className="border-t pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <Label className="text-base font-medium">
+                      {t('use_different_final')}
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      {t('use_different_final_hint')}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={useSeparateFinal}
+                    onCheckedChange={handleUseSeparateFinalChange}
+                    disabled={disabled}
+                  />
+                </div>
+                
+                {/* Final AI Selection */}
+                {useSeparateFinal && (
+                  <div className="space-y-4 mt-4 p-4 bg-muted/50 rounded-lg">
+                    <Label className="text-base font-medium">
+                      {t('final_ai')}
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      {t('final_ai_hint')}
+                    </p>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>{t('provider')}</Label>
+                        <Select
+                          value={finalSelection?.provider || ''}
+                          onValueChange={(v) => {
+                            updateSelection('final', v as AIProviderName, '');
+                          }}
+                          disabled={disabled}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={t('select_provider')} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {SUPPORTED_AI_PROVIDERS.map((provider) => {
+                              const isValid = hasValidKey(provider.name);
+                              return (
+                                <SelectItem
+                                  key={provider.name}
+                                  value={provider.name}
+                                  disabled={!isValid}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    {isValid ? (
+                                      <CheckCircle className="h-3 w-3 text-green-500" />
+                                    ) : (
+                                      <AlertCircle className="h-3 w-3 text-muted-foreground" />
+                                    )}
+                                    {provider.label}
+                                  </div>
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>{t('model')}</Label>
+                        <Select
+                          value={finalSelection?.model || ''}
+                          onValueChange={(v) => {
+                            if (finalSelection?.provider) {
+                              updateSelection('final', finalSelection.provider, v);
+                            }
+                          }}
+                          disabled={disabled || !finalSelection?.provider}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={t('select_model')} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {finalSelection?.provider && 
+                              getModelsForProvider(finalSelection.provider).map((model) => (
+                                <SelectItem key={model.model_id} value={model.model_id}>
+                                  {model.model_name}
+                                </SelectItem>
+                              ))
+                            }
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Summary */}
+              {(draftSelection?.model || finalSelection?.model) && (
+                <div className="border-t pt-4">
+                  <Label className="text-sm text-muted-foreground mb-2 block">
+                    {t('config_summary')}
+                  </Label>
+                  <div className="flex flex-wrap gap-2">
+                    {draftSelection?.model && (
+                      <Badge variant="secondary">
+                        {t('draft')}: {draftSelection.provider} / {draftSelection.model}
+                      </Badge>
+                    )}
+                    {finalSelection?.model && (
+                      <Badge variant="secondary">
+                        {t('final')}: {finalSelection.provider} / {finalSelection.model}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+            </CardContent>
+          </Card>
+        );
+      }
+      ```
+
+  18. Create OutputSettingsStep.tsx:
+      ```typescript
+      // ============================================
+      // [F138] src/components/application/OutputSettingsStep.tsx
+      // ============================================
+      
+      'use client';
+      
+      import { useTranslations } from 'next-intl';
+      import { OutputLanguage, ToneSetting } from '@/lib/types';
+      import { LanguageSelector } from './LanguageSelector';
+      import { ToneSelector } from './ToneSelector';
+      import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+      import { Settings2 } from 'lucide-react';
+      
+      interface OutputSettingsStepProps {
+        outputLanguage: OutputLanguage;
+        onOutputLanguageChange: (lang: OutputLanguage) => void;
+        toneSetting: ToneSetting;
+        onToneSettingChange: (tone: ToneSetting) => void;
+        disabled?: boolean;
+        className?: string;
+      }
+      
+      export function OutputSettingsStep({
+        outputLanguage,
+        onOutputLanguageChange,
+        toneSetting,
+        onToneSettingChange,
+        disabled = false,
+        className
+      }: OutputSettingsStepProps) {
+        const t = useTranslations('application');
+        
+        return (
+          <Card className={className}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings2 className="h-5 w-5" />
+                {t('output_settings_title')}
+              </CardTitle>
+              <CardDescription>
+                {t('output_settings_description')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-8">
+              <LanguageSelector
+                value={outputLanguage}
+                onChange={onOutputLanguageChange}
+                disabled={disabled}
+              />
+              
+              <ToneSelector
+                value={toneSetting}
+                onChange={onToneSettingChange}
+                disabled={disabled}
+              />
+            </CardContent>
+          </Card>
+        );
+      }
+      ```
+
+  19. Create AIChatInterface.tsx:
+      ```typescript
+      // ============================================
+      // [F052] src/components/ai/AIChatInterface.tsx
+      // ============================================
+      
+      'use client';
+      
+      import { useState, useRef, useEffect } from 'react';
+      import { useTranslations } from 'next-intl';
+      import { ClarificationMessage } from '@/lib/types';
+      import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+      import { Button } from '@/components/ui/button';
+      import { Textarea } from '@/components/ui/textarea';
+      import { ScrollArea } from '@/components/ui/scroll-area';
+      import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+      import { MessageSquare, Send, Loader2, Bot, User } from 'lucide-react';
+      import { cn } from '@/lib/utils';
+      
+      interface AIChatInterfaceProps {
+        messages: ClarificationMessage[];
+        onSendMessage: (message: string) => void;
+        isProcessing?: boolean;
+        disabled?: boolean;
+        className?: string;
+      }
+      
+      export function AIChatInterface({
+        messages,
+        onSendMessage,
+        isProcessing = false,
+        disabled = false,
+        className
+      }: AIChatInterfaceProps) {
+        const t = useTranslations('application');
+        const [input, setInput] = useState('');
+        const scrollRef = useRef<HTMLDivElement>(null);
+        const textareaRef = useRef<HTMLTextAreaElement>(null);
+        
+        // Scroll to bottom when messages change
+        useEffect(() => {
+          if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+          }
+        }, [messages]);
+        
+        const handleSend = () => {
+          if (input.trim() && !isProcessing && !disabled) {
+            onSendMessage(input.trim());
+            setInput('');
+          }
+        };
+        
+        const handleKeyDown = (e: React.KeyboardEvent) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+          }
+        };
+        
+        return (
+          <Card className={cn('flex flex-col', className)}>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <MessageSquare className="h-5 w-5" />
+                {t('ai_clarification')}
+              </CardTitle>
+            </CardHeader>
+            
+            <CardContent className="flex-1 flex flex-col min-h-0">
+              {/* Messages Area */}
+              <ScrollArea 
+                ref={scrollRef}
+                className="flex-1 pr-4 mb-4"
+                style={{ maxHeight: '400px' }}
+              >
+                <div className="space-y-4">
+                  {messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={cn(
+                        'flex gap-3',
+                        message.role === 'user' && 'flex-row-reverse'
+                      )}
+                    >
+                      <Avatar className={cn(
+                        'h-8 w-8',
+                        message.role === 'assistant' ? 'bg-primary' : 'bg-secondary'
+                      )}>
+                        <AvatarFallback>
+                          {message.role === 'assistant' ? (
+                            <Bot className="h-4 w-4" />
+                          ) : (
+                            <User className="h-4 w-4" />
+                          )}
+                        </AvatarFallback>
+                      </Avatar>
+                      
+                      <div className={cn(
+                        'flex-1 max-w-[80%]',
+                        message.role === 'user' && 'text-right'
+                      )}>
+                        <div className={cn(
+                          'inline-block p-3 rounded-lg text-sm',
+                          message.role === 'assistant' 
+                            ? 'bg-muted text-foreground' 
+                            : 'bg-primary text-primary-foreground'
+                        )}>
+                          <p className="whitespace-pre-wrap">{message.content}</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {new Date(message.timestamp).toLocaleTimeString()}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Processing indicator */}
+                  {isProcessing && (
+                    <div className="flex gap-3">
+                      <Avatar className="h-8 w-8 bg-primary">
+                        <AvatarFallback>
+                          <Bot className="h-4 w-4" />
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="bg-muted p-3 rounded-lg">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+              
+              {/* Input Area */}
+              <div className="flex gap-2">
+                <Textarea
+                  ref={textareaRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder={t('type_response')}
+                  disabled={disabled || isProcessing}
+                  rows={2}
+                  className="resize-none"
+                  dir="auto"
+                />
+                <Button
+                  onClick={handleSend}
+                  disabled={!input.trim() || isProcessing || disabled}
+                  className="self-end"
+                >
+                  {isProcessing ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      }
+      ```
+
+  20. Create ProcessingStep.tsx:
+      ```typescript
+      // ============================================
+      // [F139] src/components/application/ProcessingStep.tsx
+      // ============================================
+      
+      'use client';
+      
+      import { useTranslations } from 'next-intl';
+      import { ApplicationStatus, ClarificationMessage } from '@/lib/types';
+      import { AIChatInterface } from '@/components/ai/AIChatInterface';
+      import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+      import { Button } from '@/components/ui/button';
+      import { Loader2, Sparkles, MessageSquare, CheckCircle, AlertCircle } from 'lucide-react';
+      import { cn } from '@/lib/utils';
+      
+      interface ProcessingStepProps {
+        status: ApplicationStatus;
+        clarificationMessages: ClarificationMessage[];
+        onStartProcessing: () => void;
+        onSendClarification: (message: string) => void;
+        onContinueToEdit: () => void;
+        isProcessing: boolean;
+        error: string | null;
+        draftReady: boolean;
+        className?: string;
+      }
+      
+      export function ProcessingStep({
+        status,
+        clarificationMessages,
+        onStartProcessing,
+        onSendClarification,
+        onContinueToEdit,
+        isProcessing,
+        error,
+        draftReady,
+        className
+      }: ProcessingStepProps) {
+        const t = useTranslations('application');
+        
+        // Initial state - not started
+        if (status === 'draft' && clarificationMessages.length === 0 && !isProcessing) {
+          return (
+            <Card className={className}>
+              <CardContent className="py-12">
+                <div className="flex flex-col items-center justify-center text-center">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <Sparkles className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">{t('ready_to_process')}</h3>
+                  <p className="text-muted-foreground mb-6 max-w-md">
+                    {t('ready_to_process_hint')}
+                  </p>
+                  <Button onClick={onStartProcessing} size="lg">
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    {t('start_processing')}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        }
+        
+        // Processing state
+        if (isProcessing && status !== 'clarification') {
+          return (
+            <Card className={className}>
+              <CardContent className="py-12">
+                <div className="flex flex-col items-center justify-center text-center">
+                  <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">{t('processing')}</h3>
+                  <p className="text-muted-foreground">
+                    {t('processing_hint')}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        }
+        
+        // Error state
+        if (error) {
+          return (
+            <Card className={cn('border-destructive', className)}>
+              <CardContent className="py-12">
+                <div className="flex flex-col items-center justify-center text-center">
+                  <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">{t('processing_error')}</h3>
+                  <p className="text-muted-foreground mb-4">{error}</p>
+                  <Button onClick={onStartProcessing} variant="outline">
+                    {t('try_again')}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        }
+        
+        // Clarification state
+        if (status === 'clarification' || clarificationMessages.length > 0) {
+          return (
+            <div className={cn('space-y-4', className)}>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5" />
+                    {t('ai_needs_info')}
+                  </CardTitle>
+                  <CardDescription>
+                    {t('ai_needs_info_hint')}
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+              
+              <AIChatInterface
+                messages={clarificationMessages}
+                onSendMessage={onSendClarification}
+                isProcessing={isProcessing}
+                className="min-h-[400px]"
+              />
+            </div>
+          );
+        }
+        
+        // Draft ready state
+        if (draftReady || status === 'draft_ready') {
+          return (
+            <Card className={className}>
+              <CardContent className="py-12">
+                <div className="flex flex-col items-center justify-center text-center">
+                  <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
+                    <CheckCircle className="h-8 w-8 text-green-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">{t('draft_ready')}</h3>
+                  <p className="text-muted-foreground mb-6">
+                    {t('draft_ready_hint')}
+                  </p>
+                  <Button onClick={onContinueToEdit} size="lg">
+                    {t('review_and_edit')}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        }
+        
+        return null;
+      }
+      ```
+
+  21. Create OutputEditor.tsx:
+      ```typescript
+      // ============================================
+      // [F057] src/components/application/OutputEditor.tsx
+      // ============================================
+      
+      'use client';
+      
+      import { useState, useCallback } from 'react';
+      import { useTranslations } from 'next-intl';
+      import { useEditor, EditorContent } from '@tiptap/react';
+      import StarterKit from '@tiptap/starter-kit';
+      import Placeholder from '@tiptap/extension-placeholder';
+      import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+      import { Button } from '@/components/ui/button';
+      import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+      import { 
+        Edit, Eye, Bold, Italic, List, ListOrdered, 
+        Heading1, Heading2, Undo, Redo, Save 
+      } from 'lucide-react';
+      import { cn } from '@/lib/utils';
+      
+      interface OutputEditorProps {
+        content: string;
+        onChange: (content: string) => void;
+        onFinalize: () => void;
+        isProcessing?: boolean;
+        disabled?: boolean;
+        className?: string;
+      }
+      
+      export function OutputEditor({
+        content,
+        onChange,
+        onFinalize,
+        isProcessing = false,
+        disabled = false,
+        className
+      }: OutputEditorProps) {
+        const t = useTranslations('application');
+        const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
+        
+        const editor = useEditor({
+          extensions: [
+            StarterKit,
+            Placeholder.configure({
+              placeholder: t('editor_placeholder'),
+            }),
+          ],
+          content: content,
+          editable: !disabled,
+          onUpdate: ({ editor }) => {
+            onChange(editor.getHTML());
+          },
+        });
+        
+        const ToolbarButton = ({ 
+          onClick, 
+          active, 
+          disabled: btnDisabled,
+          children 
+        }: { 
+          onClick: () => void; 
+          active?: boolean;
+          disabled?: boolean;
+          children: React.ReactNode;
+        }) => (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onClick}
+            disabled={btnDisabled}
+            className={cn(
+              'h-8 w-8 p-0',
+              active && 'bg-muted'
+            )}
+          >
+            {children}
+          </Button>
+        );
+        
+        return (
+          <Card className={className}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Edit className="h-5 w-5" />
+                {t('edit_draft')}
+              </CardTitle>
+              <CardDescription>
+                {t('edit_draft_description')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'edit' | 'preview')}>
+                <div className="flex items-center justify-between mb-4">
+                  <TabsList>
+                    <TabsTrigger value="edit">
+                      <Edit className="h-4 w-4 mr-2" />
+                      {t('edit')}
+                    </TabsTrigger>
+                    <TabsTrigger value="preview">
+                      <Eye className="h-4 w-4 mr-2" />
+                      {t('preview')}
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  {/* Toolbar - only in edit mode */}
+                  {activeTab === 'edit' && editor && (
+                    <div className="flex items-center gap-1 border rounded-lg p-1">
+                      <ToolbarButton
+                        onClick={() => editor.chain().focus().toggleBold().run()}
+                        active={editor.isActive('bold')}
+                        disabled={disabled}
+                      >
+                        <Bold className="h-4 w-4" />
+                      </ToolbarButton>
+                      <ToolbarButton
+                        onClick={() => editor.chain().focus().toggleItalic().run()}
+                        active={editor.isActive('italic')}
+                        disabled={disabled}
+                      >
+                        <Italic className="h-4 w-4" />
+                      </ToolbarButton>
+                      <div className="w-px h-4 bg-border mx-1" />
+                      <ToolbarButton
+                        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+                        active={editor.isActive('heading', { level: 1 })}
+                        disabled={disabled}
+                      >
+                        <Heading1 className="h-4 w-4" />
+                      </ToolbarButton>
+                      <ToolbarButton
+                        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+                        active={editor.isActive('heading', { level: 2 })}
+                        disabled={disabled}
+                      >
+                        <Heading2 className="h-4 w-4" />
+                      </ToolbarButton>
+                      <div className="w-px h-4 bg-border mx-1" />
+                      <ToolbarButton
+                        onClick={() => editor.chain().focus().toggleBulletList().run()}
+                        active={editor.isActive('bulletList')}
+                        disabled={disabled}
+                      >
+                        <List className="h-4 w-4" />
+                      </ToolbarButton>
+                      <ToolbarButton
+                        onClick={() => editor.chain().focus().toggleOrderedList().run()}
+                        active={editor.isActive('orderedList')}
+                        disabled={disabled}
+                      >
+                        <ListOrdered className="h-4 w-4" />
+                      </ToolbarButton>
+                      <div className="w-px h-4 bg-border mx-1" />
+                      <ToolbarButton
+                        onClick={() => editor.chain().focus().undo().run()}
+                        disabled={disabled || !editor.can().undo()}
+                      >
+                        <Undo className="h-4 w-4" />
+                      </ToolbarButton>
+                      <ToolbarButton
+                        onClick={() => editor.chain().focus().redo().run()}
+                        disabled={disabled || !editor.can().redo()}
+                      >
+                        <Redo className="h-4 w-4" />
+                      </ToolbarButton>
+                    </div>
+                  )}
+                </div>
+                
+                <TabsContent value="edit" className="mt-0">
+                  <div className="border rounded-lg min-h-[400px] p-4">
+                    <EditorContent 
+                      editor={editor} 
+                      className="prose prose-sm max-w-none min-h-[350px] focus:outline-none"
+                    />
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="preview" className="mt-0">
+                  <div 
+                    className="border rounded-lg min-h-[400px] p-4 prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: content }}
+                  />
+                </TabsContent>
+              </Tabs>
+              
+              <div className="flex justify-end pt-4 border-t">
+                <Button
+                  onClick={onFinalize}
+                  disabled={isProcessing || disabled}
+                  size="lg"
+                >
+                  {isProcessing ? (
+                    <>
+                      <span className="animate-spin mr-2">⏳</span>
+                      {t('generating')}
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      {t('generate_final')}
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      }
+      ```
+
+  22. Create DocumentPreview.tsx:
+      ```typescript
+      // ============================================
+      // [F058] src/components/application/DocumentPreview.tsx
+      // ============================================
+      
+      'use client';
+      
+      import { useTranslations } from 'next-intl';
+      import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+      import { ScrollArea } from '@/components/ui/scroll-area';
+      import { FileText, Mail, FileCheck } from 'lucide-react';
+      import { cn } from '@/lib/utils';
+      
+      type DocumentType = 'cv' | 'cover_letter' | 'email';
+      
+      interface DocumentPreviewProps {
+        type: DocumentType;
+        content: string;
+        className?: string;
+      }
+      
+      const iconMap: Record<DocumentType, React.ElementType> = {
+        cv: FileCheck,
+        cover_letter: FileText,
+        email: Mail
+      };
+      
+      export function DocumentPreview({
+        type,
+        content,
+        className
+      }: DocumentPreviewProps) {
+        const t = useTranslations('application');
+        const Icon = iconMap[type];
+        
+        const titleMap: Record<DocumentType, string> = {
+          cv: t('tailored_cv'),
+          cover_letter: t('cover_letter'),
+          email: t('application_email')
+        };
+        
+        return (
+          <Card className={className}>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Icon className="h-5 w-5" />
+                {titleMap[type]}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[400px] rounded-md border p-4 bg-muted/30">
+                <div className="prose prose-sm max-w-none whitespace-pre-wrap">
+                  {content}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        );
+      }
+      ```
+
+  23. Create DownloadPanel.tsx:
+      ```typescript
+      // ============================================
+      // [F059] src/components/application/DownloadPanel.tsx
+      // ============================================
+      
+      'use client';
+      
+      import { useState } from 'react';
+      import { useTranslations } from 'next-intl';
+      import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+      import { Button } from '@/components/ui/button';
+      import { 
+        Download, FileText, File, Mail, FileCheck, 
+        Loader2, CheckCircle 
+      } from 'lucide-react';
+      import { cn } from '@/lib/utils';
+      
+      interface DownloadPanelProps {
+        documents: {
+          tailored_cv: string;
+          cover_letter: string;
+          application_email: string;
+        };
+        jobTitle?: string;
+        className?: string;
+      }
+      
+      type DocumentType = 'cv' | 'cover_letter' | 'email';
+      type FileFormat = 'docx' | 'md';
+      
+      export function DownloadPanel({
+        documents,
+        jobTitle = 'application',
+        className
+      }: DownloadPanelProps) {
+        const t = useTranslations('application');
+        const [downloading, setDownloading] = useState<string | null>(null);
+        const [downloaded, setDownloaded] = useState<string[]>([]);
+        
+        const downloadDocument = async (
+          type: DocumentType, 
+          format: FileFormat,
+          content: string
+        ) => {
+          const key = `${type}-${format}`;
+          setDownloading(key);
+          
+          try {
+            // For markdown, just download as text
+            if (format === 'md') {
+              const blob = new Blob([content], { type: 'text/markdown' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `${jobTitle}-${type}.md`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+            } else {
+              // For DOCX, call API
+              const response = await fetch('/api/export/docx', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                  content, 
+                  filename: `${jobTitle}-${type}`,
+                  type 
+                })
+              });
+              
+              if (!response.ok) throw new Error('Download failed');
+              
+              const blob = await response.blob();
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `${jobTitle}-${type}.docx`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+            }
+            
+            setDownloaded(prev => [...prev, key]);
+            
+          } catch (error) {
+            console.error('Download error:', error);
+          } finally {
+            setDownloading(null);
+          }
+        };
+        
+        const documentTypes: { type: DocumentType; icon: React.ElementType; content: string }[] = [
+          { type: 'cv', icon: FileCheck, content: documents.tailored_cv },
+          { type: 'cover_letter', icon: FileText, content: documents.cover_letter },
+          { type: 'email', icon: Mail, content: documents.application_email },
+        ];
+        
+        const titleMap: Record<DocumentType, string> = {
+          cv: t('tailored_cv'),
+          cover_letter: t('cover_letter'),
+          email: t('application_email')
+        };
+        
+        return (
+          <Card className={className}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Download className="h-5 w-5" />
+                {t('download_documents')}
+              </CardTitle>
+              <CardDescription>
+                {t('download_description')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {documentTypes.map(({ type, icon: Icon, content }) => (
+                  <div 
+                    key={type}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Icon className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{titleMap[type]}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {content.length} {t('characters')}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => downloadDocument(type, 'docx', content)}
+                        disabled={downloading !== null}
+                      >
+                        {downloading === `${type}-docx` ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : downloaded.includes(`${type}-docx`) ? (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <File className="h-4 w-4" />
+                        )}
+                        <span className="ml-2">Word</span>
+                      </Button>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => downloadDocument(type, 'md', content)}
+                        disabled={downloading !== null}
+                      >
+                        {downloading === `${type}-md` ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : downloaded.includes(`${type}-md`) ? (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <FileText className="h-4 w-4" />
+                        )}
+                        <span className="ml-2">Markdown</span>
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Download All Button */}
+              <div className="mt-6 pt-4 border-t">
+                <Button
+                  className="w-full"
+                  onClick={async () => {
+                    for (const doc of documentTypes) {
+                      await downloadDocument(doc.type, 'docx', doc.content);
+                    }
+                  }}
+                  disabled={downloading !== null}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  {t('download_all')}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      }
+      ```
+
+  24. Create FinalDocumentsStep.tsx:
+      ```typescript
+      // ============================================
+      // [F140] src/components/application/FinalDocumentsStep.tsx
+      // ============================================
+      
+      'use client';
+      
+      import { useState } from 'react';
+      import { useTranslations } from 'next-intl';
+      import { DocumentPreview } from './DocumentPreview';
+      import { DownloadPanel } from './DownloadPanel';
+      import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+      import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+      import { Button } from '@/components/ui/button';
+      import { 
+        CheckCircle, FileCheck, FileText, Mail, Download, Plus 
+      } from 'lucide-react';
+      import { cn } from '@/lib/utils';
+      
+      interface FinalDocumentsStepProps {
+        documents: {
+          tailored_cv: string;
+          cover_letter: string;
+          application_email: string;
+        };
+        onNewApplication: () => void;
+        className?: string;
+      }
+      
+      export function FinalDocumentsStep({
+        documents,
+        onNewApplication,
+        className
+      }: FinalDocumentsStepProps) {
+        const t = useTranslations('application');
+        const [activeDoc, setActiveDoc] = useState<'cv' | 'cover_letter' | 'email'>('cv');
+        
+        return (
+          <div className={cn('space-y-6', className)}>
+            {/* Success Header */}
+            <Card className="bg-green-50 dark:bg-green-950 border-green-200">
+              <CardContent className="py-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                    <CheckCircle className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-semibold text-green-800 dark:text-green-200">
+                      {t('documents_ready')}
+                    </h2>
+                    <p className="text-green-700 dark:text-green-300">
+                      {t('documents_ready_hint')}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="grid lg:grid-cols-3 gap-6">
+              {/* Document Previews - 2 columns */}
+              <div className="lg:col-span-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{t('preview_documents')}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Tabs value={activeDoc} onValueChange={(v) => setActiveDoc(v as any)}>
+                      <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="cv" className="flex items-center gap-2">
+                          <FileCheck className="h-4 w-4" />
+                          <span className="hidden sm:inline">{t('cv')}</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="cover_letter" className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          <span className="hidden sm:inline">{t('cover_letter_short')}</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="email" className="flex items-center gap-2">
+                          <Mail className="h-4 w-4" />
+                          <span className="hidden sm:inline">{t('email')}</span>
+                        </TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="cv" className="mt-4">
+                        <DocumentPreview type="cv" content={documents.tailored_cv} />
+                      </TabsContent>
+                      <TabsContent value="cover_letter" className="mt-4">
+                        <DocumentPreview type="cover_letter" content={documents.cover_letter} />
+                      </TabsContent>
+                      <TabsContent value="email" className="mt-4">
+                        <DocumentPreview type="email" content={documents.application_email} />
+                      </TabsContent>
+                    </Tabs>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              {/* Download Panel - 1 column */}
+              <div className="space-y-4">
+                <DownloadPanel documents={documents} />
+                
+                {/* New Application Button */}
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={onNewApplication}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t('new_application')}
+                </Button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+      ```
+
+  25. Create ApplicationWizard.tsx:
+      ```typescript
+      // ============================================
+      // [F134] src/components/application/ApplicationWizard.tsx
+      // ============================================
+      
+      'use client';
+      
+      import { useEffect } from 'react';
+      import { useTranslations } from 'next-intl';
+      import { useApplication } from '@/hooks/useApplication';
+      import { useCV } from '@/hooks/useCV';
+      import { WizardStep } from '@/lib/types';
+      import { WizardProgress } from './WizardProgress';
+      import { JobDescriptionInput } from './JobDescriptionInput';
+      import { PromptSelectionStep } from './PromptSelectionStep';
+      import { AIConfigurationStep } from './AIConfigurationStep';
+      import { OutputSettingsStep } from './OutputSettingsStep';
+      import { ProcessingStep } from './ProcessingStep';
+      import { OutputEditor } from './OutputEditor';
+      import { FinalDocumentsStep } from './FinalDocumentsStep';
+      import { Button } from '@/components/ui/button';
+      import { Card, CardContent } from '@/components/ui/card';
+      import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+      import { 
+        ArrowLeft, ArrowRight, AlertCircle, FileText, Loader2 
+      } from 'lucide-react';
+      import { cn } from '@/lib/utils';
+      import Link from 'next/link';
+      import { useParams } from 'next/navigation';
+      
+      interface ApplicationWizardProps {
+        className?: string;
+      }
+      
+      const STEP_ORDER: WizardStep[] = [
+        'job_description',
+        'prompts',
+        'ai_config',
+        'settings',
+        'processing',
+        'editing',
+        'final'
+      ];
+      
+      export function ApplicationWizard({ className }: ApplicationWizardProps) {
+        const t = useTranslations('application');
+        const params = useParams();
+        const locale = params.locale as string;
+        
+        const {
+          application,
+          loading,
+          processing,
+          error,
+          currentStep,
+          setCurrentStep,
+          jobDescription,
+          setJobDescription,
+          selectedPromptIds,
+          setSelectedPromptIds,
+          aiSelections,
+          setAISelections,
+          outputLanguage,
+          setOutputLanguage,
+          toneSetting,
+          setToneSetting,
+          createApplication,
+          startProcessing,
+          sendClarification,
+          updateDraft,
+          finalize,
+          reset,
+          canProceedToNext,
+          draftContent,
+          clarificationMessages,
+          finalDocuments
+        } = useApplication();
+        
+        const { cv, loading: cvLoading } = useCV();
+        
+        const currentStepIndex = STEP_ORDER.indexOf(currentStep);
+        const completedSteps = STEP_ORDER.slice(0, currentStepIndex);
+        
+        const canGoBack = currentStepIndex > 0 && currentStepIndex < 4; // Can go back before processing
+        const canGoNext = canProceedToNext && currentStepIndex < 4;
+        
+        const goBack = () => {
+          if (canGoBack) {
+            setCurrentStep(STEP_ORDER[currentStepIndex - 1]);
+          }
+        };
+        
+        const goNext = async () => {
+          if (!canGoNext) return;
+          
+          if (currentStepIndex === 3) {
+            // Moving to processing - create application first
+            try {
+              await createApplication();
+              setCurrentStep('processing');
+            } catch {}
+          } else {
+            setCurrentStep(STEP_ORDER[currentStepIndex + 1]);
+          }
+        };
+        
+        // Check if CV exists
+        if (!cvLoading && !cv) {
+          return (
+            <Card className={className}>
+              <CardContent className="py-12">
+                <div className="flex flex-col items-center justify-center text-center">
+                  <AlertCircle className="h-12 w-12 text-yellow-500 mb-4" />
+                  <h2 className="text-xl font-semibold mb-2">{t('cv_required')}</h2>
+                  <p className="text-muted-foreground mb-6 max-w-md">
+                    {t('cv_required_hint')}
+                  </p>
+                  <Link href={`/${locale}/cv-manager`}>
+                    <Button>
+                      <FileText className="h-4 w-4 mr-2" />
+                      {t('go_to_cv_manager')}
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        }
+        
+        if (loading || cvLoading) {
+          return (
+            <Card className={className}>
+              <CardContent className="py-12">
+                <div className="flex flex-col items-center justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+                  <p className="text-muted-foreground">{t('loading')}</p>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        }
+        
+        return (
+          <div className={cn('space-y-6', className)}>
+            {/* Progress */}
+            {currentStep !== 'final' && (
+              <Card>
+                <CardContent className="py-4">
+                  <WizardProgress
+                    currentStep={currentStep}
+                    completedSteps={completedSteps}
+                  />
+                </CardContent>
+              </Card>
+            )}
+            
+            {/* Error Alert */}
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>{t('error')}</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            
+            {/* Step Content */}
+            <div className="min-h-[400px]">
+              {currentStep === 'job_description' && (
+                <JobDescriptionInput
+                  value={jobDescription}
+                  onChange={setJobDescription}
+                  disabled={processing}
+                />
+              )}
+              
+              {currentStep === 'prompts' && (
+                <PromptSelectionStep
+                  selectedIds={selectedPromptIds}
+                  onSelectionChange={setSelectedPromptIds}
+                  disabled={processing}
+                />
+              )}
+              
+              {currentStep === 'ai_config' && (
+                <AIConfigurationStep
+                  selections={aiSelections}
+                  onSelectionsChange={setAISelections}
+                  disabled={processing}
+                />
+              )}
+              
+              {currentStep === 'settings' && (
+                <OutputSettingsStep
+                  outputLanguage={outputLanguage}
+                  onOutputLanguageChange={setOutputLanguage}
+                  toneSetting={toneSetting}
+                  onToneSettingChange={setToneSetting}
+                  disabled={processing}
+                />
+              )}
+              
+              {currentStep === 'processing' && (
+                <ProcessingStep
+                  status={application?.status || 'draft'}
+                  clarificationMessages={clarificationMessages}
+                  onStartProcessing={startProcessing}
+                  onSendClarification={sendClarification}
+                  onContinueToEdit={() => setCurrentStep('editing')}
+                  isProcessing={processing}
+                  error={error}
+                  draftReady={!!draftContent}
+                />
+              )}
+              
+              {currentStep === 'editing' && draftContent && (
+                <OutputEditor
+                  content={draftContent}
+                  onChange={updateDraft}
+                  onFinalize={finalize}
+                  isProcessing={processing}
+                />
+              )}
+              
+              {currentStep === 'final' && finalDocuments && (
+                <FinalDocumentsStep
+                  documents={finalDocuments}
+                  onNewApplication={reset}
+                />
+              )}
+            </div>
+            
+            {/* Navigation Buttons */}
+            {currentStep !== 'processing' && currentStep !== 'editing' && currentStep !== 'final' && (
+              <div className="flex items-center justify-between pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={goBack}
+                  disabled={!canGoBack || processing}
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  {t('back')}
+                </Button>
+                
+                <div className="text-sm text-muted-foreground">
+                  {t('step_of', { current: currentStepIndex + 1, total: 4 })}
+                </div>
+                
+                <Button
+                  onClick={goNext}
+                  disabled={!canGoNext || processing}
+                >
+                  {currentStepIndex === 3 ? t('start_processing') : t('next')}
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
+            )}
+          </div>
+        );
+      }
+      ```
+
+  26. Create new-application/loading.tsx:
+      ```typescript
+      // ============================================
+      // [F141] src/app/[locale]/new-application/loading.tsx
+      // ============================================
+      
+      import { Skeleton } from '@/components/ui/skeleton';
+      import { Card, CardContent, CardHeader } from '@/components/ui/card';
+      
+      export default function Loading() {
+        return (
+          <div className="container mx-auto p-6 max-w-4xl space-y-6">
+            {/* Header */}
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-64" />
+              <Skeleton className="h-4 w-96" />
+            </div>
+            
+            {/* Progress */}
+            <Card>
+              <CardContent className="py-4">
+                <div className="flex items-center justify-between">
+                  {Array.from({ length: 7 }).map((_, i) => (
+                    <div key={i} className="flex items-center">
+                      <Skeleton className="h-10 w-10 rounded-full" />
+                      {i < 6 && <Skeleton className="h-0.5 w-12 mx-2" />}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Content */}
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-48" />
+                <Skeleton className="h-4 w-72" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Skeleton className="h-64 w-full" />
+                <div className="flex justify-between">
+                  <Skeleton className="h-10 w-24" />
+                  <Skeleton className="h-10 w-24" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+      }
+      ```
+
+  27. Create new-application/page.tsx:
+      ```typescript
+      // ============================================
+      // [F014] src/app/[locale]/new-application/page.tsx
+      // ============================================
+      
+      'use client';
+      
+      import { useTranslations } from 'next-intl';
+      import { AuthGuard } from '@/components/auth/AuthGuard';
+      import { ApplicationWizard } from '@/components/application/ApplicationWizard';
+      import { FileEdit } from 'lucide-react';
+      
+      export default function NewApplicationPage() {
+        const t = useTranslations('application');
+        
+        return (
+          <AuthGuard>
+            <div className="container mx-auto p-6 max-w-4xl">
+              {/* Header */}
+              <div className="mb-6">
+                <h1 className="text-2xl font-bold flex items-center gap-2">
+                  <FileEdit className="h-6 w-6" />
+                  {t('new_application_title')}
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  {t('new_application_description')}
+                </p>
+              </div>
+              
+              {/* Wizard */}
+              <ApplicationWizard />
+            </div>
+          </AuthGuard>
+        );
+      }
+      ```
+
+  28. Add translations to en.json under "application" key:
+      ```json
+      {
+        "application": {
+          "new_application_title": "New Job Application",
+          "new_application_description": "Create tailored CV, cover letter, and application email for a specific job",
+          
+          "job_description_title": "Job Description",
+          "job_description_hint": "Paste the complete job description including requirements, responsibilities, and qualifications",
+          "job_description_placeholder": "Paste the job description here...\n\nInclude:\n- Job title and company\n- Required skills and qualifications\n- Responsibilities\n- Any other relevant information",
+          "characters": "Characters",
+          "words": "Words",
+          "min_chars_required": "Minimum {count} characters required",
+          "ready": "Ready",
+          
+          "select_prompts_title": "Select Prompts",
+          "select_prompts_description": "Choose one or more prompts that define how your application documents will be created",
+          
+          "ai_config_title": "AI Configuration",
+          "ai_config_description": "Select which AI model to use for generating your documents",
+          "no_ai_keys": "No AI API Keys Configured",
+          "no_ai_keys_hint": "You need to add at least one AI API key to use this feature",
+          "go_to_settings": "Go to Settings",
+          "draft_ai": "Draft AI Model",
+          "draft_ai_hint": "This model will analyze your CV and job description to create the initial draft",
+          "final_ai": "Final AI Model",
+          "final_ai_hint": "This model will polish and format the final documents",
+          "use_different_final": "Use Different Model for Final Output",
+          "use_different_final_hint": "Optionally use a different (possibly more powerful) model for the final documents",
+          "provider": "Provider",
+          "model": "Model",
+          "select_provider": "Select provider",
+          "select_model": "Select model",
+          "required": "Required",
+          "config_summary": "Configuration Summary",
+          "draft": "Draft",
+          "final": "Final",
+          
+          "output_settings_title": "Output Settings",
+          "output_settings_description": "Configure the language and tone of your application documents",
+          "output_language": "Output Language",
+          "response_tone": "Response Tone",
+          "tone_preset": "Choose Preset",
+          "tone_custom": "Custom Description",
+          "tone_custom_placeholder": "Describe the tone you want, e.g., 'Confident but humble, with emphasis on technical expertise'",
+          "tone_custom_hint": "Describe in your own words how you want the AI to write",
+          
+          "ready_to_process": "Ready to Process",
+          "ready_to_process_hint": "Your CV and job description will be analyzed by AI to create tailored application documents",
+          "start_processing": "Start Processing",
+          "processing": "Processing...",
+          "processing_hint": "AI is analyzing your CV and the job description",
+          "processing_error": "Processing Error",
+          "try_again": "Try Again",
+          
+          "ai_clarification": "AI Clarification",
+          "ai_needs_info": "AI Needs More Information",
+          "ai_needs_info_hint": "Please answer the AI's questions to continue",
+          "type_response": "Type your response...",
+          
+          "draft_ready": "Draft Ready",
+          "draft_ready_hint": "The AI has created a draft. Review and edit before generating final documents.",
+          "review_and_edit": "Review & Edit",
+          
+          "edit_draft": "Edit Draft",
+          "edit_draft_description": "Review and edit the AI-generated content before creating final documents",
+          "edit": "Edit",
+          "preview": "Preview",
+          "editor_placeholder": "Content will appear here...",
+          "generate_final": "Generate Final Documents",
+          "generating": "Generating...",
+          
+          "documents_ready": "Documents Ready!",
+          "documents_ready_hint": "Your tailored application documents have been generated successfully",
+          "preview_documents": "Preview Documents",
+          "tailored_cv": "Tailored CV",
+          "cover_letter": "Cover Letter",
+          "cover_letter_short": "Cover Letter",
+          "application_email": "Application Email",
+          "email": "Email",
+          "cv": "CV",
+          
+          "download_documents": "Download Documents",
+          "download_description": "Download your documents in Word or Markdown format",
+          "download_all": "Download All (Word)",
+          
+          "new_application": "Start New Application",
+          
+          "cv_required": "CV Required",
+          "cv_required_hint": "You need to upload your CV before creating a job application",
+          "go_to_cv_manager": "Go to CV Manager",
+          
+          "loading": "Loading...",
+          "error": "Error",
+          "back": "Back",
+          "next": "Next",
+          "step_of": "Step {current} of {total}"
+        }
+      }
+      ```
+
+  29. Add translations to fa.json under "application" key:
+      ```json
+      {
+        "application": {
+          "new_application_title": "درخواست شغلی جدید",
+          "new_application_description": "ایجاد سی‌وی، کاورلتر و ایمیل درخواست اختصاصی برای یک شغل خاص",
+          
+          "job_description_title": "شرح شغل",
+          "job_description_hint": "شرح شغل کامل شامل الزامات، مسئولیت‌ها و صلاحیت‌ها را وارد کنید",
+          "job_description_placeholder": "شرح شغل را اینجا بچسبانید...\n\nشامل:\n- عنوان شغل و شرکت\n- مهارت‌ها و صلاحیت‌های مورد نیاز\n- مسئولیت‌ها\n- سایر اطلاعات مرتبط",
+          "characters": "کاراکتر",
+          "words": "کلمه",
+          "min_chars_required": "حداقل {count} کاراکتر لازم است",
+          "ready": "آماده",
+          
+          "select_prompts_title": "انتخاب پرامپت‌ها",
+          "select_prompts_description": "یک یا چند پرامپت انتخاب کنید که نحوه ایجاد مستندات را تعیین می‌کنند",
+          
+          "ai_config_title": "پیکربندی هوش مصنوعی",
+          "ai_config_description": "انتخاب کنید کدام مدل هوش مصنوعی برای تولید مستندات استفاده شود",
+          "no_ai_keys": "کلید API تنظیم نشده است",
+          "no_ai_keys_hint": "برای استفاده از این ویژگی باید حداقل یک کلید API اضافه کنید",
+          "go_to_settings": "رفتن به تنظیمات",
+          "draft_ai": "مدل AI پیش‌نویس",
+          "draft_ai_hint": "این مدل سی‌وی و شرح شغل را تحلیل کرده و پیش‌نویس اولیه را ایجاد می‌کند",
+          "final_ai": "مدل AI نهایی",
+          "final_ai_hint": "این مدل مستندات نهایی را تکمیل و فرمت می‌کند",
+          "use_different_final": "استفاده از مدل متفاوت برای خروجی نهایی",
+          "use_different_final_hint": "اختیاری: از یک مدل متفاوت (احتمالاً قوی‌تر) برای مستندات نهایی استفاده کنید",
+          "provider": "سرویس‌دهنده",
+          "model": "مدل",
+          "select_provider": "انتخاب سرویس",
+          "select_model": "انتخاب مدل",
+          "required": "الزامی",
+          "config_summary": "خلاصه پیکربندی",
+          "draft": "پیش‌نویس",
+          "final": "نهایی",
+          
+          "output_settings_title": "تنظیمات خروجی",
+          "output_settings_description": "زبان و لحن مستندات درخواست را پیکربندی کنید",
+          "output_language": "زبان خروجی",
+          "response_tone": "لحن پاسخ",
+          "tone_preset": "انتخاب از پیش‌فرض",
+          "tone_custom": "توضیح سفارشی",
+          "tone_custom_placeholder": "لحن مورد نظر را توصیف کنید، مثلاً 'مطمئن اما فروتن، با تأکید بر تخصص فنی'",
+          "tone_custom_hint": "با کلمات خودتان توضیح دهید می‌خواهید AI چگونه بنویسد",
+          
+          "ready_to_process": "آماده پردازش",
+          "ready_to_process_hint": "سی‌وی و شرح شغل شما توسط هوش مصنوعی تحلیل خواهد شد",
+          "start_processing": "شروع پردازش",
+          "processing": "در حال پردازش...",
+          "processing_hint": "هوش مصنوعی در حال تحلیل سی‌وی و شرح شغل است",
+          "processing_error": "خطا در پردازش",
+          "try_again": "تلاش مجدد",
+          
+          "ai_clarification": "توضیحات هوش مصنوعی",
+          "ai_needs_info": "هوش مصنوعی به اطلاعات بیشتری نیاز دارد",
+          "ai_needs_info_hint": "لطفاً به سوالات هوش مصنوعی پاسخ دهید",
+          "type_response": "پاسخ خود را بنویسید...",
+          
+          "draft_ready": "پیش‌نویس آماده است",
+          "draft_ready_hint": "هوش مصنوعی پیش‌نویس را ایجاد کرده است. قبل از تولید مستندات نهایی بررسی و ویرایش کنید.",
+          "review_and_edit": "بررسی و ویرایش",
+          
+          "edit_draft": "ویرایش پیش‌نویس",
+          "edit_draft_description": "محتوای تولید شده توسط AI را قبل از ایجاد مستندات نهایی بررسی و ویرایش کنید",
+          "edit": "ویرایش",
+          "preview": "پیش‌نمایش",
+          "editor_placeholder": "محتوا اینجا نمایش داده می‌شود...",
+          "generate_final": "تولید مستندات نهایی",
+          "generating": "در حال تولید...",
+          
+          "documents_ready": "مستندات آماده است!",
+          "documents_ready_hint": "مستندات درخواست شغلی شما با موفقیت تولید شد",
+          "preview_documents": "پیش‌نمایش مستندات",
+          "tailored_cv": "سی‌وی اختصاصی",
+          "cover_letter": "کاورلتر",
+          "cover_letter_short": "کاورلتر",
+          "application_email": "ایمیل درخواست",
+          "email": "ایمیل",
+          "cv": "سی‌وی",
+          
+          "download_documents": "دانلود مستندات",
+          "download_description": "مستندات را به فرمت Word یا Markdown دانلود کنید",
+          "download_all": "دانلود همه (Word)",
+          
+          "new_application": "شروع درخواست جدید",
+          
+          "cv_required": "سی‌وی الزامی است",
+          "cv_required_hint": "قبل از ایجاد درخواست شغلی باید سی‌وی خود را آپلود کنید",
+          "go_to_cv_manager": "رفتن به مدیریت سی‌وی",
+          
+          "loading": "در حال بارگذاری...",
+          "error": "خطا",
+          "back": "بازگشت",
+          "next": "بعدی",
+          "step_of": "مرحله {current} از {total}"
+        }
+      }
+      ```
+
+checkpoint_tests:
+  - id: T01
+    description: "All application service files exist"
+    type: "files_exist"
+    files:
+      - "src/lib/applications/application-service.ts"
+      - "src/lib/applications/application-processor.ts"
+      - "src/lib/applications/application-prompts.ts"
+      - "src/lib/applications/index.ts"
+
+  - id: T02
+    description: "All API route files exist"
+    type: "files_exist"
+    files:
+      - "src/app/api/applications/route.ts"
+      - "src/app/api/applications/[id]/route.ts"
+      - "src/app/api/applications/[id]/process/route.ts"
+      - "src/app/api/applications/[id]/clarify/route.ts"
+      - "src/app/api/applications/[id]/finalize/route.ts"
+
+  - id: T03
+    description: "useApplication hook exists"
+    type: "files_exist"
+    files:
+      - "src/hooks/useApplication.ts"
+
+  - id: T04
+    description: "All wizard component files exist"
+    type: "files_exist"
+    files:
+      - "src/components/application/ApplicationWizard.tsx"
+      - "src/components/application/WizardProgress.tsx"
+      - "src/components/application/JobDescriptionInput.tsx"
+      - "src/components/application/PromptSelectionStep.tsx"
+      - "src/components/application/AIConfigurationStep.tsx"
+      - "src/components/application/OutputSettingsStep.tsx"
+      - "src/components/application/LanguageSelector.tsx"
+      - "src/components/application/ToneSelector.tsx"
+      - "src/components/application/ProcessingStep.tsx"
+      - "src/components/application/OutputEditor.tsx"
+      - "src/components/application/FinalDocumentsStep.tsx"
+      - "src/components/application/DocumentPreview.tsx"
+      - "src/components/application/DownloadPanel.tsx"
+
+  - id: T05
+    description: "AIChatInterface component exists"
+    type: "files_exist"
+    files:
+      - "src/components/ai/AIChatInterface.tsx"
+
+  - id: T06
+    description: "Page files exist"
+    type: "files_exist"
+    files:
+      - "src/app/[locale]/new-application/page.tsx"
+      - "src/app/[locale]/new-application/loading.tsx"
+
+  - id: T07
+    description: "TypeScript compiles without errors"
+    type: "command"
+    command: "npx tsc --noEmit"
+    expected_exit_code: 0
+
+  - id: T08
+    description: "Application service has all CRUD methods"
+    type: "grep"
+    file: "src/lib/applications/application-service.ts"
+    patterns:
+      - "createApplication"
+      - "getApplication"
+      - "updateApplication"
+      - "deleteApplication"
+      - "saveDraftContent"
+      - "saveFinalDocuments"
+      - "addClarificationMessage"
+
+  - id: T09
+    description: "Application processor uses AI providers"
+    type: "grep"
+    file: "src/lib/applications/application-processor.ts"
+    patterns:
+      - "getAIProvider"
+      - "processApplication"
+      - "generateFinalDocuments"
+
+  - id: T10
+    description: "useApplication hook has all state and actions"
+    type: "grep"
+    file: "src/hooks/useApplication.ts"
+    patterns:
+      - "jobDescription"
+      - "selectedPromptIds"
+      - "aiSelections"
+      - "createApplication"
+      - "startProcessing"
+      - "sendClarification"
+      - "finalize"
+
+  - id: T11
+    description: "ApplicationWizard integrates all steps"
+    type: "grep"
+    file: "src/components/application/ApplicationWizard.tsx"
+    patterns:
+      - "JobDescriptionInput"
+      - "PromptSelectionStep"
+      - "AIConfigurationStep"
+      - "OutputSettingsStep"
+      - "ProcessingStep"
+      - "OutputEditor"
+      - "FinalDocumentsStep"
+
+  - id: T12
+    description: "Page uses AuthGuard"
+    type: "grep"
+    file: "src/app/[locale]/new-application/page.tsx"
+    patterns:
+      - "AuthGuard"
+      - "ApplicationWizard"
+
+  - id: T13
+    description: "English translations have all application keys"
+    type: "grep"
+    file: "src/i18n/en.json"
+    patterns:
+      - "new_application_title"
+      - "job_description_title"
+      - "select_prompts_title"
+      - "ai_config_title"
+      - "documents_ready"
+
+  - id: T14
+    description: "Farsi translations have all application keys"
+    type: "grep"
+    file: "src/i18n/fa.json"
+    patterns:
+      - "new_application_title"
+      - "job_description_title"
+      - "documents_ready"
+
+  - id: T15
+    description: "Types include application workflow types"
+    type: "grep"
+    file: "src/lib/types.ts"
+    patterns:
+      - "ApplicationStatus"
+      - "WizardStep"
+      - "AIModelSelection"
+      - "ClarificationMessage"
+      - "FinalDocuments"
+
+max_retries: 3

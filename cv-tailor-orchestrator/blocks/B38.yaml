@@ -1,0 +1,25 @@
+id: B38
+name: "Final E2E Test"
+phase: 9
+phase_name: "Final"
+
+goal: |
+  Perform a complete end-to-end test of the entire application.
+  Scenarios:
+  - Full workflow with one/multiple AIs
+  - UI language toggle (EN/FA)
+  - Output language and tone variations
+  - Mobile responsiveness
+  - RTL testing
+
+dependencies: [B37]
+
+checkpoint_tests:
+  - id: T01
+    description: "Complete workflow works in all scenarios"
+    type: "manual"
+  - id: T02
+    description: "Responsiveness and RTL are correct"
+    type: "manual"
+
+max_retries: 3

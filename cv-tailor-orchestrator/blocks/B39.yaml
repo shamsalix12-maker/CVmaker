@@ -1,0 +1,24 @@
+id: B39
+name: "Vercel Deploy"
+phase: 9
+phase_name: "Final"
+
+goal: |
+  Deploy the final version of CV Tailor to Vercel.
+  Steps:
+  - Push latest code to GitHub
+  - Set Environment Variables in Vercel
+  - Update Supabase Redirect URLs
+  - Verify on production URL
+
+dependencies: [B38]
+
+checkpoint_tests:
+  - id: T01
+    description: "Site is accessible on Vercel domain"
+    type: "manual"
+  - id: T02
+    description: "Google Login works on production"
+    type: "manual"
+
+max_retries: 3

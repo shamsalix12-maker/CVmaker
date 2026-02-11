@@ -1,0 +1,836 @@
+# BLOCK B05: Internationalization (i18n) System
+
+## COMPLETED BLOCKS
+- B01 ✅: Create Empty Next.js Project — Files: [F001], [F002], [F003], [F004], [F005], [F006], [F007], [F008], [F009]
+- B02 ✅: Install All Dependencies — Files: [F027], [F028], [F029], [F030], [F031], [F032], [F033], [F034], [F035], [F036], [F090], [F091]
+- B03 ✅: Central TypeScript Types — Files: [F079]
+- B04 ✅: Constants and Utilities — Files: [F078], [F080]
+
+## GOAL
+Set up the complete internationalization system using next-intl.
+This enables the app to work in both English and Farsi (Persian),
+with proper RTL support for Farsi.
+
+
+## FILES TO CREATE
+[F086] src/i18n/config.ts
+[F087] src/i18n/en.json
+[F088] src/i18n/fa.json
+[F089] src/i18n/request.ts
+
+## FILES TO MODIFY
+[F003] next.config.js
+[F092] src/middleware.ts
+
+## EXISTING FILES YOU MAY IMPORT FROM
+[F001] package.json (from B01)
+[F002] tsconfig.json (from B01)
+[F003] next.config.ts (from B01)
+[F004] tailwind.config.ts (from B01)
+[F005] .env.local (from B01)
+[F006] .env.example (from B01)
+[F007] src/app/layout.tsx (from B01)
+[F008] src/app/page.tsx (from B01)
+[F009] src/app/globals.css (from B01)
+[F027] src/components/ui/button.tsx (from B02)
+[F028] src/components/ui/input.tsx (from B02)
+[F029] src/components/ui/card.tsx (from B02)
+[F030] src/components/ui/dialog.tsx (from B02)
+[F031] src/components/ui/select.tsx (from B02)
+[F032] src/components/ui/textarea.tsx (from B02)
+[F033] src/components/ui/tabs.tsx (from B02)
+[F034] src/components/ui/badge.tsx (from B02)
+[F035] src/components/ui/sonner.tsx (from B02)
+[F036] src/components/ui/dropdown-menu.tsx (from B02)
+[F090] src/lib/utils.ts (from B02)
+[F091] components.json (from B02)
+[F079] src/lib/types.ts (from B03)
+[F078] src/lib/constants.ts (from B04)
+[F080] src/lib/helpers.ts (from B04)
+
+## FILES YOU MUST NOT TOUCH
+Everything not listed above.
+
+## EXACT FILE CONTENTS
+### [F086] src/i18n/config.ts
+```typescript
+// ═══════════════════════════════════════════════════════════════
+// [F086] src/i18n/config.ts
+// i18n Configuration
+// ═══════════════════════════════════════════════════════════════
+
+export const locales = ['en', 'fa'] as const;
+export type Locale = (typeof locales)[number];
+
+export const defaultLocale: Locale = 'en';
+
+export const localeNames: Record<Locale, string> = {
+  en: 'English',
+  fa: 'فارسی',
+};
+
+export const localeDirections: Record<Locale, 'ltr' | 'rtl'> = {
+  en: 'ltr',
+  fa: 'rtl',
+};
+
+```
+
+### [F087] src/i18n/en.json
+```typescript
+{
+  "common": {
+    "app_name": "CV Tailor",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "confirm": "Confirm",
+    "download": "Download",
+    "upload": "Upload",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "search": "Search",
+    "filter": "Filter",
+    "status": "Status",
+    "actions": "Actions",
+    "language": "Language",
+    "settings": "Settings",
+    "close": "Close",
+    "open": "Open",
+    "yes": "Yes",
+    "no": "No",
+    "or": "or",
+    "and": "and",
+    "optional": "Optional",
+    "required": "Required",
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Info",
+    "view": "View",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "select": "Select",
+    "select_all": "Select All",
+    "deselect_all": "Deselect All",
+    "no_results": "No results found",
+    "try_again": "Try Again",
+    "learn_more": "Learn More"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "cv_manager": "My CV",
+    "new_application": "New Application",
+    "applications": "My Applications",
+    "prompts": "Prompt Management",
+    "templates": "Templates",
+    "settings": "Settings",
+    "logout": "Logout",
+    "login": "Login"
+  },
+  "auth": {
+    "login": "Login",
+    "login_with_google": "Login with Google",
+    "logout": "Logout",
+    "welcome": "Welcome",
+    "welcome_back": "Welcome back",
+    "login_title": "Sign in to your account",
+    "login_subtitle": "Create tailored CVs, cover letters, and application emails",
+    "logging_in": "Logging in...",
+    "login_error": "Login failed. Please try again.",
+    "dev_login_title": "Development Login",
+    "dev_login_subtitle": "This is a temporary login for development only",
+    "enter_email": "Enter your email",
+    "enter_name": "Enter your name"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome_message": "Welcome to CV Tailor",
+    "quick_actions": "Quick Actions",
+    "recent_applications": "Recent Applications",
+    "cv_status": "CV Status",
+    "cv_complete": "Your CV is complete",
+    "cv_incomplete": "Your CV needs attention",
+    "cv_missing": "No CV uploaded yet",
+    "create_first_application": "Create your first application",
+    "view_all_applications": "View all applications",
+    "total_applications": "Total Applications",
+    "draft_applications": "Drafts",
+    "completed_applications": "Completed"
+  },
+  "cv": {
+    "title": "Comprehensive CV",
+    "page_title": "My CV",
+    "page_subtitle": "Manage your comprehensive CV that will be used for all applications",
+    "upload_cv": "Upload CV",
+    "upload_description": "Upload your comprehensive CV in Word or Markdown format",
+    "upload_drag_drop": "Drag and drop your file here, or click to browse",
+    "supported_formats": "Supported formats: .docx, .md",
+    "or_enter_manually": "Or enter manually",
+    "enter_manually": "Enter Manually",
+    "personal_info": "Personal Information",
+    "full_name": "Full Name",
+    "email": "Email",
+    "phone": "Phone",
+    "location": "Location",
+    "linkedin": "LinkedIn URL",
+    "website": "Website URL",
+    "summary": "Professional Summary",
+    "work_experience": "Work Experience",
+    "add_experience": "Add Experience",
+    "job_title": "Job Title",
+    "company": "Company",
+    "start_date": "Start Date",
+    "end_date": "End Date",
+    "current_job": "I currently work here",
+    "description": "Description",
+    "achievements": "Key Achievements",
+    "education": "Education",
+    "add_education": "Add Education",
+    "degree": "Degree",
+    "field_of_study": "Field of Study",
+    "institution": "Institution",
+    "gpa": "GPA",
+    "skills": "Skills",
+    "add_skill": "Add Skill",
+    "certifications": "Certifications",
+    "add_certification": "Add Certification",
+    "cert_name": "Certification Name",
+    "issuer": "Issuer",
+    "date_obtained": "Date Obtained",
+    "expiry_date": "Expiry Date",
+    "credential_id": "Credential ID",
+    "credential_url": "Credential URL",
+    "languages": "Languages",
+    "add_language": "Add Language",
+    "language_name": "Language",
+    "proficiency": "Proficiency Level",
+    "proficiency_native": "Native",
+    "proficiency_fluent": "Fluent",
+    "proficiency_advanced": "Advanced",
+    "proficiency_intermediate": "Intermediate",
+    "proficiency_beginner": "Beginner",
+    "projects": "Projects",
+    "add_project": "Add Project",
+    "project_name": "Project Name",
+    "project_description": "Project Description",
+    "technologies_used": "Technologies Used",
+    "project_url": "Project URL",
+    "additional_sections": "Additional Sections",
+    "add_section": "Add Section",
+    "section_title": "Section Title",
+    "section_content": "Section Content",
+    "incomplete_fields": "Incomplete Fields",
+    "please_complete": "Please complete the following fields for better results",
+    "field_complete": "Complete",
+    "field_incomplete": "Incomplete",
+    "field_optional": "Optional",
+    "save_cv": "Save CV",
+    "saving": "Saving...",
+    "saved_successfully": "CV saved successfully",
+    "parsing_file": "Parsing file...",
+    "parse_error": "Failed to parse file",
+    "preview": "Preview",
+    "raw_text": "Raw Text"
+  },
+  "prompts": {
+    "title": "Prompt Management",
+    "page_subtitle": "Create and manage prompts that control how your documents are generated",
+    "add_new": "Add New Prompt",
+    "edit_prompt": "Edit Prompt",
+    "create_prompt": "Create Prompt",
+    "delete_prompt": "Delete Prompt",
+    "delete_confirm": "Are you sure you want to delete this prompt?",
+    "prompt_title": "Title",
+    "prompt_title_en": "Title (English)",
+    "prompt_title_fa": "Title (فارسی)",
+    "prompt_description": "Description",
+    "prompt_description_en": "Description (English)",
+    "prompt_description_fa": "Description (فارسی)",
+    "prompt_text": "Prompt Text",
+    "prompt_text_help": "The instructions that will be sent to the AI",
+    "category": "Category",
+    "active": "Active",
+    "inactive": "Inactive",
+    "sort_order": "Sort Order",
+    "no_prompts": "No prompts yet",
+    "create_first_prompt": "Create your first prompt to get started",
+    "saved_successfully": "Prompt saved successfully",
+    "deleted_successfully": "Prompt deleted successfully"
+  },
+  "ai": {
+    "title": "AI Settings",
+    "api_keys": "AI API Keys",
+    "api_keys_subtitle": "Connect your AI provider API keys to enable document generation",
+    "add_key": "Add API Key",
+    "edit_key": "Edit API Key",
+    "provider": "AI Provider",
+    "api_key": "API Key",
+    "enter_api_key": "Enter your API key",
+    "model": "Model",
+    "select_model": "Select a model",
+    "status_connected": "Connected",
+    "status_disconnected": "Disconnected",
+    "status_invalid": "Invalid Key",
+    "status_checking": "Checking...",
+    "available_models": "Available Models",
+    "token_balance": "Token Balance",
+    "test_connection": "Test Connection",
+    "testing": "Testing...",
+    "connection_success": "Connection successful!",
+    "connection_failed": "Connection failed",
+    "select_for_draft": "Use for Draft",
+    "select_for_final": "Use for Final Output",
+    "draft_mode": "Draft Mode",
+    "final_mode": "Final Mode",
+    "no_keys": "No API keys configured",
+    "add_first_key": "Add your first API key to get started",
+    "key_saved": "API key saved successfully",
+    "key_deleted": "API key deleted",
+    "key_hidden": "Key hidden for security",
+    "show_key": "Show key",
+    "hide_key": "Hide key"
+  },
+  "application": {
+    "new_title": "New Job Application",
+    "page_subtitle": "Create a tailored CV, cover letter, and application email for a specific job",
+    "step_job": "Job Details",
+    "step_prompts": "Select Prompts",
+    "step_ai": "AI Settings",
+    "step_output": "Output Settings",
+    "step_process": "Generate",
+    "step_review": "Review & Edit",
+    "step_download": "Download",
+    "job_title": "Job Title",
+    "company_name": "Company Name",
+    "job_description": "Job Description",
+    "enter_job_description": "Paste the job description here",
+    "job_description_help": "The full job posting or description",
+    "select_prompts": "Select Prompts",
+    "select_prompts_help": "Choose one or more prompts to guide the AI",
+    "no_prompts_selected": "No prompts selected",
+    "select_ai": "Select AI Model",
+    "select_ai_help": "Choose which AI models to use for generation",
+    "no_ai_configured": "No AI providers configured",
+    "go_to_settings": "Go to Settings",
+    "select_language": "Output Language",
+    "select_language_help": "The language for your generated documents",
+    "select_tone": "Response Tone",
+    "tone_preset": "Choose Preset",
+    "tone_custom": "Describe Custom Tone",
+    "custom_tone_placeholder": "Describe the tone you want (e.g., enthusiastic but professional)",
+    "select_template": "Select Template",
+    "template_optional": "Templates are optional",
+    "no_templates": "No templates available",
+    "start_processing": "Start Processing",
+    "processing": "Processing...",
+    "ai_thinking": "AI is thinking...",
+    "ai_asking": "AI has a question",
+    "your_answer": "Your Answer",
+    "send_answer": "Send Answer",
+    "skip_question": "Skip",
+    "draft_ready": "Draft Ready",
+    "edit_output": "Edit Output",
+    "approve_output": "Approve & Generate Documents",
+    "regenerate": "Regenerate",
+    "generating_documents": "Generating Documents...",
+    "documents_ready": "Documents Ready!",
+    "tailored_cv": "Tailored CV",
+    "cover_letter": "Cover Letter",
+    "application_email": "Application Email",
+    "download_word": "Download Word",
+    "download_markdown": "Download Markdown",
+    "download_all": "Download All",
+    "copy_to_clipboard": "Copy to Clipboard",
+    "view_application": "View Application",
+    "application_saved": "Application saved",
+    "continue_editing": "Continue Editing"
+  },
+  "applications": {
+    "title": "My Applications",
+    "page_subtitle": "View and manage all your job applications",
+    "no_applications": "No applications yet",
+    "create_first": "Create your first application",
+    "filter_all": "All",
+    "filter_drafts": "Drafts",
+    "filter_completed": "Completed",
+    "sort_newest": "Newest First",
+    "sort_oldest": "Oldest First",
+    "delete_confirm": "Are you sure you want to delete this application?",
+    "deleted_successfully": "Application deleted"
+  },
+  "templates": {
+    "title": "Template Management",
+    "page_subtitle": "Upload and manage templates for your documents",
+    "upload_template": "Upload Template",
+    "template_name": "Template Name",
+    "template_type": "Template Type",
+    "type_cv": "CV Template",
+    "type_cover_letter": "Cover Letter Template",
+    "type_email": "Email Template",
+    "select_template": "Select Template",
+    "no_templates": "No templates uploaded",
+    "upload_first": "Upload your first template",
+    "preview": "Preview Template",
+    "delete_confirm": "Are you sure you want to delete this template?",
+    "uploaded_successfully": "Template uploaded successfully",
+    "deleted_successfully": "Template deleted"
+  },
+  "settings": {
+    "title": "Settings",
+    "page_subtitle": "Configure your application preferences",
+    "ui_language": "Interface Language",
+    "ui_language_help": "The language used for the application interface",
+    "profile": "Profile",
+    "profile_info": "Profile Information",
+    "name": "Name",
+    "email": "Email",
+    "save_profile": "Save Profile",
+    "saved_successfully": "Settings saved successfully",
+    "danger_zone": "Danger Zone",
+    "delete_account": "Delete Account",
+    "delete_account_warning": "This action cannot be undone. All your data will be permanently deleted."
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Network error. Please check your connection.",
+    "not_found": "The requested resource was not found.",
+    "unauthorized": "You are not authorized to perform this action.",
+    "validation": "Please check your input and try again.",
+    "file_too_large": "File is too large. Maximum size is {size}MB.",
+    "invalid_file_type": "Invalid file type. Supported formats: {formats}",
+    "required_field": "This field is required",
+    "invalid_email": "Please enter a valid email address",
+    "invalid_url": "Please enter a valid URL"
+  }
+}
+
+```
+
+### [F088] src/i18n/fa.json
+```typescript
+{
+  "common": {
+    "app_name": "سی‌وی تیلور",
+    "loading": "در حال بارگذاری...",
+    "save": "ذخیره",
+    "cancel": "انصراف",
+    "delete": "حذف",
+    "edit": "ویرایش",
+    "add": "افزودن",
+    "confirm": "تأیید",
+    "download": "دانلود",
+    "upload": "آپلود",
+    "back": "بازگشت",
+    "next": "بعدی",
+    "previous": "قبلی",
+    "submit": "ارسال",
+    "search": "جستجو",
+    "filter": "فیلتر",
+    "status": "وضعیت",
+    "actions": "عملیات",
+    "language": "زبان",
+    "settings": "تنظیمات",
+    "close": "بستن",
+    "open": "باز کردن",
+    "yes": "بله",
+    "no": "خیر",
+    "or": "یا",
+    "and": "و",
+    "optional": "اختیاری",
+    "required": "الزامی",
+    "success": "موفقیت",
+    "error": "خطا",
+    "warning": "هشدار",
+    "info": "اطلاعات",
+    "view": "مشاهده",
+    "copy": "کپی",
+    "copied": "کپی شد!",
+    "select": "انتخاب",
+    "select_all": "انتخاب همه",
+    "deselect_all": "لغو انتخاب همه",
+    "no_results": "نتیجه‌ای یافت نشد",
+    "try_again": "تلاش مجدد",
+    "learn_more": "بیشتر بدانید"
+  },
+  "nav": {
+    "dashboard": "داشبورد",
+    "cv_manager": "سی‌وی من",
+    "new_application": "درخواست جدید",
+    "applications": "درخواست‌های من",
+    "prompts": "مدیریت پرامپت‌ها",
+    "templates": "قالب‌ها",
+    "settings": "تنظیمات",
+    "logout": "خروج",
+    "login": "ورود"
+  },
+  "auth": {
+    "login": "ورود",
+    "login_with_google": "ورود با گوگل",
+    "logout": "خروج",
+    "welcome": "خوش آمدید",
+    "welcome_back": "خوش برگشتید",
+    "login_title": "وارد حساب کاربری خود شوید",
+    "login_subtitle": "سی‌وی، کاورلتر و ایمیل درخواست اختصاصی بسازید",
+    "logging_in": "در حال ورود...",
+    "login_error": "ورود ناموفق بود. لطفاً دوباره تلاش کنید.",
+    "dev_login_title": "ورود توسعه‌دهنده",
+    "dev_login_subtitle": "این ورود موقت فقط برای توسعه است",
+    "enter_email": "ایمیل خود را وارد کنید",
+    "enter_name": "نام خود را وارد کنید"
+  },
+  "dashboard": {
+    "title": "داشبورد",
+    "welcome_message": "به سی‌وی تیلور خوش آمدید",
+    "quick_actions": "دسترسی سریع",
+    "recent_applications": "درخواست‌های اخیر",
+    "cv_status": "وضعیت سی‌وی",
+    "cv_complete": "سی‌وی شما کامل است",
+    "cv_incomplete": "سی‌وی شما نیاز به تکمیل دارد",
+    "cv_missing": "هنوز سی‌وی آپلود نشده",
+    "create_first_application": "اولین درخواست خود را بسازید",
+    "view_all_applications": "مشاهده همه درخواست‌ها",
+    "total_applications": "کل درخواست‌ها",
+    "draft_applications": "پیش‌نویس‌ها",
+    "completed_applications": "تکمیل‌شده"
+  },
+  "cv": {
+    "title": "سی‌وی جامع",
+    "page_title": "سی‌وی من",
+    "page_subtitle": "سی‌وی جامع خود را مدیریت کنید که برای تمام درخواست‌ها استفاده می‌شود",
+    "upload_cv": "آپلود سی‌وی",
+    "upload_description": "سی‌وی جامع خود را به فرمت Word یا Markdown آپلود کنید",
+    "upload_drag_drop": "فایل را اینجا بکشید و رها کنید، یا کلیک کنید",
+    "supported_formats": "فرمت‌های پشتیبانی شده: .docx, .md",
+    "or_enter_manually": "یا به صورت دستی وارد کنید",
+    "enter_manually": "ورود دستی",
+    "personal_info": "اطلاعات شخصی",
+    "full_name": "نام کامل",
+    "email": "ایمیل",
+    "phone": "تلفن",
+    "location": "موقعیت مکانی",
+    "linkedin": "آدرس لینکدین",
+    "website": "آدرس وب‌سایت",
+    "summary": "خلاصه حرفه‌ای",
+    "work_experience": "سوابق کاری",
+    "add_experience": "افزودن تجربه",
+    "job_title": "عنوان شغل",
+    "company": "شرکت",
+    "start_date": "تاریخ شروع",
+    "end_date": "تاریخ پایان",
+    "current_job": "در حال حاضر اینجا کار می‌کنم",
+    "description": "توضیحات",
+    "achievements": "دستاوردهای کلیدی",
+    "education": "تحصیلات",
+    "add_education": "افزودن تحصیلات",
+    "degree": "مدرک",
+    "field_of_study": "رشته تحصیلی",
+    "institution": "مؤسسه آموزشی",
+    "gpa": "معدل",
+    "skills": "مهارت‌ها",
+    "add_skill": "افزودن مهارت",
+    "certifications": "گواهینامه‌ها",
+    "add_certification": "افزودن گواهینامه",
+    "cert_name": "نام گواهینامه",
+    "issuer": "صادرکننده",
+    "date_obtained": "تاریخ اخذ",
+    "expiry_date": "تاریخ انقضا",
+    "credential_id": "شناسه گواهینامه",
+    "credential_url": "لینک گواهینامه",
+    "languages": "زبان‌ها",
+    "add_language": "افزودن زبان",
+    "language_name": "زبان",
+    "proficiency": "سطح مهارت",
+    "proficiency_native": "زبان مادری",
+    "proficiency_fluent": "مسلط",
+    "proficiency_advanced": "پیشرفته",
+    "proficiency_intermediate": "متوسط",
+    "proficiency_beginner": "مبتدی",
+    "projects": "پروژه‌ها",
+    "add_project": "افزودن پروژه",
+    "project_name": "نام پروژه",
+    "project_description": "توضیحات پروژه",
+    "technologies_used": "تکنولوژی‌های استفاده شده",
+    "project_url": "لینک پروژه",
+    "additional_sections": "بخش‌های اضافی",
+    "add_section": "افزودن بخش",
+    "section_title": "عنوان بخش",
+    "section_content": "محتوای بخش",
+    "incomplete_fields": "فیلدهای ناقص",
+    "please_complete": "لطفاً فیلدهای زیر را برای نتیجه بهتر تکمیل کنید",
+    "field_complete": "کامل",
+    "field_incomplete": "ناقص",
+    "field_optional": "اختیاری",
+    "save_cv": "ذخیره سی‌وی",
+    "saving": "در حال ذخیره...",
+    "saved_successfully": "سی‌وی با موفقیت ذخیره شد",
+    "parsing_file": "در حال پردازش فایل...",
+    "parse_error": "خطا در پردازش فایل",
+    "preview": "پیش‌نمایش",
+    "raw_text": "متن خام"
+  },
+  "prompts": {
+    "title": "مدیریت پرامپت‌ها",
+    "page_subtitle": "پرامپت‌هایی که نحوه تولید مستندات را کنترل می‌کنند ایجاد و مدیریت کنید",
+    "add_new": "افزودن پرامپت جدید",
+    "edit_prompt": "ویرایش پرامپت",
+    "create_prompt": "ایجاد پرامپت",
+    "delete_prompt": "حذف پرامپت",
+    "delete_confirm": "آیا مطمئن هستید که می‌خواهید این پرامپت را حذف کنید؟",
+    "prompt_title": "عنوان",
+    "prompt_title_en": "عنوان (انگلیسی)",
+    "prompt_title_fa": "عنوان (فارسی)",
+    "prompt_description": "توضیحات",
+    "prompt_description_en": "توضیحات (انگلیسی)",
+    "prompt_description_fa": "توضیحات (فارسی)",
+    "prompt_text": "متن پرامپت",
+    "prompt_text_help": "دستورالعمل‌هایی که به هوش مصنوعی ارسال می‌شود",
+    "category": "دسته‌بندی",
+    "active": "فعال",
+    "inactive": "غیرفعال",
+    "sort_order": "ترتیب نمایش",
+    "no_prompts": "هنوز پرامپتی وجود ندارد",
+    "create_first_prompt": "اولین پرامپت خود را برای شروع ایجاد کنید",
+    "saved_successfully": "پرامپت با موفقیت ذخیره شد",
+    "deleted_successfully": "پرامپت با موفقیت حذف شد"
+  },
+  "ai": {
+    "title": "تنظیمات هوش مصنوعی",
+    "api_keys": "کلیدهای API هوش مصنوعی",
+    "api_keys_subtitle": "کلیدهای API سرویس‌دهندگان هوش مصنوعی را برای فعال‌سازی تولید مستندات متصل کنید",
+    "add_key": "افزودن کلید API",
+    "edit_key": "ویرایش کلید API",
+    "provider": "سرویس هوش مصنوعی",
+    "api_key": "کلید API",
+    "enter_api_key": "کلید API خود را وارد کنید",
+    "model": "مدل",
+    "select_model": "یک مدل انتخاب کنید",
+    "status_connected": "متصل",
+    "status_disconnected": "قطع",
+    "status_invalid": "کلید نامعتبر",
+    "status_checking": "در حال بررسی...",
+    "available_models": "مدل‌های در دسترس",
+    "token_balance": "موجودی توکن",
+    "test_connection": "تست اتصال",
+    "testing": "در حال تست...",
+    "connection_success": "اتصال موفق!",
+    "connection_failed": "اتصال ناموفق",
+    "select_for_draft": "استفاده برای پیش‌نویس",
+    "select_for_final": "استفاده برای خروجی نهایی",
+    "draft_mode": "حالت پیش‌نویس",
+    "final_mode": "حالت نهایی",
+    "no_keys": "کلید API تنظیم نشده",
+    "add_first_key": "اولین کلید API خود را برای شروع اضافه کنید",
+    "key_saved": "کلید API با موفقیت ذخیره شد",
+    "key_deleted": "کلید API حذف شد",
+    "key_hidden": "کلید برای امنیت پنهان شده",
+    "show_key": "نمایش کلید",
+    "hide_key": "پنهان کردن کلید"
+  },
+  "application": {
+    "new_title": "درخواست شغلی جدید",
+    "page_subtitle": "یک سی‌وی، کاورلتر و ایمیل درخواست اختصاصی برای یک شغل خاص بسازید",
+    "step_job": "جزئیات شغل",
+    "step_prompts": "انتخاب پرامپت",
+    "step_ai": "تنظیمات AI",
+    "step_output": "تنظیمات خروجی",
+    "step_process": "تولید",
+    "step_review": "بررسی و ویرایش",
+    "step_download": "دانلود",
+    "job_title": "عنوان شغل",
+    "company_name": "نام شرکت",
+    "job_description": "شرح شغل",
+    "enter_job_description": "شرح شغل را اینجا وارد کنید",
+    "job_description_help": "آگهی یا شرح کامل شغل",
+    "select_prompts": "انتخاب پرامپت‌ها",
+    "select_prompts_help": "یک یا چند پرامپت برای هدایت هوش مصنوعی انتخاب کنید",
+    "no_prompts_selected": "پرامپتی انتخاب نشده",
+    "select_ai": "انتخاب مدل هوش مصنوعی",
+    "select_ai_help": "مدل‌های هوش مصنوعی برای تولید را انتخاب کنید",
+    "no_ai_configured": "سرویس هوش مصنوعی تنظیم نشده",
+    "go_to_settings": "رفتن به تنظیمات",
+    "select_language": "زبان خروجی",
+    "select_language_help": "زبان مستندات تولیدشده",
+    "select_tone": "لحن پاسخ",
+    "tone_preset": "انتخاب از پیش‌فرض",
+    "tone_custom": "توصیف لحن دلخواه",
+    "custom_tone_placeholder": "لحن مورد نظر خود را توصیف کنید (مثلاً: پرانرژی ولی حرفه‌ای)",
+    "select_template": "انتخاب قالب",
+    "template_optional": "قالب‌ها اختیاری هستند",
+    "no_templates": "قالبی موجود نیست",
+    "start_processing": "شروع پردازش",
+    "processing": "در حال پردازش...",
+    "ai_thinking": "هوش مصنوعی در حال فکر کردن...",
+    "ai_asking": "هوش مصنوعی سوالی دارد",
+    "your_answer": "پاسخ شما",
+    "send_answer": "ارسال پاسخ",
+    "skip_question": "رد شدن",
+    "draft_ready": "پیش‌نویس آماده است",
+    "edit_output": "ویرایش خروجی",
+    "approve_output": "تأیید و تولید مستندات",
+    "regenerate": "تولید مجدد",
+    "generating_documents": "در حال تولید مستندات...",
+    "documents_ready": "مستندات آماده است!",
+    "tailored_cv": "سی‌وی اختصاصی",
+    "cover_letter": "کاورلتر",
+    "application_email": "ایمیل درخواست",
+    "download_word": "دانلود Word",
+    "download_markdown": "دانلود Markdown",
+    "download_all": "دانلود همه",
+    "copy_to_clipboard": "کپی در کلیپ‌بورد",
+    "view_application": "مشاهده درخواست",
+    "application_saved": "درخواست ذخیره شد",
+    "continue_editing": "ادامه ویرایش"
+  },
+  "applications": {
+    "title": "درخواست‌های من",
+    "page_subtitle": "تمام درخواست‌های شغلی خود را مشاهده و مدیریت کنید",
+    "no_applications": "هنوز درخواستی وجود ندارد",
+    "create_first": "اولین درخواست خود را بسازید",
+    "filter_all": "همه",
+    "filter_drafts": "پیش‌نویس‌ها",
+    "filter_completed": "تکمیل‌شده",
+    "sort_newest": "جدیدترین",
+    "sort_oldest": "قدیمی‌ترین",
+    "delete_confirm": "آیا مطمئن هستید که می‌خواهید این درخواست را حذف کنید؟",
+    "deleted_successfully": "درخواست حذف شد"
+  },
+  "templates": {
+    "title": "مدیریت قالب‌ها",
+    "page_subtitle": "قالب‌های مستندات خود را آپلود و مدیریت کنید",
+    "upload_template": "آپلود قالب",
+    "template_name": "نام قالب",
+    "template_type": "نوع قالب",
+    "type_cv": "قالب سی‌وی",
+    "type_cover_letter": "قالب کاورلتر",
+    "type_email": "قالب ایمیل",
+    "select_template": "انتخاب قالب",
+    "no_templates": "قالبی آپلود نشده",
+    "upload_first": "اولین قالب خود را آپلود کنید",
+    "preview": "پیش‌نمایش قالب",
+    "delete_confirm": "آیا مطمئن هستید که می‌خواهید این قالب را حذف کنید؟",
+    "uploaded_successfully": "قالب با موفقیت آپلود شد",
+    "deleted_successfully": "قالب حذف شد"
+  },
+  "settings": {
+    "title": "تنظیمات",
+    "page_subtitle": "تنظیمات برنامه را پیکربندی کنید",
+    "ui_language": "زبان رابط کاربری",
+    "ui_language_help": "زبانی که برای رابط برنامه استفاده می‌شود",
+    "profile": "پروفایل",
+    "profile_info": "اطلاعات پروفایل",
+    "name": "نام",
+    "email": "ایمیل",
+    "save_profile": "ذخیره پروفایل",
+    "saved_successfully": "تنظیمات با موفقیت ذخیره شد",
+    "danger_zone": "منطقه خطر",
+    "delete_account": "حذف حساب کاربری",
+    "delete_account_warning": "این عمل قابل بازگشت نیست. تمام داده‌های شما برای همیشه حذف خواهند شد."
+  },
+  "errors": {
+    "generic": "مشکلی پیش آمد. لطفاً دوباره تلاش کنید.",
+    "network": "خطای شبکه. لطفاً اتصال خود را بررسی کنید.",
+    "not_found": "منبع درخواستی یافت نشد.",
+    "unauthorized": "شما مجاز به انجام این عمل نیستید.",
+    "validation": "لطفاً ورودی خود را بررسی و دوباره تلاش کنید.",
+    "file_too_large": "فایل بیش از حد بزرگ است. حداکثر اندازه {size} مگابایت است.",
+    "invalid_file_type": "نوع فایل نامعتبر است. فرمت‌های پشتیبانی شده: {formats}",
+    "required_field": "این فیلد الزامی است",
+    "invalid_email": "لطفاً یک آدرس ایمیل معتبر وارد کنید",
+    "invalid_url": "لطفاً یک آدرس URL معتبر وارد کنید"
+  }
+}
+
+```
+
+### [F089] src/i18n/request.ts
+```typescript
+// ═══════════════════════════════════════════════════════════════
+// [F089] src/i18n/request.ts
+// next-intl request configuration
+// ═══════════════════════════════════════════════════════════════
+
+import { getRequestConfig } from 'next-intl/server';
+import { locales, type Locale } from './config';
+
+export default getRequestConfig(async ({ locale }) => {
+  // Validate that the incoming locale is valid
+  if (!locales.includes(locale as Locale)) {
+    return {
+      messages: (await import(`./en.json`)).default
+    };
+  }
+
+  return {
+    messages: (await import(`./${locale}.json`)).default
+  };
+});
+
+```
+
+## INSTRUCTIONS
+1. Create src/i18n/config.ts with locale configuration.
+
+2. Create src/i18n/en.json with ALL English translations.
+
+3. Create src/i18n/fa.json with ALL Farsi translations (this is comprehensive).
+
+4. Create src/i18n/request.ts for next-intl server configuration.
+
+5. Update next.config.js to use next-intl plugin:
+   ```javascript
+   const createNextIntlPlugin = require('next-intl/plugin');
+   const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
+   
+   /** @type {import('next').NextConfig} */
+   const nextConfig = {};
+   
+   module.exports = withNextIntl(nextConfig);
+   ```
+
+6. Create src/middleware.ts for locale routing:
+   ```typescript
+   import createMiddleware from 'next-intl/middleware';
+   import { locales, defaultLocale } from './i18n/config';
+   
+   export default createMiddleware({
+     locales,
+     defaultLocale,
+     localePrefix: 'always'
+   });
+   
+   export const config = {
+     matcher: ['/', '/(en|fa)/:path*']
+   };
+   ```
+
+7. Make sure all translation keys match between en.json and fa.json.
+
+
+## CHECKPOINT TESTS (verify ALL after completion)
+□ [T01] i18n config file exists
+□ [T02] English translations file exists
+□ [T03] Farsi translations file exists
+□ [T04] request.ts file exists
+□ [T05] Middleware configured
+□ [T06] next.config.js uses next-intl
+□ [T07] English has all main sections
+□ [T08] Farsi has all main sections
+□ [T09] TypeScript compiles without errors
+
+## MANDATORY RULES
+1. Create ONLY the files listed in "FILES TO CREATE"
+2. Modify ONLY the files listed in "FILES TO MODIFY"
+3. NEVER import from files not in "EXISTING FILES"
+4. NEVER reference files that don't exist
+5. After completion, list every file you created/modified with full path
+6. Mark each checkpoint test as ✅ PASS or ❌ FAIL
+7. If unsure about anything, ASK — don't guess
+8. Keep each file under 200 lines
+9. All user-facing text must use i18n (if i18n is set up)
+10. Handle errors gracefully

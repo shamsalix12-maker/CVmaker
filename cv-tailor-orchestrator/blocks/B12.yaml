@@ -1,0 +1,556 @@
+id: B12
+name: "AI-Powered CV Field Extraction"
+phase: 1
+phase_name: "CV Management"
+
+goal: |
+  Create a system that uses AI to extract structured fields from raw CV text.
+  This replaces the regex-based approach with intelligent extraction.
+  Includes prompts for CV parsing and handles the AI response.
+
+dependencies: [B01, B02, B03, B04, B05, B06, B07, B09, B10, B11]
+
+files_to_create:
+  - id: F074
+    path: "src/lib/cv/cv-extractor.ts"
+    description: "AI-powered CV field extraction logic"
+
+  - id: F107
+    path: "src/lib/cv/cv-extraction-prompt.ts"
+    description: "Prompts for CV extraction"
+
+  - id: F108
+    path: "src/lib/cv/cv-validator.ts"
+    description: "Validate and check completeness of extracted CV"
+
+  - id: F109
+    path: "src/lib/cv/index.ts"
+    description: "Export all CV modules"
+
+  - id: F110
+    path: "src/app/api/cv/extract/route.ts"
+    description: "API route for AI CV extraction"
+
+files_to_modify:
+  - id: F079
+    path: "src/lib/types.ts"
+    description: "Add CVExtractionResult type"
+
+files_available:
+  - id: F063
+    path: "src/lib/supabase/client.ts"
+    from_block: B06
+  - id: F064
+    path: "src/lib/supabase/server.ts"
+    from_block: B06
+  - id: F079
+    path: "src/lib/types.ts"
+    from_block: B03
+  - id: F078
+    path: "src/lib/constants.ts"
+    from_block: B04
+  - id: F066
+    path: "src/lib/ai/ai-provider.ts"
+    from_block: B10
+  - id: F070
+    path: "src/lib/ai/ai-factory.ts"
+    from_block: B10
+  - id: F077
+    path: "src/lib/encryption.ts"
+    from_block: B11
+  - id: F072
+    path: "src/lib/parsers/docx-parser.ts"
+    from_block: B09
+  - id: F073
+    path: "src/lib/parsers/markdown-parser.ts"
+    from_block: B09
+
+commands: []
+
+instructions: |
+  1. Add to types.ts:
+     ```typescript
+     // Add these types to the existing types.ts file
+     
+     export interface CVExtractionResult {
+       success: boolean;
+       cv: Partial<ComprehensiveCV>;
+       fieldStatuses: CVFieldStatus[];
+       confidence: number;  // 0-100
+       rawText: string;
+       aiProvider: AIProviderName;
+       aiModel: string;
+       extractionNotes?: string;  // Any notes from AI about the extraction
+     }
+     
+     export interface CVExtractionRequest {
+       rawText: string;
+       aiProvider: AIProviderName;
+       aiModel: string;
+       language?: 'en' | 'fa' | 'auto';
+     }
+     ```
+  
+  2. Create cv-extraction-prompt.ts:
+     ```typescript
+     // ============================================
+     // [F107] src/lib/cv/cv-extraction-prompt.ts
+     // ============================================
+     
+     export const CV_EXTRACTION_SYSTEM_PROMPT = `You are an expert CV/Resume parser. Your job is to extract structured information from CV text.
+
+     You MUST respond with valid JSON only, no other text or markdown.
+
+     The JSON structure must be:
+     {
+       "personal_info": {
+         "full_name": "string or null",
+         "email": "string or null",
+         "phone": "string or null",
+         "location": "string or null",
+         "linkedin_url": "string or null",
+         "website_url": "string or null",
+         "summary": "string or null"
+       },
+       "work_experience": [
+         {
+           "id": "unique string",
+           "job_title": "string",
+           "company": "string",
+           "location": "string or null",
+           "start_date": "YYYY-MM or null",
+           "end_date": "YYYY-MM or null (null if current)",
+           "is_current": boolean,
+           "description": "string",
+           "achievements": ["string"]
+         }
+       ],
+       "education": [
+         {
+           "id": "unique string",
+           "degree": "string",
+           "institution": "string",
+           "location": "string or null",
+           "start_date": "YYYY-MM or null",
+           "end_date": "YYYY-MM or null",
+           "gpa": "string or null",
+           "description": "string or null"
+         }
+       ],
+       "skills": ["string"],
+       "certifications": [
+         {
+           "id": "unique string",
+           "name": "string",
+           "issuer": "string",
+           "date_obtained": "YYYY-MM or null",
+           "expiry_date": "YYYY-MM or null",
+           "credential_url": "string or null"
+         }
+       ],
+       "languages": [
+         {
+           "language": "string",
+           "proficiency": "Native | Fluent | Advanced | Intermediate | Basic"
+         }
+       ],
+       "projects": [
+         {
+           "id": "unique string",
+           "name": "string",
+           "description": "string",
+           "url": "string or null"
+         }
+       ],
+       "confidence": 0-100,
+       "notes": "Any observations about the CV quality or missing information"
+     }
+
+     Rules:
+     1. Extract ALL information you can find
+     2. Use null for fields that are not present
+     3. Generate unique IDs for list items (use simple strings like "work-1", "edu-1", etc.)
+     4. Normalize dates to YYYY-MM format when possible
+     5. If a date says "Present" or "Current", set is_current to true and end_date to null
+     6. Extract achievements as separate items in the achievements array
+     7. Be thorough - don't miss any information
+     8. The confidence score should reflect how complete and clear the CV is
+     9. Add any observations to the notes field`;
+     
+     export const CV_EXTRACTION_USER_PROMPT = (cvText: string) => 
+       `Please parse the following CV/Resume and extract all structured information:
+
+     ---CV TEXT START---
+     ${cvText}
+     ---CV TEXT END---
+
+     Respond with JSON only.`;
+     
+     // Alternative prompt for unclear/short CVs
+     export const CV_EXTRACTION_CLARIFICATION_PROMPT = (cvText: string, missingFields: string[]) =>
+       `The CV appears to be missing some important information. Please try to extract what's available and note the missing fields.
+     
+     Missing fields: ${missingFields.join(', ')}
+     
+     CV Text:
+     ${cvText}
+     
+     Respond with JSON only, using null for missing fields.`;
+     ```
+  
+  3. Create cv-validator.ts:
+     ```typescript
+     // ============================================
+     // [F108] src/lib/cv/cv-validator.ts
+     // ============================================
+     
+     import { ComprehensiveCV, CVFieldStatus } from '@/lib/types';
+     import { CV_REQUIRED_FIELDS } from '@/lib/constants';
+     
+     export function validateExtractedCV(cv: Partial<ComprehensiveCV>): CVFieldStatus[] {
+       const statuses: CVFieldStatus[] = [];
+       
+       // Check personal info fields
+       const personalFields = ['full_name', 'email', 'phone', 'summary'];
+       for (const field of personalFields) {
+         const value = cv.personal_info?.[field as keyof typeof cv.personal_info];
+         statuses.push({
+           field_name: `personal_info.${field}`,
+           is_complete: Boolean(value && String(value).trim().length > 0),
+           current_value: value || null
+         });
+       }
+       
+       // Check work experience
+       statuses.push({
+         field_name: 'work_experience',
+         is_complete: (cv.work_experience?.length || 0) > 0,
+         current_value: cv.work_experience || []
+       });
+       
+       // Check education
+       statuses.push({
+         field_name: 'education',
+         is_complete: (cv.education?.length || 0) > 0,
+         current_value: cv.education || []
+       });
+       
+       // Check skills
+       statuses.push({
+         field_name: 'skills',
+         is_complete: (cv.skills?.length || 0) > 0,
+         current_value: cv.skills || []
+       });
+       
+       return statuses;
+     }
+     
+     export function getMissingFields(statuses: CVFieldStatus[]): string[] {
+       return statuses
+         .filter(s => !s.is_complete)
+         .map(s => s.field_name);
+     }
+     
+     export function getCompletionPercentage(statuses: CVFieldStatus[]): number {
+       if (statuses.length === 0) return 0;
+       const complete = statuses.filter(s => s.is_complete).length;
+       return Math.round((complete / statuses.length) * 100);
+     }
+     
+     export function isMinimumViable(cv: Partial<ComprehensiveCV>): boolean {
+       // A CV is minimally viable if it has at least:
+       // - Name
+       // - Email OR Phone
+       // - At least one work experience OR education
+       const hasName = Boolean(cv.personal_info?.full_name);
+       const hasContact = Boolean(cv.personal_info?.email || cv.personal_info?.phone);
+       const hasExperience = (cv.work_experience?.length || 0) > 0;
+       const hasEducation = (cv.education?.length || 0) > 0;
+       
+       return hasName && hasContact && (hasExperience || hasEducation);
+     }
+     ```
+  
+  4. Create cv-extractor.ts:
+     ```typescript
+     // ============================================
+     // [F074] src/lib/cv/cv-extractor.ts
+     // ============================================
+     
+     import { getAIProvider } from '@/lib/ai';
+     import { AIProviderConfig, AICompletionOptions } from '@/lib/ai/ai-provider';
+     import { 
+       CVExtractionResult, 
+       CVExtractionRequest,
+       ComprehensiveCV,
+       AIProviderName 
+     } from '@/lib/types';
+     import { 
+       CV_EXTRACTION_SYSTEM_PROMPT, 
+       CV_EXTRACTION_USER_PROMPT 
+     } from './cv-extraction-prompt';
+     import { validateExtractedCV, getCompletionPercentage } from './cv-validator';
+     import { generateId } from '@/lib/utils';
+     
+     export async function extractCVWithAI(
+       request: CVExtractionRequest,
+       apiKey: string
+     ): Promise<CVExtractionResult> {
+       const { rawText, aiProvider, aiModel } = request;
+       
+       const provider = getAIProvider(aiProvider);
+       
+       const config: AIProviderConfig = {
+         apiKey,
+         temperature: 0.1,  // Low temperature for consistent extraction
+         maxTokens: 4096
+       };
+       
+       const options: AICompletionOptions = {
+         model: aiModel,
+         messages: [
+           { role: 'system', content: CV_EXTRACTION_SYSTEM_PROMPT },
+           { role: 'user', content: CV_EXTRACTION_USER_PROMPT(rawText) }
+         ],
+         jsonMode: true  // Request JSON output where supported
+       };
+       
+       try {
+         const response = await provider.complete(config, options);
+         const parsed = provider.parseJsonResponse<any>(response);
+         
+         if (!parsed) {
+           return {
+             success: false,
+             cv: {},
+             fieldStatuses: [],
+             confidence: 0,
+             rawText,
+             aiProvider,
+             aiModel,
+             extractionNotes: 'Failed to parse AI response as JSON'
+           };
+         }
+         
+         // Transform parsed data to our CV structure
+         const cv: Partial<ComprehensiveCV> = {
+           personal_info: parsed.personal_info || {},
+           work_experience: (parsed.work_experience || []).map((w: any) => ({
+             ...w,
+             id: w.id || generateId()
+           })),
+           education: (parsed.education || []).map((e: any) => ({
+             ...e,
+             id: e.id || generateId()
+           })),
+           skills: parsed.skills || [],
+           certifications: (parsed.certifications || []).map((c: any) => ({
+             ...c,
+             id: c.id || generateId()
+           })),
+           languages: parsed.languages || [],
+           projects: (parsed.projects || []).map((p: any) => ({
+             ...p,
+             id: p.id || generateId()
+           })),
+           additional_sections: [],
+           raw_text: rawText
+         };
+         
+         const fieldStatuses = validateExtractedCV(cv);
+         const completionPercentage = getCompletionPercentage(fieldStatuses);
+         
+         return {
+           success: true,
+           cv,
+           fieldStatuses,
+           confidence: parsed.confidence || completionPercentage,
+           rawText,
+           aiProvider,
+           aiModel,
+           extractionNotes: parsed.notes
+         };
+         
+       } catch (error: any) {
+         return {
+           success: false,
+           cv: {},
+           fieldStatuses: [],
+           confidence: 0,
+           rawText,
+           aiProvider,
+           aiModel,
+           extractionNotes: `Extraction failed: ${error.message}`
+         };
+       }
+     }
+     ```
+  
+  5. Create index.ts:
+     ```typescript
+     // ============================================
+     // [F109] src/lib/cv/index.ts
+     // ============================================
+     
+     export * from './cv-extractor';
+     export * from './cv-extraction-prompt';
+     export * from './cv-validator';
+     ```
+  
+  6. Create api/cv/extract/route.ts:
+     ```typescript
+     // ============================================
+     // [F110] src/app/api/cv/extract/route.ts
+     // ============================================
+     
+     import { NextRequest, NextResponse } from 'next/server';
+     import { createServerSupabaseClient } from '@/lib/supabase/server';
+     import { extractCVWithAI } from '@/lib/cv';
+     import { decryptApiKey } from '@/lib/encryption';
+     import { parseFile } from '@/lib/parsers';
+     import { AIProviderName } from '@/lib/types';
+     
+     export async function POST(request: NextRequest) {
+       const supabase = createServerSupabaseClient();
+       const userId = request.headers.get('x-user-id');
+       
+       if (!userId) {
+         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+       }
+       
+       const formData = await request.formData();
+       const file = formData.get('file') as File | null;
+       const rawText = formData.get('rawText') as string | null;
+       const provider = formData.get('provider') as AIProviderName;
+       const model = formData.get('model') as string;
+       
+       if (!provider || !model) {
+         return NextResponse.json({ 
+           error: 'AI provider and model are required' 
+         }, { status: 400 });
+       }
+       
+       // Get the user's API key for this provider
+       const { data: keyData, error: keyError } = await supabase
+         .from('ai_api_keys')
+         .select('api_key_encrypted')
+         .eq('user_id', userId)
+         .eq('provider_name', provider)
+         .single();
+       
+       if (keyError || !keyData) {
+         return NextResponse.json({ 
+           error: `No API key found for ${provider}. Please add one in Settings.` 
+         }, { status: 400 });
+       }
+       
+       // Decrypt the API key
+       let apiKey: string;
+       try {
+         apiKey = decryptApiKey(keyData.api_key_encrypted);
+       } catch {
+         return NextResponse.json({ 
+           error: 'Failed to decrypt API key' 
+         }, { status: 500 });
+       }
+       
+       // Get the raw text (either from file or direct input)
+       let textToProcess: string;
+       
+       if (file) {
+         try {
+           const parsed = await parseFile(file);
+           textToProcess = parsed.text;
+         } catch (error: any) {
+           return NextResponse.json({ 
+             error: `Failed to parse file: ${error.message}` 
+           }, { status: 400 });
+         }
+       } else if (rawText) {
+         textToProcess = rawText;
+       } else {
+         return NextResponse.json({ 
+           error: 'Either file or rawText is required' 
+         }, { status: 400 });
+       }
+       
+       // Extract CV fields using AI
+       const result = await extractCVWithAI(
+         {
+           rawText: textToProcess,
+           aiProvider: provider,
+           aiModel: model
+         },
+         apiKey
+       );
+       
+       return NextResponse.json(result);
+     }
+     ```
+
+checkpoint_tests:
+  - id: T01
+    description: "All CV extraction files exist"
+    type: "files_exist"
+    files:
+      - "src/lib/cv/cv-extractor.ts"
+      - "src/lib/cv/cv-extraction-prompt.ts"
+      - "src/lib/cv/cv-validator.ts"
+      - "src/lib/cv/index.ts"
+      - "src/app/api/cv/extract/route.ts"
+
+  - id: T02
+    description: "TypeScript compiles without errors"
+    type: "command"
+    command: "npx tsc --noEmit"
+    expected_exit_code: 0
+
+  - id: T03
+    description: "cv-extractor.ts uses AI provider"
+    type: "grep"
+    file: "src/lib/cv/cv-extractor.ts"
+    patterns:
+      - "getAIProvider"
+      - "extractCVWithAI"
+      - "CVExtractionResult"
+      - "provider.complete"
+
+  - id: T04
+    description: "cv-extraction-prompt.ts has extraction prompts"
+    type: "grep"
+    file: "src/lib/cv/cv-extraction-prompt.ts"
+    patterns:
+      - "CV_EXTRACTION_SYSTEM_PROMPT"
+      - "CV_EXTRACTION_USER_PROMPT"
+      - "personal_info"
+      - "work_experience"
+      - "JSON"
+
+  - id: T05
+    description: "cv-validator.ts has validation functions"
+    type: "grep"
+    file: "src/lib/cv/cv-validator.ts"
+    patterns:
+      - "validateExtractedCV"
+      - "getMissingFields"
+      - "getCompletionPercentage"
+      - "isMinimumViable"
+
+  - id: T06
+    description: "API route uses AI extraction"
+    type: "grep"
+    file: "src/app/api/cv/extract/route.ts"
+    patterns:
+      - "extractCVWithAI"
+      - "decryptApiKey"
+      - "parseFile"
+
+  - id: T07
+    description: "types.ts has CVExtractionResult"
+    type: "grep"
+    file: "src/lib/types.ts"
+    patterns:
+      - "CVExtractionResult"
+      - "CVExtractionRequest"
+
+max_retries: 3

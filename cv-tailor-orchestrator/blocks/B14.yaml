@@ -1,0 +1,1749 @@
+id: B14
+name: "CV Field Display and Completion Forms"
+phase: 1
+phase_name: "CV Management"
+
+goal: |
+  Create components to display AI-extracted CV fields, highlight incomplete fields,
+  show confidence scores, and provide forms to complete or edit information.
+
+dependencies: [B01, B02, B03, B04, B05, B06, B07, B08, B09, B10, B11, B12, B13]
+
+files_to_create:
+  - id: F042
+    path: "src/components/cv/CVFieldDisplay.tsx"
+    description: "Display extracted fields with completeness indicators"
+
+  - id: F043
+    path: "src/components/cv/CVCompletionForm.tsx"
+    description: "Form to fill in missing CV fields"
+
+  - id: F044
+    path: "src/components/cv/CVPreview.tsx"
+    description: "Preview the complete CV in a readable format"
+
+  - id: F099
+    path: "src/components/cv/FieldStatusBadge.tsx"
+    description: "Badge showing complete/incomplete status"
+
+  - id: F100
+    path: "src/components/cv/WorkExperienceForm.tsx"
+    description: "Form for adding/editing work experience entries"
+
+  - id: F101
+    path: "src/components/cv/EducationForm.tsx"
+    description: "Form for adding/editing education entries"
+
+  - id: F113
+    path: "src/components/cv/SkillsEditor.tsx"
+    description: "Tag-based editor for skills"
+
+  - id: F114
+    path: "src/components/cv/PersonalInfoForm.tsx"
+    description: "Form for editing personal information"
+
+  - id: F115
+    path: "src/components/cv/ConfidenceIndicator.tsx"
+    description: "Shows AI extraction confidence score"
+
+files_to_modify:
+  - id: F087
+    path: "src/i18n/en.json"
+    description: "Add field display and form translations"
+
+  - id: F088
+    path: "src/i18n/fa.json"
+    description: "Add field display and form translations"
+
+files_available:
+  - id: F027
+    path: "src/components/ui/button.tsx"
+    from_block: B02
+  - id: F028
+    path: "src/components/ui/input.tsx"
+    from_block: B02
+  - id: F029
+    path: "src/components/ui/card.tsx"
+    from_block: B02
+  - id: F030
+    path: "src/components/ui/dialog.tsx"
+    from_block: B02
+  - id: F032
+    path: "src/components/ui/textarea.tsx"
+    from_block: B02
+  - id: F034
+    path: "src/components/ui/badge.tsx"
+    from_block: B02
+  - id: F079
+    path: "src/lib/types.ts"
+    from_block: B03
+  - id: F078
+    path: "src/lib/constants.ts"
+    from_block: B04
+  - id: F108
+    path: "src/lib/cv/cv-validator.ts"
+    from_block: B12
+
+commands: []
+
+instructions: |
+  1. Create FieldStatusBadge.tsx:
+     ```typescript
+     // ============================================
+     // [F099] src/components/cv/FieldStatusBadge.tsx
+     // ============================================
+     
+     'use client';
+     
+     import { useTranslations } from 'next-intl';
+     import { Badge } from '@/components/ui/badge';
+     import { CheckCircle, AlertCircle } from 'lucide-react';
+     import { cn } from '@/lib/utils';
+     
+     interface FieldStatusBadgeProps {
+       isComplete: boolean;
+       size?: 'sm' | 'md';
+       showText?: boolean;
+       className?: string;
+     }
+     
+     export function FieldStatusBadge({
+       isComplete,
+       size = 'sm',
+       showText = true,
+       className
+     }: FieldStatusBadgeProps) {
+       const t = useTranslations('cv');
+       
+       const iconSize = size === 'sm' ? 'h-3 w-3' : 'h-4 w-4';
+       
+       if (isComplete) {
+         return (
+           <Badge 
+             variant="outline" 
+             className={cn(
+               'bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300',
+               className
+             )}
+           >
+             <CheckCircle className={cn(iconSize, showText && 'mr-1')} />
+             {showText && t('field_complete')}
+           </Badge>
+         );
+       }
+       
+       return (
+         <Badge 
+           variant="outline" 
+           className={cn(
+             'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-950 dark:text-yellow-300',
+             className
+           )}
+         >
+           <AlertCircle className={cn(iconSize, showText && 'mr-1')} />
+           {showText && t('field_incomplete')}
+         </Badge>
+       );
+     }
+     ```
+  
+  2. Create ConfidenceIndicator.tsx:
+     ```typescript
+     // ============================================
+     // [F115] src/components/cv/ConfidenceIndicator.tsx
+     // ============================================
+     
+     'use client';
+     
+     import { useTranslations } from 'next-intl';
+     import { cn } from '@/lib/utils';
+     import { Sparkles } from 'lucide-react';
+     
+     interface ConfidenceIndicatorProps {
+       confidence: number;  // 0-100
+       className?: string;
+     }
+     
+     export function ConfidenceIndicator({ confidence, className }: ConfidenceIndicatorProps) {
+       const t = useTranslations('cv');
+       
+       const getColor = () => {
+         if (confidence >= 80) return 'text-green-600 bg-green-100';
+         if (confidence >= 60) return 'text-yellow-600 bg-yellow-100';
+         return 'text-red-600 bg-red-100';
+       };
+       
+       const getLabel = () => {
+         if (confidence >= 80) return t('confidence_high');
+         if (confidence >= 60) return t('confidence_medium');
+         return t('confidence_low');
+       };
+       
+       return (
+         <div className={cn('flex items-center gap-2', className)}>
+           <div className={cn(
+             'flex items-center gap-1.5 px-2 py-1 rounded-full text-sm font-medium',
+             getColor()
+           )}>
+             <Sparkles className="h-3.5 w-3.5" />
+             <span>{confidence}%</span>
+           </div>
+           <span className="text-xs text-muted-foreground">
+             {t('ai_confidence')}: {getLabel()}
+           </span>
+         </div>
+       );
+     }
+     ```
+  
+  3. Create PersonalInfoForm.tsx:
+     ```typescript
+     // ============================================
+     // [F114] src/components/cv/PersonalInfoForm.tsx
+     // ============================================
+     
+     'use client';
+     
+     import { useState } from 'react';
+     import { useTranslations } from 'next-intl';
+     import { PersonalInfo } from '@/lib/types';
+     import { Button } from '@/components/ui/button';
+     import { Input } from '@/components/ui/input';
+     import { Textarea } from '@/components/ui/textarea';
+     import { Label } from '@/components/ui/label';
+     import {
+       Dialog,
+       DialogContent,
+       DialogHeader,
+       DialogTitle,
+       DialogFooter,
+     } from '@/components/ui/dialog';
+     
+     interface PersonalInfoFormProps {
+       info: Partial<PersonalInfo>;
+       open: boolean;
+       onClose: () => void;
+       onSave: (info: PersonalInfo) => void;
+     }
+     
+     export function PersonalInfoForm({
+       info,
+       open,
+       onClose,
+       onSave
+     }: PersonalInfoFormProps) {
+       const t = useTranslations('cv');
+       const [formData, setFormData] = useState<Partial<PersonalInfo>>(info);
+       
+       const handleChange = (field: keyof PersonalInfo, value: string) => {
+         setFormData(prev => ({ ...prev, [field]: value }));
+       };
+       
+       const handleSubmit = () => {
+         onSave(formData as PersonalInfo);
+         onClose();
+       };
+       
+       return (
+         <Dialog open={open} onOpenChange={onClose}>
+           <DialogContent className="max-w-lg">
+             <DialogHeader>
+               <DialogTitle>{t('edit_personal_info')}</DialogTitle>
+             </DialogHeader>
+             
+             <div className="grid gap-4 py-4">
+               <div className="grid gap-2">
+                 <Label htmlFor="full_name">{t('full_name')} *</Label>
+                 <Input
+                   id="full_name"
+                   value={formData.full_name || ''}
+                   onChange={(e) => handleChange('full_name', e.target.value)}
+                   placeholder={t('full_name_placeholder')}
+                 />
+               </div>
+               
+               <div className="grid grid-cols-2 gap-4">
+                 <div className="grid gap-2">
+                   <Label htmlFor="email">{t('email')} *</Label>
+                   <Input
+                     id="email"
+                     type="email"
+                     value={formData.email || ''}
+                     onChange={(e) => handleChange('email', e.target.value)}
+                     placeholder="email@example.com"
+                   />
+                 </div>
+                 <div className="grid gap-2">
+                   <Label htmlFor="phone">{t('phone')}</Label>
+                   <Input
+                     id="phone"
+                     value={formData.phone || ''}
+                     onChange={(e) => handleChange('phone', e.target.value)}
+                     placeholder="+1 234 567 8900"
+                   />
+                 </div>
+               </div>
+               
+               <div className="grid gap-2">
+                 <Label htmlFor="location">{t('location')}</Label>
+                 <Input
+                   id="location"
+                   value={formData.location || ''}
+                   onChange={(e) => handleChange('location', e.target.value)}
+                   placeholder={t('location_placeholder')}
+                 />
+               </div>
+               
+               <div className="grid grid-cols-2 gap-4">
+                 <div className="grid gap-2">
+                   <Label htmlFor="linkedin">{t('linkedin')}</Label>
+                   <Input
+                     id="linkedin"
+                     value={formData.linkedin_url || ''}
+                     onChange={(e) => handleChange('linkedin_url', e.target.value)}
+                     placeholder="linkedin.com/in/..."
+                   />
+                 </div>
+                 <div className="grid gap-2">
+                   <Label htmlFor="website">{t('website')}</Label>
+                   <Input
+                     id="website"
+                     value={formData.website_url || ''}
+                     onChange={(e) => handleChange('website_url', e.target.value)}
+                     placeholder="https://..."
+                   />
+                 </div>
+               </div>
+               
+               <div className="grid gap-2">
+                 <Label htmlFor="summary">{t('summary')}</Label>
+                 <Textarea
+                   id="summary"
+                   value={formData.summary || ''}
+                   onChange={(e) => handleChange('summary', e.target.value)}
+                   placeholder={t('summary_placeholder')}
+                   rows={4}
+                 />
+               </div>
+             </div>
+             
+             <DialogFooter>
+               <Button variant="outline" onClick={onClose}>
+                 {t('cancel')}
+               </Button>
+               <Button onClick={handleSubmit}>
+                 {t('save')}
+               </Button>
+             </DialogFooter>
+           </DialogContent>
+         </Dialog>
+       );
+     }
+     ```
+  
+  4. Create WorkExperienceForm.tsx:
+     ```typescript
+     // ============================================
+     // [F100] src/components/cv/WorkExperienceForm.tsx
+     // ============================================
+     
+     'use client';
+     
+     import { useState } from 'react';
+     import { useTranslations } from 'next-intl';
+     import { WorkExperience } from '@/lib/types';
+     import { generateId } from '@/lib/utils';
+     import { Button } from '@/components/ui/button';
+     import { Input } from '@/components/ui/input';
+     import { Textarea } from '@/components/ui/textarea';
+     import { Label } from '@/components/ui/label';
+     import { Checkbox } from '@/components/ui/checkbox';
+     import {
+       Dialog,
+       DialogContent,
+       DialogHeader,
+       DialogTitle,
+       DialogFooter,
+     } from '@/components/ui/dialog';
+     import { Plus, X } from 'lucide-react';
+     
+     interface WorkExperienceFormProps {
+       experience?: WorkExperience;
+       open: boolean;
+       onClose: () => void;
+       onSave: (experience: WorkExperience) => void;
+     }
+     
+     export function WorkExperienceForm({
+       experience,
+       open,
+       onClose,
+       onSave
+     }: WorkExperienceFormProps) {
+       const t = useTranslations('cv');
+       
+       const [formData, setFormData] = useState<Partial<WorkExperience>>(
+         experience || {
+           id: generateId(),
+           job_title: '',
+           company: '',
+           location: '',
+           start_date: '',
+           end_date: '',
+           is_current: false,
+           description: '',
+           achievements: []
+         }
+       );
+       
+       const [newAchievement, setNewAchievement] = useState('');
+       
+       const handleChange = (field: keyof WorkExperience, value: any) => {
+         setFormData(prev => ({ ...prev, [field]: value }));
+       };
+       
+       const addAchievement = () => {
+         if (newAchievement.trim()) {
+           handleChange('achievements', [
+             ...(formData.achievements || []),
+             newAchievement.trim()
+           ]);
+           setNewAchievement('');
+         }
+       };
+       
+       const removeAchievement = (index: number) => {
+         handleChange('achievements', 
+           (formData.achievements || []).filter((_, i) => i !== index)
+         );
+       };
+       
+       const handleSubmit = () => {
+         onSave(formData as WorkExperience);
+         onClose();
+       };
+       
+       return (
+         <Dialog open={open} onOpenChange={onClose}>
+           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+             <DialogHeader>
+               <DialogTitle>
+                 {experience ? t('edit_experience') : t('add_experience')}
+               </DialogTitle>
+             </DialogHeader>
+             
+             <div className="grid gap-4 py-4">
+               <div className="grid gap-2">
+                 <Label htmlFor="job_title">{t('job_title')} *</Label>
+                 <Input
+                   id="job_title"
+                   value={formData.job_title || ''}
+                   onChange={(e) => handleChange('job_title', e.target.value)}
+                   placeholder={t('job_title_placeholder')}
+                 />
+               </div>
+               
+               <div className="grid gap-2">
+                 <Label htmlFor="company">{t('company')} *</Label>
+                 <Input
+                   id="company"
+                   value={formData.company || ''}
+                   onChange={(e) => handleChange('company', e.target.value)}
+                   placeholder={t('company_placeholder')}
+                 />
+               </div>
+               
+               <div className="grid gap-2">
+                 <Label htmlFor="location">{t('location')}</Label>
+                 <Input
+                   id="location"
+                   value={formData.location || ''}
+                   onChange={(e) => handleChange('location', e.target.value)}
+                   placeholder={t('location_placeholder')}
+                 />
+               </div>
+               
+               <div className="grid grid-cols-2 gap-4">
+                 <div className="grid gap-2">
+                   <Label htmlFor="start_date">{t('start_date')}</Label>
+                   <Input
+                     id="start_date"
+                     type="month"
+                     value={formData.start_date || ''}
+                     onChange={(e) => handleChange('start_date', e.target.value)}
+                   />
+                 </div>
+                 <div className="grid gap-2">
+                   <Label htmlFor="end_date">{t('end_date')}</Label>
+                   <Input
+                     id="end_date"
+                     type="month"
+                     value={formData.end_date || ''}
+                     onChange={(e) => handleChange('end_date', e.target.value)}
+                     disabled={formData.is_current}
+                   />
+                 </div>
+               </div>
+               
+               <div className="flex items-center gap-2">
+                 <Checkbox
+                   id="is_current"
+                   checked={formData.is_current}
+                   onCheckedChange={(checked) => {
+                     handleChange('is_current', checked);
+                     if (checked) handleChange('end_date', '');
+                   }}
+                 />
+                 <Label htmlFor="is_current" className="cursor-pointer">
+                   {t('current_position')}
+                 </Label>
+               </div>
+               
+               <div className="grid gap-2">
+                 <Label htmlFor="description">{t('description')}</Label>
+                 <Textarea
+                   id="description"
+                   value={formData.description || ''}
+                   onChange={(e) => handleChange('description', e.target.value)}
+                   placeholder={t('description_placeholder')}
+                   rows={3}
+                 />
+               </div>
+               
+               {/* Achievements */}
+               <div className="grid gap-2">
+                 <Label>{t('achievements')}</Label>
+                 <div className="space-y-2">
+                   {(formData.achievements || []).map((achievement, index) => (
+                     <div key={index} className="flex items-center gap-2">
+                       <span className="flex-1 text-sm bg-muted p-2 rounded">
+                         {achievement}
+                       </span>
+                       <Button
+                         type="button"
+                         variant="ghost"
+                         size="sm"
+                         onClick={() => removeAchievement(index)}
+                       >
+                         <X className="h-4 w-4" />
+                       </Button>
+                     </div>
+                   ))}
+                   <div className="flex gap-2">
+                     <Input
+                       value={newAchievement}
+                       onChange={(e) => setNewAchievement(e.target.value)}
+                       placeholder={t('add_achievement_placeholder')}
+                       onKeyPress={(e) => e.key === 'Enter' && addAchievement()}
+                     />
+                     <Button type="button" variant="outline" onClick={addAchievement}>
+                       <Plus className="h-4 w-4" />
+                     </Button>
+                   </div>
+                 </div>
+               </div>
+             </div>
+             
+             <DialogFooter>
+               <Button variant="outline" onClick={onClose}>
+                 {t('cancel')}
+               </Button>
+               <Button onClick={handleSubmit}>
+                 {t('save')}
+               </Button>
+             </DialogFooter>
+           </DialogContent>
+         </Dialog>
+       );
+     }
+     ```
+  
+  5. Create EducationForm.tsx (similar structure to WorkExperienceForm):
+     ```typescript
+     // ============================================
+     // [F101] src/components/cv/EducationForm.tsx
+     // ============================================
+     
+     'use client';
+     
+     import { useState } from 'react';
+     import { useTranslations } from 'next-intl';
+     import { Education } from '@/lib/types';
+     import { generateId } from '@/lib/utils';
+     import { Button } from '@/components/ui/button';
+     import { Input } from '@/components/ui/input';
+     import { Textarea } from '@/components/ui/textarea';
+     import { Label } from '@/components/ui/label';
+     import {
+       Dialog,
+       DialogContent,
+       DialogHeader,
+       DialogTitle,
+       DialogFooter,
+     } from '@/components/ui/dialog';
+     
+     interface EducationFormProps {
+       education?: Education;
+       open: boolean;
+       onClose: () => void;
+       onSave: (education: Education) => void;
+     }
+     
+     export function EducationForm({
+       education,
+       open,
+       onClose,
+       onSave
+     }: EducationFormProps) {
+       const t = useTranslations('cv');
+       
+       const [formData, setFormData] = useState<Partial<Education>>(
+         education || {
+           id: generateId(),
+           degree: '',
+           institution: '',
+           location: '',
+           start_date: '',
+           end_date: '',
+           gpa: '',
+           description: ''
+         }
+       );
+       
+       const handleChange = (field: keyof Education, value: string) => {
+         setFormData(prev => ({ ...prev, [field]: value }));
+       };
+       
+       const handleSubmit = () => {
+         onSave(formData as Education);
+         onClose();
+       };
+       
+       return (
+         <Dialog open={open} onOpenChange={onClose}>
+           <DialogContent className="max-w-lg">
+             <DialogHeader>
+               <DialogTitle>
+                 {education ? t('edit_education') : t('add_education')}
+               </DialogTitle>
+             </DialogHeader>
+             
+             <div className="grid gap-4 py-4">
+               <div className="grid gap-2">
+                 <Label htmlFor="degree">{t('degree')} *</Label>
+                 <Input
+                   id="degree"
+                   value={formData.degree || ''}
+                   onChange={(e) => handleChange('degree', e.target.value)}
+                   placeholder={t('degree_placeholder')}
+                 />
+               </div>
+               
+               <div className="grid gap-2">
+                 <Label htmlFor="institution">{t('institution')} *</Label>
+                 <Input
+                   id="institution"
+                   value={formData.institution || ''}
+                   onChange={(e) => handleChange('institution', e.target.value)}
+                   placeholder={t('institution_placeholder')}
+                 />
+               </div>
+               
+               <div className="grid grid-cols-2 gap-4">
+                 <div className="grid gap-2">
+                   <Label htmlFor="location">{t('location')}</Label>
+                   <Input
+                     id="location"
+                     value={formData.location || ''}
+                     onChange={(e) => handleChange('location', e.target.value)}
+                   />
+                 </div>
+                 <div className="grid gap-2">
+                   <Label htmlFor="gpa">{t('gpa')}</Label>
+                   <Input
+                     id="gpa"
+                     value={formData.gpa || ''}
+                     onChange={(e) => handleChange('gpa', e.target.value)}
+                     placeholder="3.8/4.0"
+                   />
+                 </div>
+               </div>
+               
+               <div className="grid grid-cols-2 gap-4">
+                 <div className="grid gap-2">
+                   <Label htmlFor="start_date">{t('start_date')}</Label>
+                   <Input
+                     id="start_date"
+                     type="month"
+                     value={formData.start_date || ''}
+                     onChange={(e) => handleChange('start_date', e.target.value)}
+                   />
+                 </div>
+                 <div className="grid gap-2">
+                   <Label htmlFor="end_date">{t('end_date')}</Label>
+                   <Input
+                     id="end_date"
+                     type="month"
+                     value={formData.end_date || ''}
+                     onChange={(e) => handleChange('end_date', e.target.value)}
+                   />
+                 </div>
+               </div>
+               
+               <div className="grid gap-2">
+                 <Label htmlFor="description">{t('description')}</Label>
+                 <Textarea
+                   id="description"
+                   value={formData.description || ''}
+                   onChange={(e) => handleChange('description', e.target.value)}
+                   rows={3}
+                 />
+               </div>
+             </div>
+             
+             <DialogFooter>
+               <Button variant="outline" onClick={onClose}>
+                 {t('cancel')}
+               </Button>
+               <Button onClick={handleSubmit}>
+                 {t('save')}
+               </Button>
+             </DialogFooter>
+           </DialogContent>
+         </Dialog>
+       );
+     }
+     ```
+  
+  6. Create SkillsEditor.tsx:
+     ```typescript
+     // ============================================
+     // [F113] src/components/cv/SkillsEditor.tsx
+     // ============================================
+     
+     'use client';
+     
+     import { useState, useCallback } from 'react';
+     import { useTranslations } from 'next-intl';
+     import { Input } from '@/components/ui/input';
+     import { Badge } from '@/components/ui/badge';
+     import { X, Plus } from 'lucide-react';
+     import { cn } from '@/lib/utils';
+     
+     interface SkillsEditorProps {
+       skills: string[];
+       onChange: (skills: string[]) => void;
+       disabled?: boolean;
+       className?: string;
+     }
+     
+     export function SkillsEditor({
+       skills,
+       onChange,
+       disabled = false,
+       className
+     }: SkillsEditorProps) {
+       const t = useTranslations('cv');
+       const [inputValue, setInputValue] = useState('');
+       
+       const addSkill = useCallback(() => {
+         const skill = inputValue.trim();
+         if (skill && !skills.includes(skill)) {
+           onChange([...skills, skill]);
+           setInputValue('');
+         }
+       }, [inputValue, skills, onChange]);
+       
+       const removeSkill = useCallback((skillToRemove: string) => {
+         onChange(skills.filter(s => s !== skillToRemove));
+       }, [skills, onChange]);
+       
+       const handleKeyDown = (e: React.KeyboardEvent) => {
+         if (e.key === 'Enter') {
+           e.preventDefault();
+           addSkill();
+         }
+       };
+       
+       return (
+         <div className={cn('space-y-3', className)}>
+           <div className="flex gap-2">
+             <Input
+               value={inputValue}
+               onChange={(e) => setInputValue(e.target.value)}
+               onKeyDown={handleKeyDown}
+               placeholder={t('add_skill_placeholder')}
+               disabled={disabled}
+               className="flex-1"
+             />
+             <button
+               onClick={addSkill}
+               disabled={disabled || !inputValue.trim()}
+               className="px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50"
+             >
+               <Plus className="h-4 w-4" />
+             </button>
+           </div>
+           
+           <div className="flex flex-wrap gap-2">
+             {skills.map((skill) => (
+               <Badge
+                 key={skill}
+                 variant="secondary"
+                 className="px-3 py-1 text-sm"
+               >
+                 {skill}
+                 {!disabled && (
+                   <button
+                     onClick={() => removeSkill(skill)}
+                     className="ml-2 hover:text-destructive"
+                   >
+                     <X className="h-3 w-3" />
+                   </button>
+                 )}
+               </Badge>
+             ))}
+             {skills.length === 0 && (
+               <span className="text-sm text-muted-foreground">
+                 {t('no_skills_added')}
+               </span>
+             )}
+           </div>
+         </div>
+       );
+     }
+     ```
+  
+  7. Create CVFieldDisplay.tsx:
+     ```typescript
+     // ============================================
+     // [F042] src/components/cv/CVFieldDisplay.tsx
+     // ============================================
+     
+     'use client';
+     
+     import { useState } from 'react';
+     import { useTranslations } from 'next-intl';
+     import { ComprehensiveCV, CVFieldStatus, WorkExperience, Education } from '@/lib/types';
+     import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+     import { Button } from '@/components/ui/button';
+     import { FieldStatusBadge } from './FieldStatusBadge';
+     import { ConfidenceIndicator } from './ConfidenceIndicator';
+     import { PersonalInfoForm } from './PersonalInfoForm';
+     import { WorkExperienceForm } from './WorkExperienceForm';
+     import { EducationForm } from './EducationForm';
+     import { SkillsEditor } from './SkillsEditor';
+     import {
+       User, Briefcase, GraduationCap, Code, Award, Languages, FolderOpen,
+       Pencil, Plus, Trash2
+     } from 'lucide-react';
+     import { cn } from '@/lib/utils';
+     
+     interface CVFieldDisplayProps {
+       cv: Partial<ComprehensiveCV>;
+       fieldStatuses: CVFieldStatus[];
+       confidence: number;
+       onUpdate: (updates: Partial<ComprehensiveCV>) => void;
+       className?: string;
+     }
+     
+     export function CVFieldDisplay({
+       cv,
+       fieldStatuses,
+       confidence,
+       onUpdate,
+       className
+     }: CVFieldDisplayProps) {
+       const t = useTranslations('cv');
+       
+       // Edit dialogs state
+       const [editingPersonalInfo, setEditingPersonalInfo] = useState(false);
+       const [editingExperience, setEditingExperience] = useState<WorkExperience | null>(null);
+       const [addingExperience, setAddingExperience] = useState(false);
+       const [editingEducation, setEditingEducation] = useState<Education | null>(null);
+       const [addingEducation, setAddingEducation] = useState(false);
+       
+       // Helper to check if a field is complete
+       const isFieldComplete = (fieldName: string) => {
+         return fieldStatuses.find(s => s.field_name === fieldName)?.is_complete ?? false;
+       };
+       
+       // Calculate completion stats
+       const completeCount = fieldStatuses.filter(s => s.is_complete).length;
+       const totalCount = fieldStatuses.length;
+       const completionPercent = totalCount > 0 ? Math.round((completeCount / totalCount) * 100) : 0;
+       
+       // Update handlers
+       const handlePersonalInfoSave = (info: any) => {
+         onUpdate({ personal_info: info });
+       };
+       
+       const handleExperienceSave = (exp: WorkExperience) => {
+         const current = cv.work_experience || [];
+         const index = current.findIndex(e => e.id === exp.id);
+         if (index >= 0) {
+           const updated = [...current];
+           updated[index] = exp;
+           onUpdate({ work_experience: updated });
+         } else {
+           onUpdate({ work_experience: [...current, exp] });
+         }
+         setEditingExperience(null);
+         setAddingExperience(false);
+       };
+       
+       const handleExperienceDelete = (id: string) => {
+         onUpdate({
+           work_experience: (cv.work_experience || []).filter(e => e.id !== id)
+         });
+       };
+       
+       const handleEducationSave = (edu: Education) => {
+         const current = cv.education || [];
+         const index = current.findIndex(e => e.id === edu.id);
+         if (index >= 0) {
+           const updated = [...current];
+           updated[index] = edu;
+           onUpdate({ education: updated });
+         } else {
+           onUpdate({ education: [...current, edu] });
+         }
+         setEditingEducation(null);
+         setAddingEducation(false);
+       };
+       
+       const handleEducationDelete = (id: string) => {
+         onUpdate({
+           education: (cv.education || []).filter(e => e.id !== id)
+         });
+       };
+       
+       const handleSkillsChange = (skills: string[]) => {
+         onUpdate({ skills });
+       };
+       
+       return (
+         <div className={cn('space-y-6', className)}>
+           {/* Summary Header */}
+           <Card>
+             <CardContent className="py-4">
+               <div className="flex items-center justify-between flex-wrap gap-4">
+                 <div>
+                   <h3 className="font-semibold text-lg">{t('extraction_summary')}</h3>
+                   <p className="text-sm text-muted-foreground">
+                     {t('fields_complete', { count: completeCount, total: totalCount })}
+                   </p>
+                 </div>
+                 <div className="flex items-center gap-4">
+                   <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
+                     <div 
+                       className="h-full bg-primary transition-all" 
+                       style={{ width: `${completionPercent}%` }}
+                     />
+                   </div>
+                   <ConfidenceIndicator confidence={confidence} />
+                 </div>
+               </div>
+             </CardContent>
+           </Card>
+           
+           {/* Personal Info */}
+           <Card>
+             <CardHeader className="flex flex-row items-center justify-between">
+               <CardTitle className="flex items-center gap-2 text-lg">
+                 <User className="h-5 w-5" />
+                 {t('personal_info')}
+               </CardTitle>
+               <div className="flex items-center gap-2">
+                 <FieldStatusBadge isComplete={isFieldComplete('personal_info.full_name')} />
+                 <Button variant="ghost" size="sm" onClick={() => setEditingPersonalInfo(true)}>
+                   <Pencil className="h-4 w-4" />
+                 </Button>
+               </div>
+             </CardHeader>
+             <CardContent>
+               <dl className="grid grid-cols-2 gap-4 text-sm">
+                 <div>
+                   <dt className="text-muted-foreground">{t('full_name')}</dt>
+                   <dd className="font-medium">{cv.personal_info?.full_name || '—'}</dd>
+                 </div>
+                 <div>
+                   <dt className="text-muted-foreground">{t('email')}</dt>
+                   <dd>{cv.personal_info?.email || '—'}</dd>
+                 </div>
+                 <div>
+                   <dt className="text-muted-foreground">{t('phone')}</dt>
+                   <dd>{cv.personal_info?.phone || '—'}</dd>
+                 </div>
+                 <div>
+                   <dt className="text-muted-foreground">{t('location')}</dt>
+                   <dd>{cv.personal_info?.location || '—'}</dd>
+                 </div>
+               </dl>
+               {cv.personal_info?.summary && (
+                 <div className="mt-4">
+                   <dt className="text-muted-foreground text-sm">{t('summary')}</dt>
+                   <dd className="mt-1 text-sm">{cv.personal_info.summary}</dd>
+                 </div>
+               )}
+             </CardContent>
+           </Card>
+           
+           {/* Work Experience */}
+           <Card>
+             <CardHeader className="flex flex-row items-center justify-between">
+               <CardTitle className="flex items-center gap-2 text-lg">
+                 <Briefcase className="h-5 w-5" />
+                 {t('work_experience')}
+               </CardTitle>
+               <div className="flex items-center gap-2">
+                 <FieldStatusBadge isComplete={isFieldComplete('work_experience')} />
+                 <Button variant="ghost" size="sm" onClick={() => setAddingExperience(true)}>
+                   <Plus className="h-4 w-4" />
+                 </Button>
+               </div>
+             </CardHeader>
+             <CardContent>
+               {(cv.work_experience || []).length > 0 ? (
+                 <div className="space-y-4">
+                   {cv.work_experience!.map((exp) => (
+                     <div 
+                       key={exp.id} 
+                       className="p-4 bg-muted/50 rounded-lg group relative"
+                     >
+                       <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                         <Button 
+                           variant="ghost" 
+                           size="sm"
+                           onClick={() => setEditingExperience(exp)}
+                         >
+                           <Pencil className="h-3 w-3" />
+                         </Button>
+                         <Button 
+                           variant="ghost" 
+                           size="sm"
+                           onClick={() => handleExperienceDelete(exp.id)}
+                         >
+                           <Trash2 className="h-3 w-3 text-destructive" />
+                         </Button>
+                       </div>
+                       <h4 className="font-semibold">{exp.job_title}</h4>
+                       <p className="text-sm text-muted-foreground">
+                         {exp.company} {exp.location && `• ${exp.location}`}
+                       </p>
+                       <p className="text-xs text-muted-foreground mt-1">
+                         {exp.start_date} — {exp.is_current ? t('present') : exp.end_date}
+                       </p>
+                       {exp.description && (
+                         <p className="text-sm mt-2">{exp.description}</p>
+                       )}
+                     </div>
+                   ))}
+                 </div>
+               ) : (
+                 <p className="text-sm text-muted-foreground">{t('no_experience_added')}</p>
+               )}
+             </CardContent>
+           </Card>
+           
+           {/* Education */}
+           <Card>
+             <CardHeader className="flex flex-row items-center justify-between">
+               <CardTitle className="flex items-center gap-2 text-lg">
+                 <GraduationCap className="h-5 w-5" />
+                 {t('education')}
+               </CardTitle>
+               <div className="flex items-center gap-2">
+                 <FieldStatusBadge isComplete={isFieldComplete('education')} />
+                 <Button variant="ghost" size="sm" onClick={() => setAddingEducation(true)}>
+                   <Plus className="h-4 w-4" />
+                 </Button>
+               </div>
+             </CardHeader>
+             <CardContent>
+               {(cv.education || []).length > 0 ? (
+                 <div className="space-y-4">
+                   {cv.education!.map((edu) => (
+                     <div 
+                       key={edu.id} 
+                       className="p-4 bg-muted/50 rounded-lg group relative"
+                     >
+                       <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                         <Button 
+                           variant="ghost" 
+                           size="sm"
+                           onClick={() => setEditingEducation(edu)}
+                         >
+                           <Pencil className="h-3 w-3" />
+                         </Button>
+                         <Button 
+                           variant="ghost" 
+                           size="sm"
+                           onClick={() => handleEducationDelete(edu.id)}
+                         >
+                           <Trash2 className="h-3 w-3 text-destructive" />
+                         </Button>
+                       </div>
+                       <h4 className="font-semibold">{edu.degree}</h4>
+                       <p className="text-sm text-muted-foreground">{edu.institution}</p>
+                       <p className="text-xs text-muted-foreground mt-1">
+                         {edu.start_date} — {edu.end_date}
+                         {edu.gpa && ` • GPA: ${edu.gpa}`}
+                       </p>
+                     </div>
+                   ))}
+                 </div>
+               ) : (
+                 <p className="text-sm text-muted-foreground">{t('no_education_added')}</p>
+               )}
+             </CardContent>
+           </Card>
+           {/* Skills */}
+           <Card>
+             <CardHeader className="flex flex-row items-center justify-between">
+               <CardTitle className="flex items-center gap-2 text-lg">
+                 <Code className="h-5 w-5" />
+                 {t('skills')}
+               </CardTitle>
+               <FieldStatusBadge isComplete={isFieldComplete('skills')} />
+             </CardHeader>
+             <CardContent>
+               <SkillsEditor
+                 skills={cv.skills || []}
+                 onChange={handleSkillsChange}
+               />
+             </CardContent>
+           </Card>
+           
+           {/* Languages */}
+           {(cv.languages || []).length > 0 && (
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center gap-2 text-lg">
+                   <Languages className="h-5 w-5" />
+                   {t('languages')}
+                 </CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <div className="flex flex-wrap gap-2">
+                   {cv.languages!.map((lang, index) => (
+                     <Badge key={index} variant="outline">
+                       {lang.language} — {lang.proficiency}
+                     </Badge>
+                   ))}
+                 </div>
+               </CardContent>
+             </Card>
+           )}
+           
+           {/* Certifications */}
+           {(cv.certifications || []).length > 0 && (
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center gap-2 text-lg">
+                   <Award className="h-5 w-5" />
+                   {t('certifications')}
+                 </CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <div className="space-y-3">
+                   {cv.certifications!.map((cert) => (
+                     <div key={cert.id} className="p-3 bg-muted/50 rounded-lg">
+                       <h4 className="font-medium">{cert.name}</h4>
+                       <p className="text-sm text-muted-foreground">
+                         {cert.issuer} • {cert.date_obtained}
+                       </p>
+                     </div>
+                   ))}
+                 </div>
+               </CardContent>
+             </Card>
+           )}
+           
+           {/* Projects */}
+           {(cv.projects || []).length > 0 && (
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center gap-2 text-lg">
+                   <FolderOpen className="h-5 w-5" />
+                   {t('projects')}
+                 </CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <div className="space-y-3">
+                   {cv.projects!.map((project) => (
+                     <div key={project.id} className="p-3 bg-muted/50 rounded-lg">
+                       <h4 className="font-medium">{project.name}</h4>
+                       <p className="text-sm mt-1">{project.description}</p>
+                       {project.url && (
+                         <a 
+                           href={project.url} 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           className="text-xs text-primary hover:underline mt-1 inline-block"
+                         >
+                           {project.url}
+                         </a>
+                       )}
+                     </div>
+                   ))}
+                 </div>
+               </CardContent>
+             </Card>
+           )}
+           
+           {/* Edit Dialogs */}
+           <PersonalInfoForm
+             info={cv.personal_info || {}}
+             open={editingPersonalInfo}
+             onClose={() => setEditingPersonalInfo(false)}
+             onSave={handlePersonalInfoSave}
+           />
+           
+           <WorkExperienceForm
+             experience={editingExperience || undefined}
+             open={editingExperience !== null || addingExperience}
+             onClose={() => {
+               setEditingExperience(null);
+               setAddingExperience(false);
+             }}
+             onSave={handleExperienceSave}
+           />
+           
+           <EducationForm
+             education={editingEducation || undefined}
+             open={editingEducation !== null || addingEducation}
+             onClose={() => {
+               setEditingEducation(null);
+               setAddingEducation(false);
+             }}
+             onSave={handleEducationSave}
+           />
+         </div>
+       );
+     }
+     ```
+  
+  8. Create CVCompletionForm.tsx:
+     ```typescript
+     // ============================================
+     // [F043] src/components/cv/CVCompletionForm.tsx
+     // ============================================
+     
+     'use client';
+     
+     import { useTranslations } from 'next-intl';
+     import { CVFieldStatus } from '@/lib/types';
+     import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+     import { Button } from '@/components/ui/button';
+     import { AlertTriangle, ArrowRight } from 'lucide-react';
+     
+     interface CVCompletionFormProps {
+       incompleteFields: CVFieldStatus[];
+       onFieldClick: (fieldName: string) => void;
+       className?: string;
+     }
+     
+     export function CVCompletionForm({
+       incompleteFields,
+       onFieldClick,
+       className
+     }: CVCompletionFormProps) {
+       const t = useTranslations('cv');
+       
+       if (incompleteFields.length === 0) {
+         return null;
+       }
+       
+       const getFieldLabel = (fieldName: string): string => {
+         const labels: Record<string, string> = {
+           'personal_info.full_name': t('full_name'),
+           'personal_info.email': t('email'),
+           'personal_info.phone': t('phone'),
+           'personal_info.summary': t('summary'),
+           'work_experience': t('work_experience'),
+           'education': t('education'),
+           'skills': t('skills'),
+         };
+         return labels[fieldName] || fieldName;
+       };
+       
+       const getFieldSection = (fieldName: string): string => {
+         if (fieldName.startsWith('personal_info')) return 'personal';
+         return fieldName;
+       };
+       
+       return (
+         <Card className={className}>
+           <CardHeader>
+             <CardTitle className="flex items-center gap-2 text-yellow-600">
+               <AlertTriangle className="h-5 w-5" />
+               {t('incomplete_fields')}
+             </CardTitle>
+             <CardDescription>
+               {t('complete_fields_hint')}
+             </CardDescription>
+           </CardHeader>
+           <CardContent>
+             <ul className="space-y-2">
+               {incompleteFields.map((field) => (
+                 <li key={field.field_name}>
+                   <Button
+                     variant="ghost"
+                     className="w-full justify-between text-left h-auto py-3"
+                     onClick={() => onFieldClick(getFieldSection(field.field_name))}
+                   >
+                     <span className="flex items-center gap-2">
+                       <span className="w-2 h-2 rounded-full bg-yellow-500" />
+                       {getFieldLabel(field.field_name)}
+                     </span>
+                     <ArrowRight className="h-4 w-4" />
+                   </Button>
+                 </li>
+               ))}
+             </ul>
+           </CardContent>
+         </Card>
+       );
+     }
+     ```
+  
+  9. Create CVPreview.tsx:
+     ```typescript
+     // ============================================
+     // [F044] src/components/cv/CVPreview.tsx
+     // ============================================
+     
+     'use client';
+     
+     import { useTranslations } from 'next-intl';
+     import { ComprehensiveCV } from '@/lib/types';
+     import { Card, CardContent } from '@/components/ui/card';
+     import { Separator } from '@/components/ui/separator';
+     import { cn, isRTL } from '@/lib/utils';
+     import { 
+       Mail, Phone, MapPin, Linkedin, Globe, 
+       Briefcase, GraduationCap, Award, Code, Languages as LanguagesIcon
+     } from 'lucide-react';
+     
+     interface CVPreviewProps {
+       cv: Partial<ComprehensiveCV>;
+       locale: 'en' | 'fa';
+       className?: string;
+     }
+     
+     export function CVPreview({ cv, locale, className }: CVPreviewProps) {
+       const t = useTranslations('cv');
+       const rtl = isRTL(locale);
+       
+       const formatDate = (date: string | null | undefined): string => {
+         if (!date) return '';
+         const [year, month] = date.split('-');
+         return locale === 'fa' 
+           ? `${year}/${month}`
+           : new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+       };
+       
+       return (
+         <Card className={cn('overflow-hidden', className)}>
+           <CardContent className={cn(
+             'p-8 max-w-3xl mx-auto',
+             rtl && 'text-right'
+           )} dir={rtl ? 'rtl' : 'ltr'}>
+             
+             {/* Header / Personal Info */}
+             <header className="mb-8">
+               <h1 className="text-3xl font-bold mb-2">
+                 {cv.personal_info?.full_name || t('your_name')}
+               </h1>
+               
+               {cv.personal_info?.summary && (
+                 <p className="text-muted-foreground mt-3 leading-relaxed">
+                   {cv.personal_info.summary}
+                 </p>
+               )}
+               
+               <div className={cn(
+                 'flex flex-wrap gap-4 mt-4 text-sm text-muted-foreground',
+                 rtl && 'flex-row-reverse'
+               )}>
+                 {cv.personal_info?.email && (
+                   <span className="flex items-center gap-1">
+                     <Mail className="h-4 w-4" />
+                     {cv.personal_info.email}
+                   </span>
+                 )}
+                 {cv.personal_info?.phone && (
+                   <span className="flex items-center gap-1">
+                     <Phone className="h-4 w-4" />
+                     {cv.personal_info.phone}
+                   </span>
+                 )}
+                 {cv.personal_info?.location && (
+                   <span className="flex items-center gap-1">
+                     <MapPin className="h-4 w-4" />
+                     {cv.personal_info.location}
+                   </span>
+                 )}
+                 {cv.personal_info?.linkedin_url && (
+                   <span className="flex items-center gap-1">
+                     <Linkedin className="h-4 w-4" />
+                     LinkedIn
+                   </span>
+                 )}
+                 {cv.personal_info?.website_url && (
+                   <span className="flex items-center gap-1">
+                     <Globe className="h-4 w-4" />
+                     Website
+                   </span>
+                 )}
+               </div>
+             </header>
+             
+             <Separator className="my-6" />
+             
+             {/* Work Experience */}
+             {(cv.work_experience || []).length > 0 && (
+               <section className="mb-8">
+                 <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
+                   <Briefcase className="h-5 w-5" />
+                   {t('work_experience')}
+                 </h2>
+                 <div className="space-y-6">
+                   {cv.work_experience!.map((exp) => (
+                     <div key={exp.id}>
+                       <div className="flex justify-between items-start flex-wrap gap-2">
+                         <div>
+                           <h3 className="font-semibold">{exp.job_title}</h3>
+                           <p className="text-muted-foreground">{exp.company}</p>
+                         </div>
+                         <div className="text-sm text-muted-foreground">
+                           {formatDate(exp.start_date)} — {exp.is_current ? t('present') : formatDate(exp.end_date)}
+                         </div>
+                       </div>
+                       {exp.description && (
+                         <p className="mt-2 text-sm">{exp.description}</p>
+                       )}
+                       {exp.achievements && exp.achievements.length > 0 && (
+                         <ul className="mt-2 space-y-1">
+                           {exp.achievements.map((achievement, i) => (
+                             <li key={i} className="text-sm flex items-start gap-2">
+                               <span className="text-primary mt-1.5">•</span>
+                               {achievement}
+                             </li>
+                           ))}
+                         </ul>
+                       )}
+                     </div>
+                   ))}
+                 </div>
+               </section>
+             )}
+             
+             {/* Education */}
+             {(cv.education || []).length > 0 && (
+               <section className="mb-8">
+                 <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
+                   <GraduationCap className="h-5 w-5" />
+                   {t('education')}
+                 </h2>
+                 <div className="space-y-4">
+                   {cv.education!.map((edu) => (
+                     <div key={edu.id}>
+                       <div className="flex justify-between items-start flex-wrap gap-2">
+                         <div>
+                           <h3 className="font-semibold">{edu.degree}</h3>
+                           <p className="text-muted-foreground">{edu.institution}</p>
+                         </div>
+                         <div className="text-sm text-muted-foreground">
+                           {formatDate(edu.start_date)} — {formatDate(edu.end_date)}
+                           {edu.gpa && ` • GPA: ${edu.gpa}`}
+                         </div>
+                       </div>
+                       {edu.description && (
+                         <p className="mt-1 text-sm">{edu.description}</p>
+                       )}
+                     </div>
+                   ))}
+                 </div>
+               </section>
+             )}
+             
+             {/* Skills */}
+             {(cv.skills || []).length > 0 && (
+               <section className="mb-8">
+                 <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
+                   <Code className="h-5 w-5" />
+                   {t('skills')}
+                 </h2>
+                 <div className="flex flex-wrap gap-2">
+                   {cv.skills!.map((skill, i) => (
+                     <span 
+                       key={i}
+                       className="px-3 py-1 bg-muted rounded-full text-sm"
+                     >
+                       {skill}
+                     </span>
+                   ))}
+                 </div>
+               </section>
+             )}
+             
+             {/* Languages */}
+             {(cv.languages || []).length > 0 && (
+               <section className="mb-8">
+                 <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
+                   <LanguagesIcon className="h-5 w-5" />
+                   {t('languages')}
+                 </h2>
+                 <div className="flex flex-wrap gap-4">
+                   {cv.languages!.map((lang, i) => (
+                     <span key={i} className="text-sm">
+                       <span className="font-medium">{lang.language}</span>
+                       <span className="text-muted-foreground"> — {lang.proficiency}</span>
+                     </span>
+                   ))}
+                 </div>
+               </section>
+             )}
+             
+             {/* Certifications */}
+             {(cv.certifications || []).length > 0 && (
+               <section className="mb-8">
+                 <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
+                   <Award className="h-5 w-5" />
+                   {t('certifications')}
+                 </h2>
+                 <div className="space-y-2">
+                   {cv.certifications!.map((cert) => (
+                     <div key={cert.id} className="flex justify-between items-center">
+                       <div>
+                         <span className="font-medium">{cert.name}</span>
+                         <span className="text-muted-foreground"> — {cert.issuer}</span>
+                       </div>
+                       <span className="text-sm text-muted-foreground">
+                         {formatDate(cert.date_obtained)}
+                       </span>
+                     </div>
+                   ))}
+                 </div>
+               </section>
+             )}
+             
+           </CardContent>
+         </Card>
+       );
+     }
+     ```
+  
+  10. Add translations to en.json under "cv" key (append to existing):
+      ```json
+      {
+        "cv": {
+          "field_complete": "Complete",
+          "field_incomplete": "Incomplete",
+          "extraction_summary": "Extraction Summary",
+          "fields_complete": "{count} of {total} fields complete",
+          "ai_confidence": "AI Confidence",
+          "confidence_high": "High",
+          "confidence_medium": "Medium",
+          "confidence_low": "Low",
+          "personal_info": "Personal Information",
+          "work_experience": "Work Experience",
+          "education": "Education",
+          "skills": "Skills",
+          "certifications": "Certifications",
+          "languages": "Languages",
+          "projects": "Projects",
+          "full_name": "Full Name",
+          "email": "Email",
+          "phone": "Phone",
+          "location": "Location",
+          "linkedin": "LinkedIn",
+          "website": "Website",
+          "summary": "Professional Summary",
+          "edit_personal_info": "Edit Personal Information",
+          "full_name_placeholder": "John Doe",
+          "location_placeholder": "City, Country",
+          "summary_placeholder": "Brief professional summary...",
+          "job_title": "Job Title",
+          "company": "Company",
+          "start_date": "Start Date",
+          "end_date": "End Date",
+          "current_position": "I currently work here",
+          "present": "Present",
+          "description": "Description",
+          "description_placeholder": "Describe your role and responsibilities...",
+          "achievements": "Key Achievements",
+          "add_achievement_placeholder": "Add an achievement...",
+          "add_experience": "Add Experience",
+          "edit_experience": "Edit Experience",
+          "no_experience_added": "No work experience added yet",
+          "degree": "Degree",
+          "institution": "Institution",
+          "gpa": "GPA",
+          "degree_placeholder": "Bachelor of Science in...",
+          "institution_placeholder": "University name",
+          "add_education": "Add Education",
+          "edit_education": "Edit Education",
+          "no_education_added": "No education added yet",
+          "add_skill_placeholder": "Type a skill and press Enter",
+          "no_skills_added": "No skills added yet",
+          "incomplete_fields": "Incomplete Fields",
+          "complete_fields_hint": "Complete these fields to improve your CV",
+          "your_name": "Your Name",
+          "save": "Save",
+          "cancel": "Cancel"
+        }
+      }
+      ```
+  
+  11. Add same translations to fa.json:
+      ```json
+      {
+        "cv": {
+          "field_complete": "کامل",
+          "field_incomplete": "ناقص",
+          "extraction_summary": "خلاصه استخراج",
+          "fields_complete": "{count} از {total} فیلد کامل",
+          "ai_confidence": "اطمینان هوش مصنوعی",
+          "confidence_high": "بالا",
+          "confidence_medium": "متوسط",
+          "confidence_low": "پایین",
+          "personal_info": "اطلاعات شخصی",
+          "work_experience": "سوابق کاری",
+          "education": "تحصیلات",
+          "skills": "مهارت‌ها",
+          "certifications": "گواهینامه‌ها",
+          "languages": "زبان‌ها",
+          "projects": "پروژه‌ها",
+          "full_name": "نام کامل",
+          "email": "ایمیل",
+          "phone": "تلفن",
+          "location": "موقعیت",
+          "linkedin": "لینکدین",
+          "website": "وب‌سایت",
+          "summary": "خلاصه حرفه‌ای",
+          "edit_personal_info": "ویرایش اطلاعات شخصی",
+          "full_name_placeholder": "نام و نام خانوادگی",
+          "location_placeholder": "شهر، کشور",
+          "summary_placeholder": "خلاصه‌ای از تجربیات حرفه‌ای...",
+          "job_title": "عنوان شغلی",
+          "company": "شرکت",
+          "start_date": "تاریخ شروع",
+          "end_date": "تاریخ پایان",
+          "current_position": "در حال حاضر اینجا کار می‌کنم",
+          "present": "تاکنون",
+          "description": "توضیحات",
+          "description_placeholder": "نقش و مسئولیت‌های خود را شرح دهید...",
+          "achievements": "دستاوردهای کلیدی",
+          "add_achievement_placeholder": "یک دستاورد اضافه کنید...",
+          "add_experience": "افزودن تجربه",
+          "edit_experience": "ویرایش تجربه",
+          "no_experience_added": "هنوز سابقه کاری اضافه نشده",
+          "degree": "مدرک",
+          "institution": "موسسه آموزشی",
+          "gpa": "معدل",
+          "degree_placeholder": "کارشناسی در رشته...",
+          "institution_placeholder": "نام دانشگاه",
+          "add_education": "افزودن تحصیلات",
+          "edit_education": "ویرایش تحصیلات",
+          "no_education_added": "هنوز تحصیلاتی اضافه نشده",
+          "add_skill_placeholder": "مهارت را تایپ کنید و Enter بزنید",
+          "no_skills_added": "هنوز مهارتی اضافه نشده",
+          "incomplete_fields": "فیلدهای ناقص",
+          "complete_fields_hint": "این فیلدها را تکمیل کنید تا سی‌وی بهتری داشته باشید",
+          "your_name": "نام شما",
+          "save": "ذخیره",
+          "cancel": "انصراف"
+        }
+      }
+      ```
+
+checkpoint_tests:
+  - id: T01
+    description: "All CV field component files exist"
+    type: "files_exist"
+    files:
+      - "src/components/cv/CVFieldDisplay.tsx"
+      - "src/components/cv/CVCompletionForm.tsx"
+      - "src/components/cv/CVPreview.tsx"
+      - "src/components/cv/FieldStatusBadge.tsx"
+      - "src/components/cv/WorkExperienceForm.tsx"
+      - "src/components/cv/EducationForm.tsx"
+      - "src/components/cv/SkillsEditor.tsx"
+      - "src/components/cv/PersonalInfoForm.tsx"
+      - "src/components/cv/ConfidenceIndicator.tsx"
+
+  - id: T02
+    description: "TypeScript compiles without errors"
+    type: "command"
+    command: "npx tsc --noEmit"
+    expected_exit_code: 0
+
+  - id: T03
+    description: "CVFieldDisplay shows all CV sections"
+    type: "grep"
+    file: "src/components/cv/CVFieldDisplay.tsx"
+    patterns:
+      - "personal_info"
+      - "work_experience"
+      - "education"
+      - "skills"
+      - "FieldStatusBadge"
+      - "ConfidenceIndicator"
+
+  - id: T04
+    description: "CVPreview supports RTL"
+    type: "grep"
+    file: "src/components/cv/CVPreview.tsx"
+    patterns:
+      - "isRTL"
+      - "dir="
+      - "rtl"
+
+  - id: T05
+    description: "SkillsEditor uses tag-based input"
+    type: "grep"
+    file: "src/components/cv/SkillsEditor.tsx"
+    patterns:
+      - "Badge"
+      - "addSkill"
+      - "removeSkill"
+
+  - id: T06
+    description: "Forms use Dialog component"
+    type: "grep"
+    file: "src/components/cv/PersonalInfoForm.tsx"
+    patterns:
+      - "Dialog"
+      - "DialogContent"
+      - "onSave"
+
+  - id: T07
+    description: "Uses i18n for translations"
+    type: "grep"
+    file: "src/components/cv/CVFieldDisplay.tsx"
+    patterns:
+      - "useTranslations"
+
+  - id: T08
+    description: "English translations have all CV field keys"
+    type: "grep"
+    file: "src/i18n/en.json"
+    patterns:
+      - "field_complete"
+      - "extraction_summary"
+      - "add_experience"
+      - "confidence_high"
+
+  - id: T09
+    description: "Farsi translations have all CV field keys"
+    type: "grep"
+    file: "src/i18n/fa.json"
+    patterns:
+      - "field_complete"
+      - "extraction_summary"
+      - "confidence_high"
+
+max_retries: 3

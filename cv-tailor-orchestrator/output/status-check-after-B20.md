@@ -1,0 +1,114 @@
+# STATUS CHECK
+
+## Completed Blocks (15/38)
+- B01 ✅: Create Empty Next.js Project — [F001, F002, F003, F004, F005, F006, F007, F008, F009]
+- B02 ✅: Install All Dependencies — [F027, F028, F029, F030, F031, F032, F033, F034, F035, F036, F090, F091]
+- B03 ✅: Central TypeScript Types — [F079]
+- B04 ✅: Constants and Utilities — [F078, F080]
+- B05 ✅: Internationalization (i18n) System — [F086, F087, F088, F089]
+- B06 ✅: Supabase Connection and Database Setup — [F063, F064, F065, F093, F094]
+- B07 ✅: Development Auth (Temporary Login) — [F089, F090, F091, F092]
+- B08 ✅: Main Layout (Header + Sidebar + Footer) — [F037, F038, F039, F040, F093, F094, F012]
+- B09 ✅: File Parsers (Word + Markdown) — [F072, F073, F095]
+- B10 ✅: AI Provider Interface (Abstract Layer) — [F066, F067, F068, F069, F070, F104]
+- B11 ✅: API Key Encryption and Storage — [F077, F105, F106, F081]
+- B12 ✅: AI-Powered CV Field Extraction — [F074, F107, F108, F109, F110]
+- B17 ✅: Prompt Management System — [F024, F118, F119, F120, F121, F083, F045, F046, F047, F048, F122, F123, F015, F124]
+- B19 ✅: Export System (Word & Markdown) — [F075, F076, F142, F143, F025, F026, F144]
+- B20 ✅: Template Management System — [F145, F146, F147, F148, F149, F150, F060, F061, F062, F151, F152]
+
+## All Existing Files (89 files)
+- [F001] package.json
+- [F002] tsconfig.json
+- [F003] next.config.ts
+- [F004] tailwind.config.ts
+- [F005] .env.local
+- [F006] .env.example
+- [F007] src/app/layout.tsx
+- [F008] src/app/page.tsx
+- [F009] src/app/globals.css
+- [F027] src/components/ui/button.tsx
+- [F028] src/components/ui/input.tsx
+- [F029] src/components/ui/card.tsx
+- [F030] src/components/ui/dialog.tsx
+- [F031] src/components/ui/select.tsx
+- [F032] src/components/ui/textarea.tsx
+- [F033] src/components/ui/tabs.tsx
+- [F034] src/components/ui/badge.tsx
+- [F035] src/components/ui/sonner.tsx
+- [F036] src/components/ui/dropdown-menu.tsx
+- [F090] src/context/AuthContext.tsx
+- [F091] src/components/auth/DevLoginForm.tsx
+- [F079] src/lib/types.ts
+- [F078] src/lib/constants.ts
+- [F080] src/lib/helpers.ts
+- [F086] src/i18n/config.ts
+- [F087] src/i18n/en.json
+- [F088] src/i18n/fa.json
+- [F089] src/lib/auth/dev-auth.ts
+- [F063] src/lib/supabase/client.ts
+- [F064] src/lib/supabase/server.ts
+- [F065] src/lib/supabase/middleware.ts
+- [F093] src/components/layout/MainLayout.tsx
+- [F094] src/components/layout/MobileMenu.tsx
+- [F092] src/components/auth/AuthGuard.tsx
+- [F037] src/components/layout/Header.tsx
+- [F038] src/components/layout/Sidebar.tsx
+- [F039] src/components/layout/Footer.tsx
+- [F040] src/components/layout/LanguageSwitcher.tsx
+- [F012] src/app/[locale]/dashboard/page.tsx
+- [F072] src/lib/parsers/docx-parser.ts
+- [F073] src/lib/parsers/markdown-parser.ts
+- [F095] src/lib/parsers/index.ts
+- [F066] src/lib/ai/ai-provider.ts
+- [F067] src/lib/ai/openai-provider.ts
+- [F068] src/lib/ai/anthropic-provider.ts
+- [F069] src/lib/ai/google-ai-provider.ts
+- [F070] src/lib/ai/ai-factory.ts
+- [F104] src/lib/ai/index.ts
+- [F077] src/lib/encryption.ts
+- [F105] src/app/api/ai/keys/route.ts
+- [F106] src/app/api/ai/validate/route.ts
+- [F081] src/hooks/useAIKeys.ts
+- [F074] src/lib/cv/cv-extractor.ts
+- [F107] src/lib/cv/cv-extraction-prompt.ts
+- [F108] src/lib/cv/cv-validator.ts
+- [F109] src/lib/cv/index.ts
+- [F110] src/app/api/cv/extract/route.ts
+- [F024] src/app/api/prompts/route.ts
+- [F118] src/app/api/prompts/[id]/route.ts
+- [F119] src/lib/prompts/prompt-service.ts
+- [F120] src/lib/prompts/index.ts
+- [F121] src/lib/prompts/default-prompts.ts
+- [F083] src/hooks/usePrompts.ts
+- [F045] src/components/prompts/PromptList.tsx
+- [F046] src/components/prompts/PromptEditor.tsx
+- [F047] src/components/prompts/PromptSelector.tsx
+- [F048] src/components/prompts/PromptCategoryFilter.tsx
+- [F122] src/components/prompts/PromptCard.tsx
+- [F123] src/components/prompts/PromptPreview.tsx
+- [F015] src/app/[locale]/prompts/page.tsx
+- [F124] src/app/[locale]/prompts/loading.tsx
+- [F075] src/lib/generators/docx-generator.ts
+- [F076] src/lib/generators/markdown-generator.ts
+- [F142] src/lib/generators/document-formatter.ts
+- [F143] src/lib/generators/index.ts
+- [F025] src/app/api/export/docx/route.ts
+- [F026] src/app/api/export/markdown/route.ts
+- [F144] src/app/api/export/all/route.ts
+- [F145] src/lib/templates/template-service.ts
+- [F146] src/lib/templates/template-parser.ts
+- [F147] src/lib/templates/index.ts
+- [F148] src/app/api/templates/route.ts
+- [F149] src/app/api/templates/[id]/route.ts
+- [F150] src/hooks/useTemplates.ts
+- [F060] src/components/templates/TemplateUploader.tsx
+- [F061] src/components/templates/TemplateSelector.tsx
+- [F062] src/components/templates/TemplatePreview.tsx
+- [F151] src/components/templates/TemplateList.tsx
+- [F152] src/components/templates/TemplateCard.tsx
+
+## Next Block
+B14: CV Field Display and Completion Forms
+
+Confirm this matches your understanding, then I'll give you the next block.

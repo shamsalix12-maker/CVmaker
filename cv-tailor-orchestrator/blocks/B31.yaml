@@ -1,0 +1,59 @@
+id: B31
+name: "Hook & State Management (Core Backend)"
+phase: 5
+phase_name: "Core Workflow"
+
+goal: |
+  Manage the state of the entire application process with service layer and API routes.
+  Features:
+  - Service for application CRUD and workflow logic
+  - AI processing logic and prompt templates
+  - API routes for list, create, process, clarify, and finalize
+  - React hook for frontend state management
+
+dependencies: [B30]
+
+files_to_create:
+  - id: F125
+    path: "src/lib/applications/application-service.ts"
+    description: "Service for job application CRUD and workflow"
+  - id: F126
+    path: "src/lib/applications/application-processor.ts"
+    description: "AI processing logic for applications"
+  - id: F127
+    path: "src/lib/applications/application-prompts.ts"
+    description: "Prompt templates for application processing"
+  - id: F128
+    path: "src/lib/applications/index.ts"
+    description: "Export all application modules"
+  - id: F129
+    path: "src/app/api/applications/route.ts"
+    description: "API for applications list and create"
+  - id: F130
+    path: "src/app/api/applications/[id]/route.ts"
+    description: "API for single application CRUD"
+  - id: F131
+    path: "src/app/api/applications/[id]/process/route.ts"
+    description: "API to start AI processing"
+  - id: F132
+    path: "src/app/api/applications/[id]/clarify/route.ts"
+    description: "API for clarification responses"
+  - id: F133
+    path: "src/app/api/applications/[id]/finalize/route.ts"
+    description: "API to generate final documents"
+  - id: F084
+    path: "src/hooks/useApplication.ts"
+    description: "Main hook for application workflow state"
+
+checkpoint_tests:
+  - id: T01
+    description: "Create new application record via API"
+    type: "manual"
+  - id: T02
+    description: "Update application status and persist to Supabase"
+    type: "manual"
+  - id: T03
+    description: "Save and load draft/final outputs correctly"
+    type: "manual"
+
+max_retries: 3

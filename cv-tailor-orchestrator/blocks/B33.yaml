@@ -1,0 +1,62 @@
+id: B33
+name: "Template Management System"
+phase: 6
+phase_name: "Templates"
+
+goal: |
+  Complete template management system for custom document styling.
+  Features:
+  - Upload Word/Markdown templates
+  - List and preview templates
+  - Apply templates to output generation
+  - Service layer and API routes for template CRUD
+
+dependencies: [B29]
+
+files_to_create:
+  - id: F145
+    path: "src/lib/templates/template-service.ts"
+    description: "Template CRUD service"
+  - id: F146
+    path: "src/lib/templates/template-processor.ts"
+    description: "Apply templates to content"
+  - id: F147
+    path: "src/lib/templates/index.ts"
+    description: "Export template modules"
+  - id: F148
+    path: "src/app/api/templates/route.ts"
+    description: "Templates list and create API"
+  - id: F149
+    path: "src/app/api/templates/[id]/route.ts"
+    description: "Single template CRUD API"
+  - id: F150
+    path: "src/hooks/useTemplates.ts"
+    description: "React hook for templates"
+  - id: F060
+    path: "src/components/templates/TemplateUploader.tsx"
+    description: "Upload template component"
+  - id: F061
+    path: "src/components/templates/TemplateSelector.tsx"
+    description: "Select template component"
+  - id: F062
+    path: "src/components/templates/TemplatePreview.tsx"
+    description: "Preview template component"
+  - id: F151
+    path: "src/components/templates/TemplateCard.tsx"
+    description: "Template card display"
+  - id: F152
+    path: "src/components/templates/TemplateList.tsx"
+    description: "List of templates"
+
+checkpoint_tests:
+  - id: T01
+    description: "Upload .docx and .md templates"
+    type: "manual"
+  - id: T02
+    description: "Template list displays correctly by type"
+    type: "manual"
+  - id: T03
+    description: "Delete template works"
+    type: "manual"
+
+max_retries: 3

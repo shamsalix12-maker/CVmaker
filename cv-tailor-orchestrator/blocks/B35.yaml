@@ -1,0 +1,34 @@
+id: B35
+name: "Applications List & Details"
+phase: 7
+phase_name: "Dashboard & Lists"
+
+goal: |
+  Pages for viewing the history of applications and re-downloading documents.
+  Features:
+  - List of all applications with status
+  - Detailed view of a single application
+  - Re-downloading documents from detail page
+
+dependencies: [B34]
+
+files_to_modify:
+  - id: F017
+    path: "src/app/[locale]/applications/page.tsx"
+    description: "Applications list page"
+  - id: F018
+    path: "src/app/[locale]/applications/[id]/page.tsx"
+    description: "Application details page"
+
+checkpoint_tests:
+  - id: T01
+    description: "All applications are listed with correct status"
+    type: "manual"
+  - id: T02
+    description: "Clicking an application opens detail page"
+    type: "manual"
+  - id: T03
+    description: "Detail page allows re-downloading files"
+    type: "manual"
+
+max_retries: 3

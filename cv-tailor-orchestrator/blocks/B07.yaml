@@ -1,0 +1,188 @@
+id: B07
+name: "Development Auth (Temporary Login)"
+phase: 0
+phase_name: "Foundation"
+
+goal: |
+  Create a simple temporary authentication system for development purposes.
+  This will be replaced with Google OAuth in the final phase.
+  Users can "login" by entering their email and name - no password required.
+  This allows development to proceed without OAuth complexity.
+
+dependencies: [B01, B02, B03, B04, B05, B06]
+
+files_to_create:
+  - id: F089
+    path: "src/lib/auth/dev-auth.ts"
+    description: "Development authentication helper functions"
+
+  - id: F090
+    path: "src/context/AuthContext.tsx"
+    description: "React context for authentication state"
+
+  - id: F091
+    path: "src/components/auth/DevLoginForm.tsx"
+    description: "Simple login form for development"
+
+  - id: F092
+    path: "src/components/auth/AuthGuard.tsx"
+    description: "Component to protect routes that require authentication"
+
+files_to_modify:
+  - id: F011
+    path: "src/app/[locale]/page.tsx"
+    description: "Landing page with login form"
+
+  - id: F010
+    path: "src/app/[locale]/layout.tsx"
+    description: "Add AuthContext provider"
+
+  - id: F087
+    path: "src/i18n/en.json"
+    description: "Add auth-related translations"
+
+  - id: F088
+    path: "src/i18n/fa.json"
+    description: "Add auth-related translations"
+
+files_available:
+  - id: F001
+    path: "package.json"
+    from_block: B01
+  - id: F063
+    path: "src/lib/supabase/client.ts"
+    from_block: B06
+  - id: F064
+    path: "src/lib/supabase/server.ts"
+    from_block: B06
+  - id: F079
+    path: "src/lib/types.ts"
+    from_block: B03
+  - id: F080
+    path: "src/lib/utils.ts"
+    from_block: B04
+  - id: F086
+    path: "src/i18n/config.ts"
+    from_block: B05
+  - id: F087
+    path: "src/i18n/en.json"
+    from_block: B05
+  - id: F088
+    path: "src/i18n/fa.json"
+    from_block: B05
+
+commands: []
+
+instructions: |
+  1. Create dev-auth.ts with these functions:
+     - devLogin(email: string, name: string): Creates or retrieves user from Supabase
+     - devLogout(): Clears the session
+     - getCurrentUser(): Returns current user or null
+     - Use localStorage to persist the user ID during development
+  
+  2. Create AuthContext.tsx:
+     - Provide user state, loading state, login/logout functions
+     - Check for existing session on mount
+     - Export useAuth hook
+  
+  3. Create DevLoginForm.tsx:
+     - Simple form with email and name fields
+     - Submit button
+     - Loading state during login
+     - Error message display
+     - Use i18n for all text
+     - Support RTL for Farsi
+  
+  4. Create AuthGuard.tsx:
+     - Wrap protected pages
+     - If not authenticated, redirect to login page
+     - Show loading spinner while checking auth
+  
+  5. Update [locale]/page.tsx:
+     - Show DevLoginForm if not authenticated
+     - Redirect to /dashboard if authenticated
+  
+  6. Update [locale]/layout.tsx:
+     - Wrap children with AuthProvider
+  
+  7. Add to en.json and fa.json under "auth" key:
+     - login_title, email_label, name_label, login_button, logging_in, 
+       login_error, welcome_back, logout, email_placeholder, name_placeholder
+
+  IMPORTANT: This is temporary for development. Keep it simple.
+  Do NOT implement password, OAuth, or complex session management.
+
+checkpoint_tests:
+  - id: T01
+    description: "dev-auth.ts file exists"
+    type: "files_exist"
+    files:
+      - "src/lib/auth/dev-auth.ts"
+
+  - id: T02
+    description: "AuthContext.tsx file exists"
+    type: "files_exist"
+    files:
+      - "src/context/AuthContext.tsx"
+
+  - id: T03
+    description: "DevLoginForm.tsx file exists"
+    type: "files_exist"
+    files:
+      - "src/components/auth/DevLoginForm.tsx"
+
+  - id: T04
+    description: "AuthGuard.tsx file exists"
+    type: "files_exist"
+    files:
+      - "src/components/auth/AuthGuard.tsx"
+
+  - id: T05
+    description: "TypeScript compiles without errors"
+    type: "command"
+    command: "npx tsc --noEmit"
+    expected_exit_code: 0
+
+  - id: T06
+    description: "AuthContext exports useAuth hook"
+    type: "grep"
+    file: "src/context/AuthContext.tsx"
+    patterns:
+      - "export function useAuth"
+      - "AuthProvider"
+      - "createContext"
+
+  - id: T07
+    description: "DevLoginForm uses i18n"
+    type: "grep"
+    file: "src/components/auth/DevLoginForm.tsx"
+    patterns:
+      - "useTranslations"
+      - "t("
+
+  - id: T08
+    description: "English translations have auth keys"
+    type: "grep"
+    file: "src/i18n/en.json"
+    patterns:
+      - "login_title"
+      - "email_label"
+      - "login_button"
+
+  - id: T09
+    description: "Farsi translations have auth keys"
+    type: "grep"
+    file: "src/i18n/fa.json"
+    patterns:
+      - "login_title"
+      - "email_label"
+      - "login_button"
+
+  - id: T10
+    description: "Layout includes AuthProvider"
+    type: "grep"
+    file: "src/app/[locale]/layout.tsx"
+    patterns:
+      - "AuthProvider"
+
+max_retries: 3

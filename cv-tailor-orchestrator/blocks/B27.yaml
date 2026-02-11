@@ -1,0 +1,35 @@
+id: B27
+name: "Multi-AI Draft Panel"
+phase: 5
+phase_name: "Core Workflow"
+
+goal: |
+  Create a panel to manage multiple AI drafts.
+  Features:
+  - Select multiple AI models for drafting
+  - Display each draft outcome separately
+  - Select the final AI model for consolidation
+  - Combine drafts and send to the final model
+
+dependencies: [B20, B26]
+
+files_to_create:
+  - id: F053
+    path: "src/components/ai/AIMultiDraftPanel.tsx"
+    description: "Component for managing multiple AI drafts"
+
+checkpoint_tests:
+  - id: T01
+    description: "Select multiple AIs for Draft"
+    type: "manual"
+  - id: T02
+    description: "Each Draft is displayed separately"
+    type: "manual"
+  - id: T03
+    description: "Select Final AI"
+    type: "manual"
+  - id: T04
+    description: "Combine drafts and send to Final"
+    type: "manual"
+
+max_retries: 3

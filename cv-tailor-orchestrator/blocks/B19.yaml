@@ -1,0 +1,749 @@
+id: B19
+name: "Export System (Word & Markdown)"
+phase: 4
+phase_name: "Export & Templates"
+
+goal: |
+  Create the export system that generates downloadable Word (.docx) and Markdown (.md) files
+  from the generated documents. This includes proper formatting, styling, and template support.
+
+dependencies: [B01, B02, B03, B04, B05, B06]
+
+files_to_create:
+  - id: F075
+    path: "src/lib/generators/docx-generator.ts"
+    description: "Generate formatted Word documents"
+
+  - id: F076
+    path: "src/lib/generators/markdown-generator.ts"
+    description: "Generate Markdown files"
+
+  - id: F142
+    path: "src/lib/generators/document-formatter.ts"
+    description: "Common formatting utilities"
+
+  - id: F143
+    path: "src/lib/generators/index.ts"
+    description: "Export all generators"
+
+  - id: F025
+    path: "src/app/api/export/docx/route.ts"
+    description: "API route for Word export"
+
+  - id: F026
+    path: "src/app/api/export/markdown/route.ts"
+    description: "API route for Markdown export"
+
+  - id: F144
+    path: "src/app/api/export/all/route.ts"
+    description: "API route to export all documents as ZIP"
+
+files_to_modify: []
+
+files_available:
+  - id: F079
+    path: "src/lib/types.ts"
+    from_block: B03
+  - id: F078
+    path: "src/lib/constants.ts"
+    from_block: B04
+  - id: F080
+    path: "src/lib/utils.ts"
+    from_block: B04
+
+commands: []
+
+instructions: |
+  1. Create document-formatter.ts:
+     ```typescript
+     // ============================================
+     // [F142] src/lib/generators/document-formatter.ts
+     // ============================================
+     
+     export interface DocumentSection {
+       type: 'heading' | 'paragraph' | 'list' | 'divider';
+       level?: 1 | 2 | 3;  // For headings
+       content?: string;
+       items?: string[];   // For lists
+     }
+     
+     export function parseContentToSections(content: string): DocumentSection[] {
+       const sections: DocumentSection[] = [];
+       const lines = content.split('\n');
+       let currentList: string[] = [];
+       
+       for (let i = 0; i < lines.length; i++) {
+         const line = lines[i].trim();
+         
+         // Skip empty lines
+         if (!line) {
+           // Flush any pending list
+           if (currentList.length > 0) {
+             sections.push({ type: 'list', items: [...currentList] });
+             currentList = [];
+           }
+           continue;
+         }
+         
+         // Check for headings (Markdown style)
+         if (line.startsWith('### ')) {
+           if (currentList.length > 0) {
+             sections.push({ type: 'list', items: [...currentList] });
+             currentList = [];
+           }
+           sections.push({ type: 'heading', level: 3, content: line.slice(4) });
+         } else if (line.startsWith('## ')) {
+           if (currentList.length > 0) {
+             sections.push({ type: 'list', items: [...currentList] });
+             currentList = [];
+           }
+           sections.push({ type: 'heading', level: 2, content: line.slice(3) });
+         } else if (line.startsWith('# ')) {
+           if (currentList.length > 0) {
+             sections.push({ type: 'list', items: [...currentList] });
+             currentList = [];
+           }
+           sections.push({ type: 'heading', level: 1, content: line.slice(2) });
+         }
+         // Check for list items
+         else if (line.startsWith('- ') || line.startsWith('• ') || line.startsWith('* ')) {
+           currentList.push(line.slice(2));
+         }
+         // Check for numbered list
+         else if (/^\d+\.\s/.test(line)) {
+           currentList.push(line.replace(/^\d+\.\s/, ''));
+         }
+         // Check for divider
+         else if (line === '---' || line === '***' || line === '___') {
+           if (currentList.length > 0) {
+             sections.push({ type: 'list', items: [...currentList] });
+             currentList = [];
+           }
+           sections.push({ type: 'divider' });
+         }
+         // Regular paragraph
+         else {
+           if (currentList.length > 0) {
+             sections.push({ type: 'list', items: [...currentList] });
+             currentList = [];
+           }
+           sections.push({ type: 'paragraph', content: line });
+         }
+       }
+       
+       // Flush any remaining list
+       if (currentList.length > 0) {
+         sections.push({ type: 'list', items: currentList });
+       }
+       
+       return sections;
+     }
+     
+     export function cleanText(text: string): string {
+       return text
+         .replace(/\*\*(.*?)\*\*/g, '$1')  // Remove bold markdown
+         .replace(/\*(.*?)\*/g, '$1')       // Remove italic markdown
+         .replace(/`(.*?)`/g, '$1')         // Remove code markdown
+         .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove links, keep text
+         .trim();
+     }
+     
+     export function formatDate(date: Date, locale: string = 'en'): string {
+       return date.toLocaleDateString(locale === 'fa' ? 'fa-IR' : 'en-US', {
+         year: 'numeric',
+         month: 'long',
+         day: 'numeric'
+       });
+     }
+     ```
+
+  2. Create docx-generator.ts:
+     ```typescript
+     // ============================================
+     // [F075] src/lib/generators/docx-generator.ts
+     // ============================================
+     
+     import {
+       Document,
+       Paragraph,
+       TextRun,
+       HeadingLevel,
+       AlignmentType,
+       BorderStyle,
+       Packer,
+       PageBreak,
+       Table,
+       TableCell,
+       TableRow,
+       WidthType,
+     } from 'docx';
+     import { parseContentToSections, DocumentSection, cleanText } from './document-formatter';
+     
+     export interface DocxOptions {
+       title?: string;
+       author?: string;
+       type: 'cv' | 'cover_letter' | 'email';
+       locale?: 'en' | 'fa';
+     }
+     
+     export async function generateDocx(
+       content: string,
+       options: DocxOptions
+     ): Promise<Buffer> {
+       const sections = parseContentToSections(content);
+       const paragraphs = sectionsToDocxParagraphs(sections, options);
+       
+       const doc = new Document({
+         creator: options.author || 'CV Tailor',
+         title: options.title || 'Document',
+         description: `Generated ${options.type} document`,
+         styles: {
+           paragraphStyles: [
+             {
+               id: 'Normal',
+               name: 'Normal',
+               basedOn: 'Normal',
+               next: 'Normal',
+               run: {
+                 font: 'Arial',
+                 size: 24,  // 12pt
+               },
+               paragraph: {
+                 spacing: {
+                   after: 200,
+                   line: 276,  // 1.15 line spacing
+                 },
+               },
+             },
+             {
+               id: 'Heading1',
+               name: 'Heading 1',
+               basedOn: 'Normal',
+               next: 'Normal',
+               run: {
+                 font: 'Arial',
+                 size: 36,  // 18pt
+                 bold: true,
+                 color: '2E74B5',
+               },
+               paragraph: {
+                 spacing: {
+                   before: 400,
+                   after: 200,
+                 },
+               },
+             },
+             {
+               id: 'Heading2',
+               name: 'Heading 2',
+               basedOn: 'Normal',
+               next: 'Normal',
+               run: {
+                 font: 'Arial',
+                 size: 28,  // 14pt
+                 bold: true,
+                 color: '404040',
+               },
+               paragraph: {
+                 spacing: {
+                   before: 300,
+                   after: 150,
+                 },
+               },
+             },
+           ],
+         },
+         sections: [
+           {
+             properties: {
+               page: {
+                 margin: {
+                   top: 1440,    // 1 inch
+                   right: 1440,
+                   bottom: 1440,
+                   left: 1440,
+                 },
+               },
+             },
+             children: paragraphs,
+           },
+         ],
+       });
+       
+       const buffer = await Packer.toBuffer(doc);
+       return Buffer.from(buffer);
+     }
+     
+     function sectionsToDocxParagraphs(
+       sections: DocumentSection[],
+       options: DocxOptions
+     ): Paragraph[] {
+       const paragraphs: Paragraph[] = [];
+       const isRTL = options.locale === 'fa';
+       
+       for (const section of sections) {
+         switch (section.type) {
+           case 'heading':
+             paragraphs.push(
+               new Paragraph({
+                 text: cleanText(section.content || ''),
+                 heading: section.level === 1 
+                   ? HeadingLevel.HEADING_1 
+                   : section.level === 2 
+                     ? HeadingLevel.HEADING_2 
+                     : HeadingLevel.HEADING_3,
+                 alignment: isRTL ? AlignmentType.RIGHT : AlignmentType.LEFT,
+                 bidirectional: isRTL,
+               })
+             );
+             break;
+             
+           case 'paragraph':
+             paragraphs.push(
+               new Paragraph({
+                 children: [
+                   new TextRun({
+                     text: cleanText(section.content || ''),
+                     font: 'Arial',
+                     size: 24,
+                   }),
+                 ],
+                 alignment: isRTL ? AlignmentType.RIGHT : AlignmentType.LEFT,
+                 bidirectional: isRTL,
+               })
+             );
+             break;
+             
+           case 'list':
+             for (const item of section.items || []) {
+               paragraphs.push(
+                 new Paragraph({
+                   children: [
+                     new TextRun({
+                       text: `• ${cleanText(item)}`,
+                       font: 'Arial',
+                       size: 24,
+                     }),
+                   ],
+                   indent: {
+                     left: 720,  // 0.5 inch
+                   },
+                   alignment: isRTL ? AlignmentType.RIGHT : AlignmentType.LEFT,
+                   bidirectional: isRTL,
+                 })
+               );
+             }
+             break;
+             
+           case 'divider':
+             paragraphs.push(
+               new Paragraph({
+                 children: [],
+                 border: {
+                   bottom: {
+                     color: 'CCCCCC',
+                     space: 1,
+                     style: BorderStyle.SINGLE,
+                     size: 6,
+                   },
+                 },
+                 spacing: {
+                   before: 200,
+                   after: 200,
+                 },
+               })
+             );
+             break;
+         }
+       }
+       
+       return paragraphs;
+     }
+     
+     export async function generateCVDocx(
+       content: string,
+       name: string,
+       locale: 'en' | 'fa' = 'en'
+     ): Promise<Buffer> {
+       return generateDocx(content, {
+         title: `${name} - CV`,
+         author: name,
+         type: 'cv',
+         locale,
+       });
+     }
+     
+     export async function generateCoverLetterDocx(
+       content: string,
+       name: string,
+       locale: 'en' | 'fa' = 'en'
+     ): Promise<Buffer> {
+       return generateDocx(content, {
+         title: `${name} - Cover Letter`,
+         author: name,
+         type: 'cover_letter',
+         locale,
+       });
+     }
+     
+     export async function generateEmailDocx(
+       content: string,
+       name: string,
+       locale: 'en' | 'fa' = 'en'
+     ): Promise<Buffer> {
+       return generateDocx(content, {
+         title: `${name} - Application Email`,
+         author: name,
+         type: 'email',
+         locale,
+       });
+     }
+     ```
+
+  3. Create markdown-generator.ts:
+     ```typescript
+     // ============================================
+     // [F076] src/lib/generators/markdown-generator.ts
+     // ============================================
+     
+     export interface MarkdownOptions {
+       title?: string;
+       includeMetadata?: boolean;
+       type: 'cv' | 'cover_letter' | 'email';
+     }
+     
+     export function generateMarkdown(
+       content: string,
+       options: MarkdownOptions
+     ): string {
+       let markdown = '';
+       
+       // Add YAML frontmatter if requested
+       if (options.includeMetadata) {
+         markdown += '---\n';
+         markdown += `title: "${options.title || 'Document'}"\n`;
+         markdown += `type: ${options.type}\n`;
+         markdown += `generated: ${new Date().toISOString()}\n`;
+         markdown += '---\n\n';
+       }
+       
+       // Add title if provided
+       if (options.title) {
+         markdown += `# ${options.title}\n\n`;
+       }
+       
+       // Add content (already in markdown format or plain text)
+       markdown += content;
+       
+       // Ensure proper line endings
+       markdown = markdown.replace(/\r\n/g, '\n');
+       
+       return markdown;
+     }
+     
+     export function generateCVMarkdown(
+       content: string,
+       name: string
+     ): string {
+       return generateMarkdown(content, {
+         title: `${name} - CV`,
+         type: 'cv',
+         includeMetadata: true,
+       });
+     }
+     
+     export function generateCoverLetterMarkdown(
+       content: string,
+       name: string
+     ): string {
+       return generateMarkdown(content, {
+         title: `${name} - Cover Letter`,
+         type: 'cover_letter',
+         includeMetadata: true,
+       });
+     }
+     
+     export function generateEmailMarkdown(
+       content: string,
+       name: string
+     ): string {
+       return generateMarkdown(content, {
+         title: `${name} - Application Email`,
+         type: 'email',
+         includeMetadata: true,
+       });
+     }
+     
+     // Convert HTML to Markdown (basic)
+     export function htmlToMarkdown(html: string): string {
+       let md = html;
+       
+       // Headers
+       md = md.replace(/<h1[^>]*>(.*?)<\/h1>/gi, '# $1\n\n');
+       md = md.replace(/<h2[^>]*>(.*?)<\/h2>/gi, '## $1\n\n');
+       md = md.replace(/<h3[^>]*>(.*?)<\/h3>/gi, '### $1\n\n');
+       
+       // Bold and italic
+       md = md.replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**');
+       md = md.replace(/<b[^>]*>(.*?)<\/b>/gi, '**$1**');
+       md = md.replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*');
+       md = md.replace(/<i[^>]*>(.*?)<\/i>/gi, '*$1*');
+       
+       // Lists
+       md = md.replace(/<ul[^>]*>/gi, '');
+       md = md.replace(/<\/ul>/gi, '\n');
+       md = md.replace(/<ol[^>]*>/gi, '');
+       md = md.replace(/<\/ol>/gi, '\n');
+       md = md.replace(/<li[^>]*>(.*?)<\/li>/gi, '- $1\n');
+       
+       // Paragraphs and line breaks
+       md = md.replace(/<p[^>]*>(.*?)<\/p>/gi, '$1\n\n');
+       md = md.replace(/<br\s*\/?>/gi, '\n');
+       
+       // Links
+       md = md.replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, '[$2]($1)');
+       
+       // Remove remaining HTML tags
+       md = md.replace(/<[^>]+>/g, '');
+       
+       // Decode HTML entities
+       md = md.replace(/&nbsp;/g, ' ');
+       md = md.replace(/&amp;/g, '&');
+       md = md.replace(/&lt;/g, '<');
+       md = md.replace(/&gt;/g, '>');
+       md = md.replace(/&quot;/g, '"');
+       
+       // Clean up extra whitespace
+       md = md.replace(/\n{3,}/g, '\n\n');
+       md = md.trim();
+       
+       return md;
+     }
+     ```
+
+  4. Create index.ts:
+     ```typescript
+     // ============================================
+     // [F143] src/lib/generators/index.ts
+     // ============================================
+     
+     export * from './docx-generator';
+     export * from './markdown-generator';
+     export * from './document-formatter';
+     ```
+
+  5. Create API route for Word export:
+     ```typescript
+     // ============================================
+     // [F025] src/app/api/export/docx/route.ts
+     // ============================================
+     
+     import { NextRequest, NextResponse } from 'next/server';
+     import { generateDocx } from '@/lib/generators';
+     
+     export async function POST(request: NextRequest) {
+       try {
+         const { content, filename, type, locale } = await request.json();
+         
+         if (!content) {
+           return NextResponse.json(
+             { error: 'Content is required' },
+             { status: 400 }
+           );
+         }
+         
+         const buffer = await generateDocx(content, {
+           title: filename || 'Document',
+           type: type || 'cv',
+           locale: locale || 'en',
+         });
+         
+         return new NextResponse(buffer, {
+           headers: {
+             'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+             'Content-Disposition': `attachment; filename="${filename || 'document'}.docx"`,
+           },
+         });
+         
+       } catch (error: any) {
+         console.error('DOCX export error:', error);
+         return NextResponse.json(
+           { error: error.message || 'Export failed' },
+           { status: 500 }
+         );
+       }
+     }
+     ```
+
+  6. Create API route for Markdown export:
+     ```typescript
+     // ============================================
+     // [F026] src/app/api/export/markdown/route.ts
+     // ============================================
+     
+     import { NextRequest, NextResponse } from 'next/server';
+     import { generateMarkdown, htmlToMarkdown } from '@/lib/generators';
+     
+     export async function POST(request: NextRequest) {
+       try {
+         const { content, filename, type, isHtml } = await request.json();
+         
+         if (!content) {
+           return NextResponse.json(
+             { error: 'Content is required' },
+             { status: 400 }
+           );
+         }
+         
+         // Convert HTML to Markdown if needed
+         const markdownContent = isHtml ? htmlToMarkdown(content) : content;
+         
+         const markdown = generateMarkdown(markdownContent, {
+           title: filename,
+           type: type || 'cv',
+           includeMetadata: true,
+         });
+         
+         return new NextResponse(markdown, {
+           headers: {
+             'Content-Type': 'text/markdown; charset=utf-8',
+             'Content-Disposition': `attachment; filename="${filename || 'document'}.md"`,
+           },
+         });
+         
+       } catch (error: any) {
+         console.error('Markdown export error:', error);
+         return NextResponse.json(
+           { error: error.message || 'Export failed' },
+           { status: 500 }
+         );
+       }
+     }
+     ```
+
+  7. Create API route for ZIP export (all documents):
+     ```typescript
+     // ============================================
+     // [F144] src/app/api/export/all/route.ts
+     // ============================================
+     
+     import { NextRequest, NextResponse } from 'next/server';
+     import { generateDocx } from '@/lib/generators';
+     import JSZip from 'jszip';
+     
+     export async function POST(request: NextRequest) {
+       try {
+         const { documents, name, format, locale } = await request.json();
+         
+         if (!documents || !documents.tailored_cv || !documents.cover_letter || !documents.application_email) {
+           return NextResponse.json(
+             { error: 'All documents are required' },
+             { status: 400 }
+           );
+         }
+         
+         const zip = new JSZip();
+         const baseName = name || 'application';
+         
+         if (format === 'docx' || format === 'both') {
+           // Generate Word documents
+           const cvBuffer = await generateDocx(documents.tailored_cv, {
+             title: `${baseName} - CV`,
+             type: 'cv',
+             locale,
+           });
+           zip.file(`${baseName}-cv.docx`, cvBuffer);
+           
+           const coverBuffer = await generateDocx(documents.cover_letter, {
+             title: `${baseName} - Cover Letter`,
+             type: 'cover_letter',
+             locale,
+           });
+           zip.file(`${baseName}-cover-letter.docx`, coverBuffer);
+           
+           const emailBuffer = await generateDocx(documents.application_email, {
+             title: `${baseName} - Application Email`,
+             type: 'email',
+             locale,
+           });
+           zip.file(`${baseName}-email.docx`, emailBuffer);
+         }
+         
+         if (format === 'md' || format === 'both') {
+           // Add Markdown files
+           zip.file(`${baseName}-cv.md`, documents.tailored_cv);
+           zip.file(`${baseName}-cover-letter.md`, documents.cover_letter);
+           zip.file(`${baseName}-email.md`, documents.application_email);
+         }
+         
+         const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
+         
+         return new NextResponse(zipBuffer, {
+           headers: {
+             'Content-Type': 'application/zip',
+             'Content-Disposition': `attachment; filename="${baseName}-documents.zip"`,
+           },
+         });
+         
+       } catch (error: any) {
+         console.error('ZIP export error:', error);
+         return NextResponse.json(
+           { error: error.message || 'Export failed' },
+           { status: 500 }
+         );
+       }
+     }
+     ```
+
+checkpoint_tests:
+  - id: T01
+    description: "All generator files exist"
+    type: "files_exist"
+    files:
+      - "src/lib/generators/docx-generator.ts"
+      - "src/lib/generators/markdown-generator.ts"
+      - "src/lib/generators/document-formatter.ts"
+      - "src/lib/generators/index.ts"
+
+  - id: T02
+    description: "All export API routes exist"
+    type: "files_exist"
+    files:
+      - "src/app/api/export/docx/route.ts"
+      - "src/app/api/export/markdown/route.ts"
+      - "src/app/api/export/all/route.ts"
+
+  - id: T03
+    description: "TypeScript compiles without errors"
+    type: "command"
+    command: "npx tsc --noEmit"
+    expected_exit_code: 0
+
+  - id: T04
+    description: "docx-generator exports generate functions"
+    type: "grep"
+    file: "src/lib/generators/docx-generator.ts"
+    patterns:
+      - "export async function generateDocx"
+      - "generateCVDocx"
+      - "generateCoverLetterDocx"
+      - "Document"
+      - "Packer"
+
+  - id: T05
+    description: "markdown-generator exports functions"
+    type: "grep"
+    file: "src/lib/generators/markdown-generator.ts"
+    patterns:
+      - "export function generateMarkdown"
+      - "htmlToMarkdown"
+
+  - id: T06
+    description: "Export routes return correct content types"
+    type: "grep"
+    file: "src/app/api/export/docx/route.ts"
+    patterns:
+      - "application/vnd.openxmlformats"
+      - "Content-Disposition"
+
+max_retries: 3

@@ -1,0 +1,3 @@
+node_modules\n.env.local\n.next\n.agent\nagent.md
+.vercel
+.env*.local

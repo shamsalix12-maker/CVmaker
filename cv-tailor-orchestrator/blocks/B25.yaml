@@ -1,0 +1,753 @@
+id: B25
+name: "DOCX File Generator"
+phase: 4
+phase_name: "Export & Templates"
+
+goal: |
+  Create a system to generate formatted Word (.docx) files from document content.
+  This includes API routes for exporting CV, cover letter, and email as Word files.
+  Uses the 'docx' library to create professional, formatted documents.
+
+dependencies: [B01, B02, B03, B04, B05, B06]
+
+files_to_create:
+  - id: F075
+    path: "src/lib/generators/docx-generator.ts"
+    description: "Core DOCX generation logic"
+
+  - id: F142
+    path: "src/lib/generators/docx-styles.ts"
+    description: "Predefined styles for DOCX documents"
+
+  - id: F143
+    path: "src/lib/generators/docx-templates.ts"
+    description: "Document templates for CV, cover letter, email"
+
+  - id: F025
+    path: "src/app/api/export/docx/route.ts"
+    description: "API route for DOCX export"
+
+  - id: F144
+    path: "src/lib/generators/index.ts"
+    description: "Export all generator modules"
+
+files_to_modify: []
+
+files_available:
+  - id: F079
+    path: "src/lib/types.ts"
+    from_block: B03
+  - id: F078
+    path: "src/lib/constants.ts"
+    from_block: B04
+  - id: F080
+    path: "src/lib/utils.ts"
+    from_block: B04
+
+commands: []
+
+instructions: |
+  1. Create docx-styles.ts:
+     ```typescript
+     // ============================================
+     // [F142] src/lib/generators/docx-styles.ts
+     // ============================================
+     
+     import {
+       HeadingLevel,
+       AlignmentType,
+       TabStopPosition,
+       TabStopType,
+       convertInchesToTwip,
+       BorderStyle,
+     } from 'docx';
+     
+     // Color palette
+     export const COLORS = {
+       primary: '2563EB',      // Blue
+       secondary: '64748B',    // Slate
+       text: '1E293B',         // Dark slate
+       lightText: '64748B',    // Light slate
+       accent: '0EA5E9',       // Sky blue
+       border: 'E2E8F0',       // Light border
+       background: 'F8FAFC',   // Light background
+     };
+     
+     // Font sizes in half-points (1 point = 2 half-points)
+     export const FONT_SIZES = {
+       title: 48,          // 24pt
+       heading1: 36,       // 18pt
+       heading2: 28,       // 14pt
+       heading3: 24,       // 12pt
+       body: 22,           // 11pt
+       small: 20,          // 10pt
+       caption: 18,        // 9pt
+     };
+     
+     // Spacing in twips (1 inch = 1440 twips)
+     export const SPACING = {
+       paragraph: 240,     // 12pt after paragraph
+       section: 480,       // 24pt after section
+       line: 276,          // 1.15 line spacing
+     };
+     
+     // Common text run styles
+     export const TEXT_STYLES = {
+       title: {
+         bold: true,
+         size: FONT_SIZES.title,
+         color: COLORS.text,
+         font: 'Calibri',
+       },
+       heading1: {
+         bold: true,
+         size: FONT_SIZES.heading1,
+         color: COLORS.primary,
+         font: 'Calibri',
+       },
+       heading2: {
+         bold: true,
+         size: FONT_SIZES.heading2,
+         color: COLORS.text,
+         font: 'Calibri',
+       },
+       heading3: {
+         bold: true,
+         size: FONT_SIZES.heading3,
+         color: COLORS.text,
+         font: 'Calibri',
+       },
+       body: {
+         size: FONT_SIZES.body,
+         color: COLORS.text,
+         font: 'Calibri',
+       },
+       bodyBold: {
+         bold: true,
+         size: FONT_SIZES.body,
+         color: COLORS.text,
+         font: 'Calibri',
+       },
+       subtle: {
+         size: FONT_SIZES.small,
+         color: COLORS.lightText,
+         font: 'Calibri',
+       },
+       link: {
+         size: FONT_SIZES.body,
+         color: COLORS.primary,
+         font: 'Calibri',
+         underline: {},
+       },
+     };
+     
+     // Paragraph styles
+     export const PARAGRAPH_STYLES = {
+       title: {
+         alignment: AlignmentType.CENTER,
+         spacing: { after: SPACING.paragraph },
+       },
+       heading: {
+         spacing: { before: SPACING.section, after: SPACING.paragraph },
+       },
+       body: {
+         spacing: { after: SPACING.paragraph, line: SPACING.line },
+       },
+       bullet: {
+         spacing: { after: 120, line: SPACING.line },
+       },
+       contact: {
+         alignment: AlignmentType.CENTER,
+         spacing: { after: 60 },
+       },
+     };
+     
+     // Page margins
+     export const PAGE_MARGINS = {
+       top: convertInchesToTwip(0.75),
+       right: convertInchesToTwip(0.75),
+       bottom: convertInchesToTwip(0.75),
+       left: convertInchesToTwip(0.75),
+     };
+     
+     // Section properties
+     export const SECTION_PROPERTIES = {
+       page: {
+         margin: PAGE_MARGINS,
+       },
+     };
+     ```
+
+  2. Create docx-templates.ts:
+     ```typescript
+     // ============================================
+     // [F143] src/lib/generators/docx-templates.ts
+     // ============================================
+     
+     import {
+       Document,
+       Paragraph,
+       TextRun,
+       HeadingLevel,
+       AlignmentType,
+       BorderStyle,
+       Table,
+       TableRow,
+       TableCell,
+       WidthType,
+       Header,
+       Footer,
+       PageNumber,
+       NumberFormat,
+     } from 'docx';
+     import { TEXT_STYLES, PARAGRAPH_STYLES, SECTION_PROPERTIES, COLORS, SPACING } from './docx-styles';
+     
+     // Helper to create a styled text run
+     export function createTextRun(
+       text: string, 
+       style: keyof typeof TEXT_STYLES = 'body'
+     ): TextRun {
+       return new TextRun({
+         text,
+         ...TEXT_STYLES[style],
+       });
+     }
+     
+     // Helper to create a paragraph with runs
+     export function createParagraph(
+       runs: TextRun | TextRun[],
+       options: {
+         heading?: HeadingLevel;
+         alignment?: AlignmentType;
+         spacing?: { before?: number; after?: number };
+         bullet?: { level: number };
+       } = {}
+     ): Paragraph {
+       const runsArray = Array.isArray(runs) ? runs : [runs];
+       
+       return new Paragraph({
+         children: runsArray,
+         heading: options.heading,
+         alignment: options.alignment,
+         spacing: options.spacing || PARAGRAPH_STYLES.body.spacing,
+         bullet: options.bullet,
+       });
+     }
+     
+     // Create section header with line
+     export function createSectionHeader(title: string): Paragraph[] {
+       return [
+         new Paragraph({
+           children: [createTextRun(title, 'heading1')],
+           spacing: { before: SPACING.section, after: 120 },
+           border: {
+             bottom: {
+               color: COLORS.primary,
+               space: 4,
+               size: 12,
+               style: BorderStyle.SINGLE,
+             },
+           },
+         }),
+       ];
+     }
+     
+     // Create contact info line
+     export function createContactLine(items: string[]): Paragraph {
+       const runs: TextRun[] = [];
+       
+       items.forEach((item, index) => {
+         if (index > 0) {
+           runs.push(new TextRun({
+             text: '  •  ',
+             ...TEXT_STYLES.subtle,
+           }));
+         }
+         runs.push(new TextRun({
+           text: item,
+           ...TEXT_STYLES.subtle,
+         }));
+       });
+       
+       return new Paragraph({
+         children: runs,
+         alignment: AlignmentType.CENTER,
+         spacing: { after: 60 },
+       });
+     }
+     
+     // Create experience/education entry
+     export function createExperienceEntry(
+       title: string,
+       subtitle: string,
+       dateRange: string,
+       description?: string,
+       bullets?: string[]
+     ): Paragraph[] {
+       const paragraphs: Paragraph[] = [];
+       
+       // Title and date on same line
+       paragraphs.push(new Paragraph({
+         children: [
+           createTextRun(title, 'bodyBold'),
+           new TextRun({ text: '\t' }),
+           createTextRun(dateRange, 'subtle'),
+         ],
+         tabStops: [
+           {
+             type: 'right' as any,
+             position: 9360, // Right align at 6.5 inches
+           },
+         ],
+         spacing: { after: 60 },
+       }));
+       
+       // Subtitle (company/institution)
+       paragraphs.push(new Paragraph({
+         children: [createTextRun(subtitle, 'subtle')],
+         spacing: { after: 120 },
+       }));
+       
+       // Description
+       if (description) {
+         paragraphs.push(new Paragraph({
+           children: [createTextRun(description, 'body')],
+           spacing: { after: 120 },
+         }));
+       }
+       
+       // Bullet points
+       if (bullets && bullets.length > 0) {
+         bullets.forEach(bullet => {
+           paragraphs.push(new Paragraph({
+             children: [createTextRun(bullet, 'body')],
+             bullet: { level: 0 },
+             spacing: { after: 60 },
+           }));
+         });
+       }
+       
+       return paragraphs;
+     }
+     
+     // Create skills section
+     export function createSkillsSection(skills: string[]): Paragraph[] {
+       const skillText = skills.join('  •  ');
+       
+       return [
+         ...createSectionHeader('Skills'),
+         new Paragraph({
+           children: [createTextRun(skillText, 'body')],
+           spacing: { after: SPACING.paragraph },
+         }),
+       ];
+     }
+     
+     // Create footer with page numbers
+     export function createFooter(): Footer {
+       return new Footer({
+         children: [
+           new Paragraph({
+             alignment: AlignmentType.CENTER,
+             children: [
+               new TextRun({
+                 children: [PageNumber.CURRENT],
+                 ...TEXT_STYLES.caption,
+               }),
+               new TextRun({
+                 text: ' / ',
+                 ...TEXT_STYLES.caption,
+               }),
+               new TextRun({
+                 children: [PageNumber.TOTAL_PAGES],
+                 ...TEXT_STYLES.caption,
+               }),
+             ],
+           }),
+         ],
+       });
+     }
+     ```
+
+  3. Create docx-generator.ts:
+     ```typescript
+     // ============================================
+     // [F075] src/lib/generators/docx-generator.ts
+     // ============================================
+     
+     import {
+       Document,
+       Paragraph,
+       TextRun,
+       Packer,
+       AlignmentType,
+       HeadingLevel,
+       Header,
+       Footer,
+       PageNumber,
+     } from 'docx';
+     import {
+       TEXT_STYLES,
+       PARAGRAPH_STYLES,
+       SECTION_PROPERTIES,
+       COLORS,
+       SPACING,
+     } from './docx-styles';
+     import {
+       createTextRun,
+       createParagraph,
+       createSectionHeader,
+       createContactLine,
+       createExperienceEntry,
+       createSkillsSection,
+       createFooter,
+     } from './docx-templates';
+     
+     export type DocumentType = 'cv' | 'cover_letter' | 'email';
+     
+     export interface GenerateDocxOptions {
+       content: string;
+       type: DocumentType;
+       title?: string;
+       metadata?: {
+         author?: string;
+         company?: string;
+         jobTitle?: string;
+       };
+     }
+     
+     // Parse markdown-like content into paragraphs
+     function parseContent(content: string): Paragraph[] {
+       const paragraphs: Paragraph[] = [];
+       const lines = content.split('\n');
+       
+       let currentBullets: string[] = [];
+       
+       const flushBullets = () => {
+         if (currentBullets.length > 0) {
+           currentBullets.forEach(bullet => {
+             paragraphs.push(new Paragraph({
+               children: [createTextRun(bullet.replace(/^[-•*]\s*/, ''), 'body')],
+               bullet: { level: 0 },
+               spacing: { after: 60 },
+             }));
+           });
+           currentBullets = [];
+         }
+       };
+       
+       for (const line of lines) {
+         const trimmedLine = line.trim();
+         
+         if (!trimmedLine) {
+           flushBullets();
+           continue;
+         }
+         
+         // Heading 1: # Title or === underline
+         if (trimmedLine.startsWith('# ') || trimmedLine.startsWith('## ')) {
+           flushBullets();
+           const headingText = trimmedLine.replace(/^#+\s*/, '');
+           const level = trimmedLine.startsWith('## ') ? 'heading2' : 'heading1';
+           
+           if (level === 'heading1') {
+             paragraphs.push(...createSectionHeader(headingText));
+           } else {
+             paragraphs.push(new Paragraph({
+               children: [createTextRun(headingText, 'heading2')],
+               spacing: { before: SPACING.paragraph, after: 120 },
+             }));
+           }
+           continue;
+         }
+         
+         // Heading 3: ### Subtitle
+         if (trimmedLine.startsWith('### ')) {
+           flushBullets();
+           const headingText = trimmedLine.replace(/^###\s*/, '');
+           paragraphs.push(new Paragraph({
+             children: [createTextRun(headingText, 'heading3')],
+             spacing: { before: 120, after: 60 },
+           }));
+           continue;
+         }
+         
+         // Bullet points
+         if (/^[-•*]\s/.test(trimmedLine)) {
+           currentBullets.push(trimmedLine);
+           continue;
+         }
+         
+         // Bold text: **text**
+         if (trimmedLine.includes('**')) {
+           flushBullets();
+           const parts = trimmedLine.split(/\*\*(.*?)\*\*/g);
+           const runs: TextRun[] = [];
+           
+           parts.forEach((part, index) => {
+             if (index % 2 === 1) {
+               // Bold part
+               runs.push(createTextRun(part, 'bodyBold'));
+             } else if (part) {
+               runs.push(createTextRun(part, 'body'));
+             }
+           });
+           
+           paragraphs.push(new Paragraph({
+             children: runs,
+             spacing: { after: SPACING.paragraph },
+           }));
+           continue;
+         }
+         
+         // Regular paragraph
+         flushBullets();
+         paragraphs.push(new Paragraph({
+           children: [createTextRun(trimmedLine, 'body')],
+           spacing: { after: SPACING.paragraph },
+         }));
+       }
+       
+       flushBullets();
+       return paragraphs;
+     }
+     
+     // Generate CV document
+     function generateCVDocument(content: string, options: GenerateDocxOptions): Document {
+       const paragraphs = parseContent(content);
+       
+       return new Document({
+         creator: options.metadata?.author || 'CV Tailor',
+         title: options.title || 'Tailored CV',
+         description: 'CV generated by CV Tailor',
+         sections: [
+           {
+             properties: SECTION_PROPERTIES,
+             footers: {
+               default: createFooter(),
+             },
+             children: paragraphs,
+           },
+         ],
+       });
+     }
+     
+     // Generate Cover Letter document
+     function generateCoverLetterDocument(content: string, options: GenerateDocxOptions): Document {
+       const paragraphs = parseContent(content);
+       
+       // Add date at the top
+       const today = new Date().toLocaleDateString('en-US', {
+         year: 'numeric',
+         month: 'long',
+         day: 'numeric',
+       });
+       
+       const headerParagraphs: Paragraph[] = [
+         new Paragraph({
+           children: [createTextRun(today, 'body')],
+           spacing: { after: SPACING.section },
+         }),
+       ];
+       
+       return new Document({
+         creator: options.metadata?.author || 'CV Tailor',
+         title: options.title || 'Cover Letter',
+         description: 'Cover letter generated by CV Tailor',
+         sections: [
+           {
+             properties: SECTION_PROPERTIES,
+             children: [...headerParagraphs, ...paragraphs],
+           },
+         ],
+       });
+     }
+     
+     // Generate Email document
+     function generateEmailDocument(content: string, options: GenerateDocxOptions): Document {
+       const paragraphs = parseContent(content);
+       
+       return new Document({
+         creator: options.metadata?.author || 'CV Tailor',
+         title: options.title || 'Application Email',
+         description: 'Application email generated by CV Tailor',
+         sections: [
+           {
+             properties: SECTION_PROPERTIES,
+             children: paragraphs,
+           },
+         ],
+       });
+     }
+     
+     // Main export function
+     export async function generateDocx(options: GenerateDocxOptions): Promise<Buffer> {
+       let document: Document;
+       
+       switch (options.type) {
+         case 'cv':
+           document = generateCVDocument(options.content, options);
+           break;
+         case 'cover_letter':
+           document = generateCoverLetterDocument(options.content, options);
+           break;
+         case 'email':
+           document = generateEmailDocument(options.content, options);
+           break;
+         default:
+           document = generateCVDocument(options.content, options);
+       }
+       
+       const buffer = await Packer.toBuffer(document);
+       return Buffer.from(buffer);
+     }
+     
+     // Generate all three documents as a zip (optional future feature)
+     export async function generateAllDocx(
+       documents: {
+         cv: string;
+         coverLetter: string;
+         email: string;
+       },
+       metadata?: GenerateDocxOptions['metadata']
+     ): Promise<{
+       cv: Buffer;
+       coverLetter: Buffer;
+       email: Buffer;
+     }> {
+       const [cv, coverLetter, email] = await Promise.all([
+         generateDocx({ content: documents.cv, type: 'cv', metadata }),
+         generateDocx({ content: documents.coverLetter, type: 'cover_letter', metadata }),
+         generateDocx({ content: documents.email, type: 'email', metadata }),
+       ]);
+       
+       return { cv, coverLetter, email };
+     }
+     ```
+
+  4. Create API route for DOCX export:
+     ```typescript
+     // ============================================
+     // [F025] src/app/api/export/docx/route.ts
+     // ============================================
+     
+     import { NextRequest, NextResponse } from 'next/server';
+     import { generateDocx, DocumentType } from '@/lib/generators/docx-generator';
+     
+     export async function POST(request: NextRequest) {
+       try {
+         const body = await request.json();
+         const { content, type, filename, metadata } = body;
+         
+         if (!content) {
+           return NextResponse.json(
+             { error: 'Content is required' },
+             { status: 400 }
+           );
+         }
+         
+         const docType: DocumentType = type || 'cv';
+         const buffer = await generateDocx({
+           content,
+           type: docType,
+           title: filename,
+           metadata,
+         });
+         
+         const fileName = filename 
+           ? `${filename}.docx` 
+           : `${docType}-${Date.now()}.docx`;
+         
+         return new NextResponse(buffer, {
+           status: 200,
+           headers: {
+             'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+             'Content-Disposition': `attachment; filename="${fileName}"`,
+             'Content-Length': buffer.length.toString(),
+           },
+         });
+         
+       } catch (error: any) {
+         console.error('DOCX generation error:', error);
+         return NextResponse.json(
+           { error: error.message || 'Failed to generate document' },
+           { status: 500 }
+         );
+       }
+     }
+     ```
+
+  5. Create generators index:
+     ```typescript
+     // ============================================
+     // [F144] src/lib/generators/index.ts
+     // ============================================
+     
+     export * from './docx-generator';
+     export * from './docx-styles';
+     export * from './docx-templates';
+     ```
+
+checkpoint_tests:
+  - id: T01
+    description: "All generator files exist"
+    type: "files_exist"
+    files:
+      - "src/lib/generators/docx-generator.ts"
+      - "src/lib/generators/docx-styles.ts"
+      - "src/lib/generators/docx-templates.ts"
+      - "src/lib/generators/index.ts"
+
+  - id: T02
+    description: "API route exists"
+    type: "files_exist"
+    files:
+      - "src/app/api/export/docx/route.ts"
+
+  - id: T03
+    description: "TypeScript compiles without errors"
+    type: "command"
+    command: "npx tsc --noEmit"
+    expected_exit_code: 0
+
+  - id: T04
+    description: "DOCX generator exports main function"
+    type: "grep"
+    file: "src/lib/generators/docx-generator.ts"
+    patterns:
+      - "export async function generateDocx"
+      - "generateCVDocument"
+      - "generateCoverLetterDocument"
+      - "generateEmailDocument"
+      - "Packer.toBuffer"
+
+  - id: T05
+    description: "Styles are properly defined"
+    type: "grep"
+    file: "src/lib/generators/docx-styles.ts"
+    patterns:
+      - "TEXT_STYLES"
+      - "PARAGRAPH_STYLES"
+      - "PAGE_MARGINS"
+      - "COLORS"
+
+  - id: T06
+    description: "Templates have helper functions"
+    type: "grep"
+    file: "src/lib/generators/docx-templates.ts"
+    patterns:
+      - "createTextRun"
+      - "createParagraph"
+      - "createSectionHeader"
+      - "createExperienceEntry"
+
+  - id: T07
+    description: "API route handles POST"
+    type: "grep"
+    file: "src/app/api/export/docx/route.ts"
+    patterns:
+      - "export async function POST"
+      - "generateDocx"
+      - "Content-Disposition"
+
+max_retries: 3

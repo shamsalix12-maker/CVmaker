@@ -1,0 +1,186 @@
+id: B02
+name: "Install All Dependencies"
+phase: 0
+phase_name: "Foundation"
+
+goal: |
+  Install all npm packages required for the entire project.
+  This includes UI components (shadcn), Supabase, AI SDKs, 
+  file processing libraries, and utilities.
+
+dependencies:
+  - B01
+
+files_to_create:
+  - id: F027
+    path: "src/components/ui/button.tsx"
+  - id: F028
+    path: "src/components/ui/input.tsx"
+  - id: F029
+    path: "src/components/ui/card.tsx"
+  - id: F030
+    path: "src/components/ui/dialog.tsx"
+  - id: F031
+    path: "src/components/ui/select.tsx"
+  - id: F032
+    path: "src/components/ui/textarea.tsx"
+  - id: F033
+    path: "src/components/ui/tabs.tsx"
+  - id: F034
+    path: "src/components/ui/badge.tsx"
+  - id: F035
+    path: "src/components/ui/sonner.tsx"
+  - id: F036
+    path: "src/components/ui/dropdown-menu.tsx"
+  - id: F090
+    path: "src/lib/utils.ts"
+  - id: F091
+    path: "components.json"
+
+files_to_modify:
+  - id: F001
+    path: "package.json"
+  - id: F009
+    path: "src/app/globals.css"
+  - id: F004
+    path: "tailwind.config.ts"
+
+files_available:
+  - id: F001
+    path: "package.json"
+    from_block: B01
+  - id: F002
+    path: "tsconfig.json"
+    from_block: B01
+  - id: F004
+    path: "tailwind.config.ts"
+    from_block: B01
+  - id: F009
+    path: "src/app/globals.css"
+    from_block: B01
+
+commands:
+  - |
+    # Initialize shadcn-ui
+    npx shadcn-ui@latest init -y
+  
+  - |
+    # Add shadcn components
+    npx shadcn-ui@latest add button input card dialog select textarea tabs badge sonner dropdown-menu
+  
+  - |
+    # Supabase
+    npm install @supabase/supabase-js @supabase/ssr
+  
+  - |
+    # AI SDKs
+    npm install openai @anthropic-ai/sdk @google/generative-ai
+  
+  - |
+    # File Parsing & Generation
+    npm install mammoth docx file-saver jszip
+    npm install @types/file-saver --save-dev
+  
+  - |
+    # Markdown Processing
+    npm install remark remark-html remark-parse unified
+  
+  - |
+    # Rich Text Editor
+    npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-placeholder @tiptap/pm
+  
+  - |
+    # Internationalization
+    npm install next-intl
+  
+  - |
+    # Encryption
+    npm install crypto-js
+    npm install @types/crypto-js --save-dev
+  
+  - |
+    # Utilities
+    npm install clsx tailwind-merge lucide-react zod uuid
+    npm install @types/uuid --save-dev
+
+instructions: |
+  1. Run shadcn-ui init first. When prompted:
+     - Style: Default
+     - Base color: Slate
+     - CSS variables: Yes
+  
+  2. Add all the shadcn components listed.
+  
+  3. Install all other dependencies in order.
+  
+  4. Verify no peer dependency conflicts.
+  
+  5. Do NOT modify any component code yet - just install.
+  
+  6. The shadcn init will create src/lib/utils.ts and modify globals.css and tailwind.config.ts - this is expected.
+
+checkpoint_tests:
+  - id: T01
+    description: "shadcn components directory exists"
+    type: "files_exist"
+    files:
+      - "src/components/ui/button.tsx"
+      - "src/components/ui/input.tsx"
+      - "src/components/ui/card.tsx"
+      - "src/components/ui/dialog.tsx"
+      - "src/components/ui/select.tsx"
+      - "src/components/ui/textarea.tsx"
+      - "src/components/ui/tabs.tsx"
+      - "src/components/ui/badge.tsx"
+      - "src/components/ui/dropdown-menu.tsx"
+
+  - id: T02
+    description: "Supabase packages installed"
+    type: "grep"
+    file: "package.json"
+    patterns:
+      - '"@supabase/supabase-js":'
+      - '"@supabase/ssr":'
+
+  - id: T03
+    description: "AI SDK packages installed"
+    type: "grep"
+    file: "package.json"
+    patterns:
+      - '"openai":'
+      - '"@anthropic-ai/sdk":'
+      - '"@google/generative-ai":'
+
+  - id: T04
+    description: "File processing packages installed"
+    type: "grep"
+    file: "package.json"
+    patterns:
+      - '"mammoth":'
+      - '"docx":'
+      - '"file-saver":'
+
+  - id: T05
+    description: "Other required packages installed"
+    type: "grep"
+    file: "package.json"
+    patterns:
+      - '"next-intl":'
+      - '"crypto-js":'
+      - '"@tiptap/react":'
+      - '"lucide-react":'
+      - '"zod":'
+
+  - id: T06
+    description: "TypeScript compiles without errors"
+    type: "command"
+    command: "npx tsc --noEmit"
+    expected_exit_code: 0
+
+  - id: T07
+    description: "No npm audit high vulnerabilities"
+    type: "command"
+    command: "npm audit --audit-level=high || true"
+    expected_exit_code: 0
+
+max_retries: 3

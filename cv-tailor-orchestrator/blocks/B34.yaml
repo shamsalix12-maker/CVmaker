@@ -1,0 +1,32 @@
+id: B34
+name: "Dashboard"
+phase: 7
+phase_name: "Dashboard & Lists"
+
+goal: |
+  Main dashboard providing a summary of user activity and quick access to features.
+  Features:
+  - Application stats summary
+  - Comprehensive CV status (Complete/Incomplete)
+  - Recent applications list
+  - Quick action to start New Application
+
+dependencies: [B32]
+
+files_to_modify:
+  - id: F012
+    path: "src/app/[locale]/dashboard/page.tsx"
+    description: "Update dashboard with real data and stats"
+
+checkpoint_tests:
+  - id: T01
+    description: "Summary stats are correct"
+    type: "manual"
+  - id: T02
+    description: "CV status reflects reality"
+    type: "manual"
+  - id: T03
+    description: "Recent applications list is shown"
+    type: "manual"
+
+max_retries: 3

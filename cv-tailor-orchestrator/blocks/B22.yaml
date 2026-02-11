@@ -1,0 +1,672 @@
+id: B22
+name: "Applications List & Detail Pages"
+phase: 5
+phase_name: "Dashboard & Lists"
+
+goal: |
+  Create the applications list page showing all user's job applications,
+  and detail page for viewing/continuing a specific application.
+
+dependencies: [B01, B02, B03, B04, B05, B06, B07, B08, B18]
+
+files_to_create:
+  - id: F159
+    path: "src/components/applications/ApplicationList.tsx"
+    description: "List of applications with filters"
+
+  - id: F160
+    path: "src/components/applications/ApplicationCard.tsx"
+    description: "Card for single application"
+
+  - id: F161
+    path: "src/components/applications/ApplicationFilters.tsx"
+    description: "Filter by status, date"
+
+  - id: F162
+    path: "src/hooks/useApplications.ts"
+    description: "Hook for applications list"
+
+  - id: F017
+    path: "src/app/[locale]/applications/page.tsx"
+    description: "Applications list page"
+
+  - id: F163
+    path: "src/app/[locale]/applications/loading.tsx"
+    description: "Loading state"
+
+  - id: F018
+    path: "src/app/[locale]/applications/[id]/page.tsx"
+    description: "Application detail page"
+
+  - id: F164
+    path: "src/app/[locale]/applications/[id]/loading.tsx"
+    description: "Detail loading state"
+
+files_to_modify:
+  - id: F087
+    path: "src/i18n/en.json"
+    description: "Applications translations"
+
+  - id: F088
+    path: "src/i18n/fa.json"
+    description: "Applications translations"
+
+files_available:
+  - id: F084
+    path: "src/hooks/useApplication.ts"
+    from_block: B18
+  - id: F140
+    path: "src/components/application/FinalDocumentsStep.tsx"
+    from_block: B18
+  - id: F059
+    path: "src/components/application/DownloadPanel.tsx"
+    from_block: B18
+
+commands: []
+
+instructions: |
+  1. Create useApplications.ts (list hook):
+     ```typescript
+     // ============================================
+     // [F162] src/hooks/useApplications.ts
+     // ============================================
+     
+     'use client';
+     
+     import { useState, useEffect, useCallback } from 'react';
+     import { useAuth } from '@/context/AuthContext';
+     import { JobApplication, ApplicationStatus } from '@/lib/types';
+     
+     interface UseApplicationsOptions {
+       status?: ApplicationStatus;
+       limit?: number;
+     }
+     
+     export function useApplications(options: UseApplicationsOptions = {}) {
+       const { user } = useAuth();
+       const [applications, setApplications] = useState<JobApplication[]>([]);
+       const [loading, setLoading] = useState(true);
+       const [error, setError] = useState<string | null>(null);
+       
+       const fetchApplications = useCallback(async () => {
+         if (!user) return;
+         
+         setLoading(true);
+         setError(null);
+         
+         try {
+           const res = await fetch('/api/applications', {
+             headers: { 'x-user-id': user.id }
+           });
+           
+           const data = await res.json();
+           if (data.error) throw new Error(data.error);
+           
+           let apps = data.applications || [];
+           
+           // Filter by status if specified
+           if (options.status) {
+             apps = apps.filter((a: JobApplication) => a.status === options.status);
+           }
+           
+           // Limit if specified
+           if (options.limit) {
+             apps = apps.slice(0, options.limit);
+           }
+           
+           setApplications(apps);
+           
+         } catch (err: any) {
+           setError(err.message);
+         } finally {
+           setLoading(false);
+         }
+       }, [user, options.status, options.limit]);
+       
+       useEffect(() => {
+         fetchApplications();
+       }, [fetchApplications]);
+       
+       const deleteApplication = useCallback(async (id: string) => {
+         if (!user) return;
+         
+         try {
+           const res = await fetch(`/api/applications/${id}`, {
+             method: 'DELETE',
+             headers: { 'x-user-id': user.id }
+           });
+           
+           const data = await res.json();
+           if (data.error) throw new Error(data.error);
+           
+           setApplications(prev => prev.filter(a => a.id !== id));
+           
+         } catch (err: any) {
+           setError(err.message);
+           throw err;
+         }
+       }, [user]);
+       
+       return {
+         applications,
+         loading,
+         error,
+         refresh: fetchApplications,
+         deleteApplication
+       };
+     }
+     ```
+
+  2. Create ApplicationCard.tsx:
+     ```typescript
+     // ============================================
+     // [F160] src/components/applications/ApplicationCard.tsx
+     // ============================================
+     
+     'use client';
+     
+     import { useTranslations } from 'next-intl';
+     import { useParams } from 'next/navigation';
+     import Link from 'next/link';
+     import { JobApplication } from '@/lib/types';
+     import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+     import { Badge } from '@/components/ui/badge';
+     import { Button } from '@/components/ui/button';
+     import { formatDate, truncateText } from '@/lib/utils';
+     import { 
+       FileText, Clock, CheckCircle, AlertCircle, 
+       ArrowRight, Trash2, Download 
+     } from 'lucide-react';
+     import { cn } from '@/lib/utils';
+     
+     interface ApplicationCardProps {
+       application: JobApplication;
+       onDelete?: () => void;
+       className?: string;
+     }
+     
+     const statusConfig: Record<string, { 
+       icon: React.ElementType; 
+       color: string;
+       bgColor: string;
+     }> = {
+       completed: { icon: CheckCircle, color: 'text-green-600', bgColor: 'bg-green-100' },
+       draft: { icon: Clock, color: 'text-gray-600', bgColor: 'bg-gray-100' },
+       processing: { icon: Clock, color: 'text-blue-600', bgColor: 'bg-blue-100' },
+       clarification: { icon: AlertCircle, color: 'text-yellow-600', bgColor: 'bg-yellow-100' },
+       draft_ready: { icon: FileText, color: 'text-purple-600', bgColor: 'bg-purple-100' },
+       editing: { icon: FileText, color: 'text-purple-600', bgColor: 'bg-purple-100' },
+       error: { icon: AlertCircle, color: 'text-red-600', bgColor: 'bg-red-100' }
+     };
+     
+     export function ApplicationCard({ 
+       application, 
+       onDelete,
+       className 
+     }: ApplicationCardProps) {
+       const t = useTranslations('applications');
+       const params = useParams();
+       const locale = params.locale as string;
+       
+       const config = statusConfig[application.status] || statusConfig.draft;
+       const Icon = config.icon;
+       const jobPreview = truncateText(application.job_description, 100);
+       
+       return (
+         <Card className={cn('hover:shadow-md transition-shadow', className)}>
+           <CardHeader className="pb-2">
+             <div className="flex items-start justify-between">
+               <div className="flex items-center gap-3">
+                 <div className={cn('p-2 rounded-full', config.bgColor)}>
+                   <Icon className={cn('h-4 w-4', config.color)} />
+                 </div>
+                 <div>
+                   <CardTitle className="text-base line-clamp-1">
+                     {jobPreview}
+                   </CardTitle>
+                   <p className="text-sm text-muted-foreground">
+                     {formatDate(application.created_at, locale)}
+                   </p>
+                 </div>
+               </div>
+               <Badge 
+                 variant="outline" 
+                 className={cn(config.bgColor, config.color, 'border-0')}
+               >
+                 {t(`status_${application.status}`)}
+               </Badge>
+             </div>
+           </CardHeader>
+           <CardContent>
+             <div className="flex items-center justify-between mt-2">
+               <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                 <span>{application.selected_prompt_ids.length} {t('prompts_used')}</span>
+                 <span>•</span>
+                 <span>{application.output_language.toUpperCase()}</span>
+               </div>
+               
+               <div className="flex items-center gap-2">
+                 {onDelete && (
+                   <Button 
+                     variant="ghost" 
+                     size="sm"
+                     onClick={(e) => { e.preventDefault(); onDelete(); }}
+                   >
+                     <Trash2 className="h-4 w-4 text-destructive" />
+                   </Button>
+                 )}
+                 
+                 <Link href={`/${locale}/applications/${application.id}`}>
+                   <Button variant="outline" size="sm">
+                     {application.status === 'completed' ? (
+                       <>
+                         <Download className="h-4 w-4 mr-1" />
+                         {t('view')}
+                       </>
+                     ) : (
+                       <>
+                         {t('continue')}
+                         <ArrowRight className="h-4 w-4 ml-1" />
+                       </>
+                     )}
+                   </Button>
+                 </Link>
+               </div>
+             </div>
+           </CardContent>
+         </Card>
+       );
+     }
+     ```
+
+  3. Create ApplicationFilters.tsx:
+     ```typescript
+     // ============================================
+     // [F161] src/components/applications/ApplicationFilters.tsx
+     // ============================================
+     
+     'use client';
+     
+     import { useTranslations } from 'next-intl';
+     import { ApplicationStatus } from '@/lib/types';
+     import { Badge } from '@/components/ui/badge';
+     import { cn } from '@/lib/utils';
+     
+     interface ApplicationFiltersProps {
+       selectedStatus: ApplicationStatus | 'all';
+       onStatusChange: (status: ApplicationStatus | 'all') => void;
+       className?: string;
+     }
+     
+     const statuses: (ApplicationStatus | 'all')[] = [
+       'all',
+       'completed',
+       'draft',
+       'processing',
+       'draft_ready',
+       'error'
+     ];
+     
+     export function ApplicationFilters({
+       selectedStatus,
+       onStatusChange,
+       className
+     }: ApplicationFiltersProps) {
+       const t = useTranslations('applications');
+       
+       return (
+         <div className={cn('flex flex-wrap gap-2', className)}>
+           {statuses.map((status) => (
+             <Badge
+               key={status}
+               variant={selectedStatus === status ? 'default' : 'outline'}
+               className="cursor-pointer"
+               onClick={() => onStatusChange(status)}
+             >
+               {status === 'all' ? t('all') : t(`status_${status}`)}
+             </Badge>
+           ))}
+         </div>
+       );
+     }
+     ```
+
+  4. Create ApplicationList.tsx:
+     ```typescript
+     // ============================================
+     // [F159] src/components/applications/ApplicationList.tsx
+     // ============================================
+     
+     'use client';
+     
+     import { useState } from 'react';
+     import { useTranslations } from 'next-intl';
+     import { JobApplication, ApplicationStatus } from '@/lib/types';
+     import { ApplicationCard } from './ApplicationCard';
+     import { ApplicationFilters } from './ApplicationFilters';
+     import { Loader2 } from 'lucide-react';
+     
+     interface ApplicationListProps {
+       applications: JobApplication[];
+       loading?: boolean;
+       onDelete?: (app: JobApplication) => void;
+       className?: string;
+     }
+     
+     export function ApplicationList({
+       applications,
+       loading = false,
+       onDelete,
+       className
+     }: ApplicationListProps) {
+       const t = useTranslations('applications');
+       const [statusFilter, setStatusFilter] = useState<ApplicationStatus | 'all'>('all');
+       
+       const filteredApps = statusFilter === 'all'
+         ? applications
+         : applications.filter(a => a.status === statusFilter);
+       
+       if (loading) {
+         return (
+           <div className="flex items-center justify-center py-12">
+             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+           </div>
+         );
+       }
+       
+       return (
+         <div className={className}>
+           <ApplicationFilters
+             selectedStatus={statusFilter}
+             onStatusChange={setStatusFilter}
+             className="mb-6"
+           />
+           
+           {filteredApps.length === 0 ? (
+             <div className="text-center py-12 text-muted-foreground">
+               {t('no_applications')}
+             </div>
+           ) : (
+             <div className="space-y-4">
+               {filteredApps.map((app) => (
+                 <ApplicationCard
+                   key={app.id}
+                   application={app}
+                   onDelete={onDelete ? () => onDelete(app) : undefined}
+                 />
+               ))}
+             </div>
+           )}
+         </div>
+       );
+     }
+     ```
+
+  5. Create applications/page.tsx:
+     ```typescript
+     // ============================================
+     // [F017] src/app/[locale]/applications/page.tsx
+     // ============================================
+     
+     'use client';
+     
+     import { useTranslations } from 'next-intl';
+     import { useParams } from 'next/navigation';
+     import Link from 'next/link';
+     import { AuthGuard } from '@/components/auth/AuthGuard';
+     import { useApplications } from '@/hooks/useApplications';
+     import { ApplicationList } from '@/components/applications/ApplicationList';
+     import { Button } from '@/components/ui/button';
+     import { useToast } from '@/components/ui/use-toast';
+     import { FileText, Plus } from 'lucide-react';
+     
+     export default function ApplicationsPage() {
+       const t = useTranslations('applications');
+       const params = useParams();
+       const locale = params.locale as string;
+       const { toast } = useToast();
+       
+       const { applications, loading, error, deleteApplication } = useApplications();
+       
+       const handleDelete = async (app: any) => {
+         if (!confirm(t('delete_confirm'))) return;
+         
+         try {
+           await deleteApplication(app.id);
+           toast({ title: t('deleted') });
+         } catch {
+           toast({ variant: 'destructive', title: t('delete_error') });
+         }
+       };
+       
+       return (
+         <AuthGuard>
+           <div className="container mx-auto p-6 max-w-4xl">
+             <div className="flex items-center justify-between mb-6">
+               <div>
+                 <h1 className="text-2xl font-bold flex items-center gap-2">
+                   <FileText className="h-6 w-6" />
+                   {t('title')}
+                 </h1>
+                 <p className="text-muted-foreground mt-1">
+                   {t('description')}
+                 </p>
+               </div>
+               
+               <Link href={`/${locale}/new-application`}>
+                 <Button>
+                   <Plus className="h-4 w-4 mr-2" />
+                   {t('new')}
+                 </Button>
+               </Link>
+             </div>
+             
+             {error && (
+               <div className="mb-6 p-4 bg-destructive/10 text-destructive rounded-lg">
+                 {error}
+               </div>
+             )}
+             
+             <ApplicationList
+               applications={applications}
+               loading={loading}
+               onDelete={handleDelete}
+             />
+           </div>
+         </AuthGuard>
+       );
+     }
+     ```
+
+  6. Create applications/[id]/page.tsx:
+     ```typescript
+     // ============================================
+     // [F018] src/app/[locale]/applications/[id]/page.tsx
+     // ============================================
+     
+     'use client';
+     
+     import { useEffect } from 'react';
+     import { useTranslations } from 'next-intl';
+     import { useParams, useRouter } from 'next/navigation';
+     import { AuthGuard } from '@/components/auth/AuthGuard';
+     import { useApplication } from '@/hooks/useApplication';
+     import { ApplicationWizard } from '@/components/application/ApplicationWizard';
+     import { FinalDocumentsStep } from '@/components/application/FinalDocumentsStep';
+     import { Card, CardContent } from '@/components/ui/card';
+     import { Button } from '@/components/ui/button';
+     import { Loader2, ArrowLeft, FileText } from 'lucide-react';
+     import Link from 'next/link';
+     
+     export default function ApplicationDetailPage() {
+       const t = useTranslations('applications');
+       const params = useParams();
+       const router = useRouter();
+       const locale = params.locale as string;
+       const id = params.id as string;
+       
+       const { 
+         application, 
+         loading, 
+         error,
+         loadApplication,
+         reset,
+         finalDocuments
+       } = useApplication();
+       
+       useEffect(() => {
+         if (id) {
+           loadApplication(id);
+         }
+       }, [id, loadApplication]);
+       
+       const handleNewApplication = () => {
+         reset();
+         router.push(`/${locale}/new-application`);
+       };
+       
+       if (loading) {
+         return (
+           <AuthGuard>
+             <div className="container mx-auto p-6 max-w-4xl">
+               <Card>
+                 <CardContent className="py-12">
+                   <div className="flex flex-col items-center justify-center">
+                     <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+                     <p className="text-muted-foreground">{t('loading')}</p>
+                   </div>
+                 </CardContent>
+               </Card>
+             </div>
+           </AuthGuard>
+         );
+       }
+       
+       if (error || !application) {
+         return (
+           <AuthGuard>
+             <div className="container mx-auto p-6 max-w-4xl">
+               <Card>
+                 <CardContent className="py-12 text-center">
+                   <p className="text-destructive mb-4">{error || t('not_found')}</p>
+                   <Link href={`/${locale}/applications`}>
+                     <Button variant="outline">
+                       <ArrowLeft className="h-4 w-4 mr-2" />
+                       {t('back_to_list')}
+                     </Button>
+                   </Link>
+                 </CardContent>
+               </Card>
+             </div>
+           </AuthGuard>
+         );
+       }
+       
+       // If completed, show final documents
+       if (application.status === 'completed' && finalDocuments) {
+         return (
+           <AuthGuard>
+             <div className="container mx-auto p-6 max-w-4xl">
+               <div className="mb-6">
+                 <Link href={`/${locale}/applications`}>
+                   <Button variant="ghost" size="sm">
+                     <ArrowLeft className="h-4 w-4 mr-2" />
+                     {t('back_to_list')}
+                   </Button>
+                 </Link>
+               </div>
+               
+               <div className="mb-6">
+                 <h1 className="text-2xl font-bold flex items-center gap-2">
+                   <FileText className="h-6 w-6" />
+                   {t('application_details')}
+                 </h1>
+               </div>
+               
+               <FinalDocumentsStep
+                 documents={finalDocuments}
+                 onNewApplication={handleNewApplication}
+               />
+             </div>
+           </AuthGuard>
+         );
+       }
+       
+       // Otherwise show wizard to continue
+       return (
+         <AuthGuard>
+           <div className="container mx-auto p-6 max-w-4xl">
+             <div className="mb-6">
+               <Link href={`/${locale}/applications`}>
+                 <Button variant="ghost" size="sm">
+                   <ArrowLeft className="h-4 w-4 mr-2" />
+                   {t('back_to_list')}
+                 </Button>
+               </Link>
+             </div>
+             
+             <ApplicationWizard />
+           </div>
+         </AuthGuard>
+       );
+     }
+     ```
+
+  7. Create loading states:
+     ```typescript
+     // [F163] src/app/[locale]/applications/loading.tsx
+     // [F164] src/app/[locale]/applications/[id]/loading.tsx
+     // Standard skeleton loading components
+     ```
+
+  8. Add translations to en.json under "applications":
+     ```json
+     {
+       "applications": {
+         "title": "My Applications",
+         "description": "View and manage your job applications",
+         "new": "New Application",
+         "all": "All",
+         "status_completed": "Completed",
+         "status_draft": "Draft",
+         "status_processing": "Processing",
+         "status_clarification": "Needs Info",
+         "status_draft_ready": "Draft Ready",
+         "status_editing": "Editing",
+         "status_error": "Error",
+         "prompts_used": "prompts",
+         "view": "View",
+         "continue": "Continue",
+         "no_applications": "No applications found",
+         "delete_confirm": "Are you sure you want to delete this application?",
+         "deleted": "Application deleted",
+         "delete_error": "Failed to delete",
+         "loading": "Loading application...",
+         "not_found": "Application not found",
+         "back_to_list": "Back to Applications",
+         "application_details": "Application Details"
+       }
+     }
+     ```
+
+  9. Add same translations to fa.json
+
+checkpoint_tests:
+  - id: T01
+    description: "All application list files exist"
+    type: "files_exist"
+    files:
+      - "src/components/applications/ApplicationList.tsx"
+      - "src/components/applications/ApplicationCard.tsx"
+      - "src/components/applications/ApplicationFilters.tsx"
+      - "src/hooks/useApplications.ts"
+      - "src/app/[locale]/applications/page.tsx"
+      - "src/app/[locale]/applications/[id]/page.tsx"
+
+  - id: T02
+    description: "TypeScript compiles without errors"
+    type: "command"
+    command: "npx tsc --noEmit"
+    expected_exit_code: 0
+
+max_retries: 3

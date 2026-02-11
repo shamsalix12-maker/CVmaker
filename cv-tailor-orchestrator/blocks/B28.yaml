@@ -1,0 +1,36 @@
+id: B28
+name: "Output Editor (Rich Text Editor)"
+phase: 5
+phase_name: "Core Workflow"
+
+goal: |
+  Implement a Rich Text Editor for editing AI-generated CVs and cover letters.
+  Features:
+  - Basic formatting (Bold, Italic, Heading, List, Link)
+  - Load initial content from AI output
+  - Allow manual editing
+  - Approval button for finalization
+  - RTL support for Persian
+
+dependencies: [B02, B27]
+
+files_to_create:
+  - id: F057
+    path: "src/components/application/OutputEditor.tsx"
+    description: "Rich Text Editor based on TipTap"
+
+checkpoint_tests:
+  - id: T01
+    description: "Editor loads with sample content"
+    type: "manual"
+  - id: T02
+    description: "Text editing is possible"
+    type: "manual"
+  - id: T03
+    description: "Bold, Italic, Heading tools work"
+    type: "manual"
+  - id: T04
+    description: "RTL layout is correct for Persian"
+    type: "manual"
+
+max_retries: 3

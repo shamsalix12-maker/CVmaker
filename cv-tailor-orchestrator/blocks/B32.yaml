@@ -1,0 +1,57 @@
+id: B32
+name: "New Application Page (Wizard Integration)"
+phase: 5
+phase_name: "Core Workflow"
+
+goal: |
+  Integrate all components into a multi-step wizard on the New Application page.
+  Steps:
+  1. Job Description Input (F054)
+  2. Prompt Selection (F136)
+  3. AI Configuration (F137)
+  4. Language/Tone Selection (F055, F056)
+  5. Template Selection (F061)
+  6. AI Processing & Clarification (F052)
+  7. Multi-AI Drafts (F053)
+  8. Editor (F057)
+  9. Final Documents (F058, F059)
+
+dependencies: [B31, B17, B14, B23, B24, B25, B26, B27, B28, B29, B30]
+
+files_to_create:
+  - id: F134
+    path: "src/components/application/ApplicationWizard.tsx"
+    description: "Main wizard container with step navigation"
+  - id: F135
+    path: "src/components/application/WizardProgress.tsx"
+    description: "Progress indicator for wizard steps"
+  - id: F136
+    path: "src/components/application/PromptSelectionStep.tsx"
+    description: "Wizard step for prompt selection"
+  - id: F137
+    path: "src/components/application/AIConfigurationStep.tsx"
+    description: "Wizard step for AI provider/model selection"
+  - id: F138
+    path: "src/components/application/ProcessingStep.tsx"
+    description: "Wizard step for AI processing with status"
+  - id: F139
+    path: "src/components/application/FinalDocumentsStep.tsx"
+    description: "Wizard step for final document preview and download"
+
+files_to_modify:
+  - id: F014
+    path: "src/app/[locale]/new-application/page.tsx"
+    description: "Full implementation of the multi-step wizard"
+
+checkpoint_tests:
+  - id: T01
+    description: "Complete workflow from input to download works without errors"
+    type: "manual"
+  - id: T02
+    description: "Step navigation works correctly (Next/Back)"
+    type: "manual"
+  - id: T03
+    description: "All intermediate steps reflect the current state"
+    type: "manual"
+
+max_retries: 3

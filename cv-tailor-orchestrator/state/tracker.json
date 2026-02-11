@@ -1,0 +1,2024 @@
+{
+  "project_name": "cv-tailor-app",
+  "current_block": "B26",
+  "started_at": "2026-02-10T16:40:08.351Z",
+  "last_updated": "2026-02-10T21:17:44.489Z",
+  "blocks": {
+    "B01": {
+      "status": "passed",
+      "started_at": "2026-02-10T16:41:36.837Z",
+      "completed_at": "2026-02-10T16:44:17.903Z",
+      "attempts": 1,
+      "test_results": [
+        {
+          "test_id": "T01",
+          "description": "package.json exists and has Next.js dependency",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T02",
+          "description": "TypeScript compiles without errors",
+          "passed": true,
+          "actual_output": "Command executed successfully"
+        },
+        {
+          "test_id": "T03",
+          "description": "All required files exist",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T04",
+          "description": "Tailwind is configured",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T05",
+          "description": ".env.local has required placeholders",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        }
+      ],
+      "files_created": [
+        "F001",
+        "F002",
+        "F003",
+        "F004",
+        "F005",
+        "F006",
+        "F007",
+        "F008",
+        "F009"
+      ],
+      "files_modified": [],
+      "errors": [
+        "[T03] Missing files: next.config.js, tailwind.config.ts",
+        "[T04] File not found: tailwind.config.ts"
+      ]
+    },
+    "B02": {
+      "status": "passed",
+      "started_at": "2026-02-10T16:44:41.930Z",
+      "completed_at": "2026-02-10T16:49:58.237Z",
+      "attempts": 1,
+      "test_results": [
+        {
+          "test_id": "T01",
+          "description": "shadcn components directory exists",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T02",
+          "description": "Supabase packages installed",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T03",
+          "description": "AI SDK packages installed",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T04",
+          "description": "File processing packages installed",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T05",
+          "description": "Other required packages installed",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T06",
+          "description": "TypeScript compiles without errors",
+          "passed": true,
+          "actual_output": "Command executed successfully"
+        },
+        {
+          "test_id": "T07",
+          "description": "No npm audit high vulnerabilities",
+          "passed": true,
+          "actual_output": "Command executed successfully"
+        }
+      ],
+      "files_created": [
+        "F027",
+        "F028",
+        "F029",
+        "F030",
+        "F031",
+        "F032",
+        "F033",
+        "F034",
+        "F035",
+        "F036",
+        "F090",
+        "F091"
+      ],
+      "files_modified": [
+        "F001",
+        "F009",
+        "F004"
+      ],
+      "errors": []
+    },
+    "B03": {
+      "status": "passed",
+      "started_at": "2026-02-10T16:50:05.522Z",
+      "completed_at": "2026-02-10T16:51:34.134Z",
+      "attempts": 1,
+      "test_results": [
+        {
+          "test_id": "T01",
+          "description": "types.ts file exists",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T02",
+          "description": "All core interfaces are exported",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T03",
+          "description": "All core types are exported",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T04",
+          "description": "TypeScript compiles without errors",
+          "passed": true,
+          "actual_output": "Command executed successfully"
+        }
+      ],
+      "files_created": [
+        "F079"
+      ],
+      "files_modified": [],
+      "errors": []
+    },
+    "B04": {
+      "status": "passed",
+      "started_at": "2026-02-10T16:51:45.911Z",
+      "completed_at": "2026-02-10T16:52:55.334Z",
+      "attempts": 1,
+      "test_results": [
+        {
+          "test_id": "T01",
+          "description": "constants.ts file exists",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T02",
+          "description": "helpers.ts file exists",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T03",
+          "description": "Key constants are exported",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T04",
+          "description": "Key helpers are exported",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T05",
+          "description": "TypeScript compiles without errors",
+          "passed": true,
+          "actual_output": "Command executed successfully"
+        }
+      ],
+      "files_created": [
+        "F078",
+        "F080"
+      ],
+      "files_modified": [],
+      "errors": []
+    },
+    "B05": {
+      "status": "passed",
+      "started_at": "2026-02-10T16:53:03.625Z",
+      "completed_at": "2026-02-10T16:56:53.805Z",
+      "attempts": 1,
+      "test_results": [
+        {
+          "test_id": "T01",
+          "description": "i18n config file exists",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T02",
+          "description": "English translations file exists",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T03",
+          "description": "Farsi translations file exists",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T04",
+          "description": "request.ts file exists",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T05",
+          "description": "Middleware configured",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T06",
+          "description": "next.config.ts uses next-intl",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T07",
+          "description": "English has all main sections",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T08",
+          "description": "Farsi has all main sections",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T09",
+          "description": "TypeScript compiles without errors",
+          "passed": true,
+          "actual_output": "Command executed successfully"
+        }
+      ],
+      "files_created": [
+        "F086",
+        "F087",
+        "F088",
+        "F089"
+      ],
+      "files_modified": [
+        "F003",
+        "F092"
+      ],
+      "errors": [
+        "[T06] File not found: next.config.js"
+      ]
+    },
+    "B06": {
+      "status": "passed",
+      "started_at": "2026-02-10T16:57:01.565Z",
+      "completed_at": "2026-02-10T16:58:58.631Z",
+      "attempts": 1,
+      "test_results": [
+        {
+          "test_id": "T01",
+          "description": "Supabase client files exist",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T02",
+          "description": "Database types file exists",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T03",
+          "description": "Schema SQL file exists",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T04",
+          "description": "Client uses createBrowserClient",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T05",
+          "description": "Server uses createServerClient",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T06",
+          "description": "Schema has all required tables",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T07",
+          "description": "TypeScript compiles without errors",
+          "passed": true,
+          "actual_output": "Command executed successfully"
+        }
+      ],
+      "files_created": [
+        "F063",
+        "F064",
+        "F065",
+        "F093",
+        "F094"
+      ],
+      "files_modified": [
+        "F005",
+        "F006"
+      ],
+      "errors": []
+    },
+    "B07": {
+      "status": "passed",
+      "started_at": "2026-02-10T16:59:06.547Z",
+      "completed_at": "2026-02-10T17:03:44.462Z",
+      "attempts": 1,
+      "test_results": [
+        {
+          "test_id": "T01",
+          "description": "dev-auth.ts file exists",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T02",
+          "description": "AuthContext.tsx file exists",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T03",
+          "description": "DevLoginForm.tsx file exists",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T04",
+          "description": "AuthGuard.tsx file exists",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T05",
+          "description": "TypeScript compiles without errors",
+          "passed": true,
+          "actual_output": "Command executed successfully"
+        },
+        {
+          "test_id": "T06",
+          "description": "AuthContext exports useAuth hook",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T07",
+          "description": "DevLoginForm uses i18n",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T08",
+          "description": "English translations have auth keys",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T09",
+          "description": "Farsi translations have auth keys",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T10",
+          "description": "Layout includes AuthProvider",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        }
+      ],
+      "files_created": [
+        "F089",
+        "F090",
+        "F091",
+        "F092"
+      ],
+      "files_modified": [
+        "F011",
+        "F010",
+        "F087",
+        "F088"
+      ],
+      "errors": [
+        "[T05] Exit code: 2"
+      ]
+    },
+    "B08": {
+      "status": "passed",
+      "started_at": "2026-02-10T17:03:51.915Z",
+      "completed_at": "2026-02-10T17:10:49.716Z",
+      "attempts": 1,
+      "test_results": [
+        {
+          "test_id": "T01",
+          "description": "All layout component files exist",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T02",
+          "description": "Dashboard page exists",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T03",
+          "description": "TypeScript compiles without errors",
+          "passed": true,
+          "actual_output": "Command executed successfully"
+        },
+        {
+          "test_id": "T04",
+          "description": "Header uses AuthContext",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T05",
+          "description": "Sidebar has all navigation links",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T06",
+          "description": "LanguageSwitcher handles locale change",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T07",
+          "description": "MainLayout combines all components",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T08",
+          "description": "English translations have nav keys",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T09",
+          "description": "Farsi translations have nav keys",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T10",
+          "description": "Dashboard page uses AuthGuard",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        }
+      ],
+      "files_created": [
+        "F037",
+        "F038",
+        "F039",
+        "F040",
+        "F093",
+        "F094",
+        "F012"
+      ],
+      "files_modified": [
+        "F010",
+        "F087",
+        "F088",
+        "F009"
+      ],
+      "errors": []
+    },
+    "B09": {
+      "status": "passed",
+      "started_at": "2026-02-10T17:10:58.742Z",
+      "completed_at": "2026-02-10T17:13:12.762Z",
+      "attempts": 1,
+      "test_results": [
+        {
+          "test_id": "T01",
+          "description": "All parser files exist",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T02",
+          "description": "TypeScript compiles without errors",
+          "passed": true,
+          "actual_output": "Command executed successfully"
+        },
+        {
+          "test_id": "T03",
+          "description": "docx-parser exports parseDocx function",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T04",
+          "description": "markdown-parser exports parseMarkdown function",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T05",
+          "description": "index.ts exports all parsers and utilities",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T06",
+          "description": "Error handling is implemented",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        }
+      ],
+      "files_created": [
+        "F072",
+        "F073",
+        "F095"
+      ],
+      "files_modified": [],
+      "errors": [
+        "[T02] Exit code: 2"
+      ]
+    },
+    "B10": {
+      "status": "passed",
+      "started_at": "2026-02-10T17:13:38.121Z",
+      "completed_at": "2026-02-10T17:15:42.988Z",
+      "attempts": 1,
+      "test_results": [
+        {
+          "test_id": "T01",
+          "description": "All AI provider files exist",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T02",
+          "description": "TypeScript compiles without errors",
+          "passed": true,
+          "actual_output": "Command executed successfully"
+        },
+        {
+          "test_id": "T03",
+          "description": "ai-provider.ts exports interface and base class",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T04",
+          "description": "All providers extend BaseAIProvider",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T05",
+          "description": "Factory exports getAIProvider",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T06",
+          "description": "index.ts exports all modules",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        }
+      ],
+      "files_created": [
+        "F066",
+        "F067",
+        "F068",
+        "F069",
+        "F070",
+        "F104"
+      ],
+      "files_modified": [],
+      "errors": []
+    },
+    "B11": {
+      "status": "passed",
+      "started_at": "2026-02-10T17:15:52.898Z",
+      "completed_at": "2026-02-10T17:20:59.471Z",
+      "attempts": 1,
+      "test_results": [
+        {
+          "test_id": "T01",
+          "description": "All API key management files exist",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T02",
+          "description": "TypeScript compiles without errors",
+          "passed": true,
+          "actual_output": "Command executed successfully"
+        },
+        {
+          "test_id": "T03",
+          "description": "encryption.ts exports encrypt/decrypt functions",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T04",
+          "description": "Keys API route has all CRUD methods",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T05",
+          "description": "useAIKeys hook exports all functions",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T06",
+          "description": "English translations have ai_keys section",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        }
+      ],
+      "files_created": [
+        "F077",
+        "F105",
+        "F106",
+        "F081"
+      ],
+      "files_modified": [
+        "F087",
+        "F088"
+      ],
+      "errors": []
+    },
+    "B12": {
+      "status": "passed",
+      "started_at": "2026-02-10T17:21:05.737Z",
+      "completed_at": "2026-02-10T17:31:44.222Z",
+      "attempts": 1,
+      "test_results": [
+        {
+          "test_id": "T01",
+          "description": "All CV extraction files exist",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T02",
+          "description": "TypeScript compiles without errors",
+          "passed": true,
+          "actual_output": "Command executed successfully"
+        },
+        {
+          "test_id": "T03",
+          "description": "cv-extractor.ts uses AI provider",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T04",
+          "description": "cv-extraction-prompt.ts has extraction prompts",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T05",
+          "description": "cv-validator.ts has validation functions",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T06",
+          "description": "API route uses AI extraction",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T07",
+          "description": "types.ts has CVExtractionResult",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        }
+      ],
+      "files_created": [
+        "F074",
+        "F107",
+        "F108",
+        "F109",
+        "F110"
+      ],
+      "files_modified": [
+        "F079"
+      ],
+      "errors": [
+        "[T02] Exit code: 2",
+        "[T02] Exit code: 1"
+      ]
+    },
+    "B14": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "attempts": 0,
+      "test_results": [],
+      "files_created": [],
+      "files_modified": [],
+      "errors": []
+    },
+    "B15": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "attempts": 0,
+      "test_results": [],
+      "files_created": [],
+      "files_modified": [],
+      "errors": []
+    },
+    "B16": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "attempts": 0,
+      "test_results": [],
+      "files_created": [],
+      "files_modified": [],
+      "errors": []
+    },
+    "B17": {
+      "status": "passed",
+      "started_at": "2026-02-10T17:31:50.615Z",
+      "completed_at": "2026-02-10T17:44:46.763Z",
+      "attempts": 1,
+      "test_results": [
+        {
+          "test_id": "T01",
+          "description": "All prompt service files exist",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T02",
+          "description": "All prompt API route files exist",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T03",
+          "description": "usePrompts hook exists",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T04",
+          "description": "All prompt component files exist",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T05",
+          "description": "Prompts page exists",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T06",
+          "description": "TypeScript compiles without errors",
+          "passed": true,
+          "actual_output": "Command executed successfully"
+        },
+        {
+          "test_id": "T07",
+          "description": "Prompt service has all CRUD methods",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T08",
+          "description": "API route has GET, POST methods",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T09",
+          "description": "Single prompt API has GET, PUT, DELETE, PATCH",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T10",
+          "description": "usePrompts exports all functions",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T11",
+          "description": "PromptEditor has bilingual support",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T12",
+          "description": "PromptSelector uses usePrompts hook",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T13",
+          "description": "Default prompts include seed data",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T14",
+          "description": "Prompts page uses AuthGuard",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T15",
+          "description": "English translations have all prompt keys",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T16",
+          "description": "Farsi translations have all prompt keys",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        }
+      ],
+      "files_created": [
+        "F024",
+        "F118",
+        "F119",
+        "F120",
+        "F121",
+        "F083",
+        "F045",
+        "F046",
+        "F047",
+        "F048",
+        "F122",
+        "F123",
+        "F015",
+        "F124"
+      ],
+      "files_modified": [
+        "F087",
+        "F088"
+      ],
+      "errors": []
+    },
+    "B18": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "attempts": 0,
+      "test_results": [],
+      "files_created": [],
+      "files_modified": [],
+      "errors": []
+    },
+    "B19": {
+      "status": "passed",
+      "started_at": "2026-02-10T17:44:54.096Z",
+      "completed_at": "2026-02-10T20:58:03.047Z",
+      "attempts": 1,
+      "test_results": [
+        {
+          "test_id": "T01",
+          "description": "All generator files exist",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T02",
+          "description": "All export API routes exist",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T03",
+          "description": "TypeScript compiles without errors",
+          "passed": true,
+          "actual_output": "Command executed successfully"
+        },
+        {
+          "test_id": "T04",
+          "description": "docx-generator exports generate functions",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T05",
+          "description": "markdown-generator exports functions",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T06",
+          "description": "Export routes return correct content types",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        }
+      ],
+      "files_created": [
+        "F075",
+        "F076",
+        "F142",
+        "F143",
+        "F025",
+        "F026",
+        "F144"
+      ],
+      "files_modified": [],
+      "errors": []
+    },
+    "B20": {
+      "status": "passed",
+      "started_at": "2026-02-10T20:58:09.638Z",
+      "completed_at": "2026-02-10T21:02:18.122Z",
+      "attempts": 1,
+      "test_results": [
+        {
+          "test_id": "T01",
+          "description": "All template files exist",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T02",
+          "description": "All template components exist",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T03",
+          "description": "TypeScript compiles without errors",
+          "passed": true,
+          "actual_output": "Command executed successfully"
+        },
+        {
+          "test_id": "T04",
+          "description": "Template parser has placeholder functions",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        }
+      ],
+      "files_created": [
+        "F145",
+        "F146",
+        "F147",
+        "F148",
+        "F149",
+        "F150",
+        "F060",
+        "F061",
+        "F062",
+        "F151",
+        "F152"
+      ],
+      "files_modified": [
+        "F087",
+        "F088"
+      ],
+      "errors": []
+    },
+    "B21": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "attempts": 0,
+      "test_results": [],
+      "files_created": [],
+      "files_modified": [],
+      "errors": []
+    },
+    "B22": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "attempts": 0,
+      "test_results": [],
+      "files_created": [],
+      "files_modified": [],
+      "errors": []
+    },
+    "B23": {
+      "status": "passed",
+      "started_at": "2026-02-10T21:02:24.407Z",
+      "completed_at": "2026-02-10T21:04:38.905Z",
+      "attempts": 1,
+      "test_results": [
+        {
+          "test_id": "T01",
+          "description": "All settings files exist",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T02",
+          "description": "TypeScript compiles without errors",
+          "passed": true,
+          "actual_output": "Command executed successfully"
+        }
+      ],
+      "files_created": [
+        "F049",
+        "F165",
+        "F166",
+        "F167",
+        "F168"
+      ],
+      "files_modified": [
+        "F016",
+        "F087",
+        "F088"
+      ],
+      "errors": []
+    },
+    "B24": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "attempts": 0,
+      "test_results": [],
+      "files_created": [],
+      "files_modified": [],
+      "errors": []
+    },
+    "B25": {
+      "status": "passed",
+      "started_at": "2026-02-10T21:05:43.350Z",
+      "completed_at": "2026-02-10T21:09:53.202Z",
+      "attempts": 1,
+      "test_results": [
+        {
+          "test_id": "T01",
+          "description": "All generator files exist",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T02",
+          "description": "API route exists",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T03",
+          "description": "TypeScript compiles without errors",
+          "passed": true,
+          "actual_output": "Command executed successfully"
+        },
+        {
+          "test_id": "T04",
+          "description": "DOCX generator exports main function",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T05",
+          "description": "Styles are properly defined",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T06",
+          "description": "Templates have helper functions",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T07",
+          "description": "API route handles POST",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        }
+      ],
+      "files_created": [
+        "F075",
+        "F142",
+        "F143",
+        "F025",
+        "F144"
+      ],
+      "files_modified": [],
+      "errors": [
+        "[T03] Exit code: null"
+      ]
+    },
+    "B26": {
+      "status": "passed",
+      "started_at": "2026-02-10T21:10:00.732Z",
+      "completed_at": "2026-02-10T21:17:44.488Z",
+      "attempts": 1,
+      "test_results": [
+        {
+          "test_id": "T01",
+          "description": "Markdown generator file exists",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T02",
+          "description": "API route exists",
+          "passed": true,
+          "actual_output": "All files exist",
+          "expected_output": "All files exist"
+        },
+        {
+          "test_id": "T03",
+          "description": "TypeScript compiles without errors",
+          "passed": true,
+          "actual_output": "Command executed successfully"
+        },
+        {
+          "test_id": "T04",
+          "description": "Markdown generator exports main functions",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T05",
+          "description": "API route handles POST and PUT",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        },
+        {
+          "test_id": "T06",
+          "description": "Index exports markdown generator",
+          "passed": true,
+          "actual_output": "All patterns found",
+          "expected_output": "All patterns found"
+        }
+      ],
+      "files_created": [
+        "F076",
+        "F026"
+      ],
+      "files_modified": [
+        "F144"
+      ],
+      "errors": [
+        "[T03] Exit code: 1",
+        "[T03] Exit code: 2",
+        "[T03] Exit code: 2"
+      ]
+    },
+    "B27": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "attempts": 0,
+      "test_results": [],
+      "files_created": [],
+      "files_modified": [],
+      "errors": []
+    },
+    "B28": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "attempts": 0,
+      "test_results": [],
+      "files_created": [],
+      "files_modified": [],
+      "errors": []
+    },
+    "B29": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "attempts": 0,
+      "test_results": [],
+      "files_created": [],
+      "files_modified": [],
+      "errors": []
+    },
+    "B30": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "attempts": 0,
+      "test_results": [],
+      "files_created": [],
+      "files_modified": [],
+      "errors": []
+    },
+    "B31": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "attempts": 0,
+      "test_results": [],
+      "files_created": [],
+      "files_modified": [],
+      "errors": []
+    },
+    "B32": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "attempts": 0,
+      "test_results": [],
+      "files_created": [],
+      "files_modified": [],
+      "errors": []
+    },
+    "B33": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "attempts": 0,
+      "test_results": [],
+      "files_created": [],
+      "files_modified": [],
+      "errors": []
+    },
+    "B34": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "attempts": 0,
+      "test_results": [],
+      "files_created": [],
+      "files_modified": [],
+      "errors": []
+    },
+    "B35": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "attempts": 0,
+      "test_results": [],
+      "files_created": [],
+      "files_modified": [],
+      "errors": []
+    },
+    "B36": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "attempts": 0,
+      "test_results": [],
+      "files_created": [],
+      "files_modified": [],
+      "errors": []
+    },
+    "B37": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "attempts": 0,
+      "test_results": [],
+      "files_created": [],
+      "files_modified": [],
+      "errors": []
+    },
+    "B38": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "attempts": 0,
+      "test_results": [],
+      "files_created": [],
+      "files_modified": [],
+      "errors": []
+    },
+    "B39": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "attempts": 0,
+      "test_results": [],
+      "files_created": [],
+      "files_modified": [],
+      "errors": []
+    }
+  },
+  "file_registry": {
+    "F001": {
+      "path": "package.json",
+      "created_by": "B01",
+      "modified_by": [
+        "B02"
+      ],
+      "exists": true
+    },
+    "F002": {
+      "path": "tsconfig.json",
+      "created_by": "B01",
+      "modified_by": [],
+      "exists": true
+    },
+    "F003": {
+      "path": "next.config.ts",
+      "created_by": "B01",
+      "modified_by": [
+        "B05"
+      ],
+      "exists": true
+    },
+    "F004": {
+      "path": "tailwind.config.ts",
+      "created_by": "B01",
+      "modified_by": [
+        "B02"
+      ],
+      "exists": true
+    },
+    "F005": {
+      "path": ".env.local",
+      "created_by": "B01",
+      "modified_by": [
+        "B06"
+      ],
+      "exists": true
+    },
+    "F006": {
+      "path": ".env.example",
+      "created_by": "B01",
+      "modified_by": [
+        "B06"
+      ],
+      "exists": true
+    },
+    "F007": {
+      "path": "src/app/layout.tsx",
+      "created_by": "B01",
+      "modified_by": [],
+      "exists": true
+    },
+    "F008": {
+      "path": "src/app/page.tsx",
+      "created_by": "B01",
+      "modified_by": [],
+      "exists": true
+    },
+    "F009": {
+      "path": "src/app/globals.css",
+      "created_by": "B01",
+      "modified_by": [
+        "B02",
+        "B08"
+      ],
+      "exists": true
+    },
+    "F027": {
+      "path": "src/components/ui/button.tsx",
+      "created_by": "B02",
+      "modified_by": [],
+      "exists": true
+    },
+    "F028": {
+      "path": "src/components/ui/input.tsx",
+      "created_by": "B02",
+      "modified_by": [],
+      "exists": true
+    },
+    "F029": {
+      "path": "src/components/ui/card.tsx",
+      "created_by": "B02",
+      "modified_by": [],
+      "exists": true
+    },
+    "F030": {
+      "path": "src/components/ui/dialog.tsx",
+      "created_by": "B02",
+      "modified_by": [],
+      "exists": true
+    },
+    "F031": {
+      "path": "src/components/ui/select.tsx",
+      "created_by": "B02",
+      "modified_by": [],
+      "exists": true
+    },
+    "F032": {
+      "path": "src/components/ui/textarea.tsx",
+      "created_by": "B02",
+      "modified_by": [],
+      "exists": true
+    },
+    "F033": {
+      "path": "src/components/ui/tabs.tsx",
+      "created_by": "B02",
+      "modified_by": [],
+      "exists": true
+    },
+    "F034": {
+      "path": "src/components/ui/badge.tsx",
+      "created_by": "B02",
+      "modified_by": [],
+      "exists": true
+    },
+    "F035": {
+      "path": "src/components/ui/sonner.tsx",
+      "created_by": "B02",
+      "modified_by": [],
+      "exists": true
+    },
+    "F036": {
+      "path": "src/components/ui/dropdown-menu.tsx",
+      "created_by": "B02",
+      "modified_by": [],
+      "exists": true
+    },
+    "F090": {
+      "path": "src/context/AuthContext.tsx",
+      "created_by": "B07",
+      "modified_by": [],
+      "exists": true
+    },
+    "F091": {
+      "path": "src/components/auth/DevLoginForm.tsx",
+      "created_by": "B07",
+      "modified_by": [],
+      "exists": true
+    },
+    "F079": {
+      "path": "src/lib/types.ts",
+      "created_by": "B03",
+      "modified_by": [
+        "B12"
+      ],
+      "exists": true
+    },
+    "F078": {
+      "path": "src/lib/constants.ts",
+      "created_by": "B04",
+      "modified_by": [],
+      "exists": true
+    },
+    "F080": {
+      "path": "src/lib/helpers.ts",
+      "created_by": "B04",
+      "modified_by": [],
+      "exists": true
+    },
+    "F086": {
+      "path": "src/i18n/config.ts",
+      "created_by": "B05",
+      "modified_by": [],
+      "exists": true
+    },
+    "F087": {
+      "path": "src/i18n/en.json",
+      "created_by": "B05",
+      "modified_by": [
+        "B07",
+        "B08",
+        "B11",
+        "B17",
+        "B20",
+        "B23"
+      ],
+      "exists": true
+    },
+    "F088": {
+      "path": "src/i18n/fa.json",
+      "created_by": "B05",
+      "modified_by": [
+        "B07",
+        "B08",
+        "B11",
+        "B17",
+        "B20",
+        "B23"
+      ],
+      "exists": true
+    },
+    "F089": {
+      "path": "src/lib/auth/dev-auth.ts",
+      "created_by": "B07",
+      "modified_by": [],
+      "exists": true
+    },
+    "F063": {
+      "path": "src/lib/supabase/client.ts",
+      "created_by": "B06",
+      "modified_by": [],
+      "exists": true
+    },
+    "F064": {
+      "path": "src/lib/supabase/server.ts",
+      "created_by": "B06",
+      "modified_by": [],
+      "exists": true
+    },
+    "F065": {
+      "path": "src/lib/supabase/middleware.ts",
+      "created_by": "B06",
+      "modified_by": [],
+      "exists": true
+    },
+    "F093": {
+      "path": "src/components/layout/MainLayout.tsx",
+      "created_by": "B08",
+      "modified_by": [],
+      "exists": true
+    },
+    "F094": {
+      "path": "src/components/layout/MobileMenu.tsx",
+      "created_by": "B08",
+      "modified_by": [],
+      "exists": true
+    },
+    "F092": {
+      "path": "src/components/auth/AuthGuard.tsx",
+      "created_by": "B07",
+      "modified_by": [],
+      "exists": true
+    },
+    "F037": {
+      "path": "src/components/layout/Header.tsx",
+      "created_by": "B08",
+      "modified_by": [],
+      "exists": true
+    },
+    "F038": {
+      "path": "src/components/layout/Sidebar.tsx",
+      "created_by": "B08",
+      "modified_by": [],
+      "exists": true
+    },
+    "F039": {
+      "path": "src/components/layout/Footer.tsx",
+      "created_by": "B08",
+      "modified_by": [],
+      "exists": true
+    },
+    "F040": {
+      "path": "src/components/layout/LanguageSwitcher.tsx",
+      "created_by": "B08",
+      "modified_by": [],
+      "exists": true
+    },
+    "F012": {
+      "path": "src/app/[locale]/dashboard/page.tsx",
+      "created_by": "B08",
+      "modified_by": [],
+      "exists": true
+    },
+    "F072": {
+      "path": "src/lib/parsers/docx-parser.ts",
+      "created_by": "B09",
+      "modified_by": [],
+      "exists": true
+    },
+    "F073": {
+      "path": "src/lib/parsers/markdown-parser.ts",
+      "created_by": "B09",
+      "modified_by": [],
+      "exists": true
+    },
+    "F095": {
+      "path": "src/lib/parsers/index.ts",
+      "created_by": "B09",
+      "modified_by": [],
+      "exists": true
+    },
+    "F066": {
+      "path": "src/lib/ai/ai-provider.ts",
+      "created_by": "B10",
+      "modified_by": [],
+      "exists": true
+    },
+    "F067": {
+      "path": "src/lib/ai/openai-provider.ts",
+      "created_by": "B10",
+      "modified_by": [],
+      "exists": true
+    },
+    "F068": {
+      "path": "src/lib/ai/anthropic-provider.ts",
+      "created_by": "B10",
+      "modified_by": [],
+      "exists": true
+    },
+    "F069": {
+      "path": "src/lib/ai/google-ai-provider.ts",
+      "created_by": "B10",
+      "modified_by": [],
+      "exists": true
+    },
+    "F070": {
+      "path": "src/lib/ai/ai-factory.ts",
+      "created_by": "B10",
+      "modified_by": [],
+      "exists": true
+    },
+    "F104": {
+      "path": "src/lib/ai/index.ts",
+      "created_by": "B10",
+      "modified_by": [],
+      "exists": true
+    },
+    "F077": {
+      "path": "src/lib/encryption.ts",
+      "created_by": "B11",
+      "modified_by": [],
+      "exists": true
+    },
+    "F105": {
+      "path": "src/app/api/ai/keys/route.ts",
+      "created_by": "B11",
+      "modified_by": [],
+      "exists": true
+    },
+    "F106": {
+      "path": "src/app/api/ai/validate/route.ts",
+      "created_by": "B11",
+      "modified_by": [],
+      "exists": true
+    },
+    "F081": {
+      "path": "src/hooks/useAIKeys.ts",
+      "created_by": "B11",
+      "modified_by": [],
+      "exists": true
+    },
+    "F074": {
+      "path": "src/lib/cv/cv-extractor.ts",
+      "created_by": "B12",
+      "modified_by": [],
+      "exists": true
+    },
+    "F107": {
+      "path": "src/lib/cv/cv-extraction-prompt.ts",
+      "created_by": "B12",
+      "modified_by": [],
+      "exists": true
+    },
+    "F108": {
+      "path": "src/lib/cv/cv-validator.ts",
+      "created_by": "B12",
+      "modified_by": [],
+      "exists": true
+    },
+    "F109": {
+      "path": "src/lib/cv/index.ts",
+      "created_by": "B12",
+      "modified_by": [],
+      "exists": true
+    },
+    "F110": {
+      "path": "src/app/api/cv/extract/route.ts",
+      "created_by": "B12",
+      "modified_by": [],
+      "exists": true
+    },
+    "F024": {
+      "path": "src/app/api/prompts/route.ts",
+      "created_by": "B17",
+      "modified_by": [],
+      "exists": true
+    },
+    "F118": {
+      "path": "src/app/api/prompts/[id]/route.ts",
+      "created_by": "B17",
+      "modified_by": [],
+      "exists": true
+    },
+    "F119": {
+      "path": "src/lib/prompts/prompt-service.ts",
+      "created_by": "B17",
+      "modified_by": [],
+      "exists": true
+    },
+    "F120": {
+      "path": "src/lib/prompts/index.ts",
+      "created_by": "B17",
+      "modified_by": [],
+      "exists": true
+    },
+    "F121": {
+      "path": "src/lib/prompts/default-prompts.ts",
+      "created_by": "B17",
+      "modified_by": [],
+      "exists": true
+    },
+    "F083": {
+      "path": "src/hooks/usePrompts.ts",
+      "created_by": "B17",
+      "modified_by": [],
+      "exists": true
+    },
+    "F045": {
+      "path": "src/components/prompts/PromptList.tsx",
+      "created_by": "B17",
+      "modified_by": [],
+      "exists": true
+    },
+    "F046": {
+      "path": "src/components/prompts/PromptEditor.tsx",
+      "created_by": "B17",
+      "modified_by": [],
+      "exists": true
+    },
+    "F047": {
+      "path": "src/components/prompts/PromptSelector.tsx",
+      "created_by": "B17",
+      "modified_by": [],
+      "exists": true
+    },
+    "F048": {
+      "path": "src/components/prompts/PromptCategoryFilter.tsx",
+      "created_by": "B17",
+      "modified_by": [],
+      "exists": true
+    },
+    "F122": {
+      "path": "src/components/prompts/PromptCard.tsx",
+      "created_by": "B17",
+      "modified_by": [],
+      "exists": true
+    },
+    "F123": {
+      "path": "src/components/prompts/PromptPreview.tsx",
+      "created_by": "B17",
+      "modified_by": [],
+      "exists": true
+    },
+    "F015": {
+      "path": "src/app/[locale]/prompts/page.tsx",
+      "created_by": "B17",
+      "modified_by": [],
+      "exists": true
+    },
+    "F124": {
+      "path": "src/app/[locale]/prompts/loading.tsx",
+      "created_by": "B17",
+      "modified_by": [],
+      "exists": true
+    },
+    "F075": {
+      "path": "src/lib/generators/docx-generator.ts",
+      "created_by": "B25",
+      "modified_by": [],
+      "exists": true
+    },
+    "F076": {
+      "path": "src/lib/generators/markdown-generator.ts",
+      "created_by": "B26",
+      "modified_by": [],
+      "exists": true
+    },
+    "F142": {
+      "path": "src/lib/generators/docx-styles.ts",
+      "created_by": "B25",
+      "modified_by": [],
+      "exists": true
+    },
+    "F143": {
+      "path": "src/lib/generators/docx-templates.ts",
+      "created_by": "B25",
+      "modified_by": [],
+      "exists": true
+    },
+    "F025": {
+      "path": "src/app/api/export/docx/route.ts",
+      "created_by": "B25",
+      "modified_by": [],
+      "exists": true
+    },
+    "F026": {
+      "path": "src/app/api/export/markdown/route.ts",
+      "created_by": "B26",
+      "modified_by": [],
+      "exists": true
+    },
+    "F144": {
+      "path": "src/lib/generators/index.ts",
+      "created_by": "B25",
+      "modified_by": [
+        "B26"
+      ],
+      "exists": true
+    },
+    "F145": {
+      "path": "src/lib/templates/template-service.ts",
+      "created_by": "B20",
+      "modified_by": [],
+      "exists": true
+    },
+    "F146": {
+      "path": "src/lib/templates/template-parser.ts",
+      "created_by": "B20",
+      "modified_by": [],
+      "exists": true
+    },
+    "F147": {
+      "path": "src/lib/templates/index.ts",
+      "created_by": "B20",
+      "modified_by": [],
+      "exists": true
+    },
+    "F148": {
+      "path": "src/app/api/templates/route.ts",
+      "created_by": "B20",
+      "modified_by": [],
+      "exists": true
+    },
+    "F149": {
+      "path": "src/app/api/templates/[id]/route.ts",
+      "created_by": "B20",
+      "modified_by": [],
+      "exists": true
+    },
+    "F150": {
+      "path": "src/hooks/useTemplates.ts",
+      "created_by": "B20",
+      "modified_by": [],
+      "exists": true
+    },
+    "F060": {
+      "path": "src/components/templates/TemplateUploader.tsx",
+      "created_by": "B20",
+      "modified_by": [],
+      "exists": true
+    },
+    "F061": {
+      "path": "src/components/templates/TemplateSelector.tsx",
+      "created_by": "B20",
+      "modified_by": [],
+      "exists": true
+    },
+    "F062": {
+      "path": "src/components/templates/TemplatePreview.tsx",
+      "created_by": "B20",
+      "modified_by": [],
+      "exists": true
+    },
+    "F151": {
+      "path": "src/components/templates/TemplateList.tsx",
+      "created_by": "B20",
+      "modified_by": [],
+      "exists": true
+    },
+    "F152": {
+      "path": "src/components/templates/TemplateCard.tsx",
+      "created_by": "B20",
+      "modified_by": [],
+      "exists": true
+    },
+    "F049": {
+      "path": "src/components/ai/AIKeyManager.tsx",
+      "created_by": "B23",
+      "modified_by": [],
+      "exists": true
+    },
+    "F165": {
+      "path": "src/components/settings/SettingsNav.tsx",
+      "created_by": "B23",
+      "modified_by": [],
+      "exists": true
+    },
+    "F166": {
+      "path": "src/components/settings/ProfileSettings.tsx",
+      "created_by": "B23",
+      "modified_by": [],
+      "exists": true
+    },
+    "F167": {
+      "path": "src/components/settings/LanguageSettings.tsx",
+      "created_by": "B23",
+      "modified_by": [],
+      "exists": true
+    },
+    "F168": {
+      "path": "src/components/settings/TemplateSettings.tsx",
+      "created_by": "B23",
+      "modified_by": [],
+      "exists": true
+    }
+  }
+}

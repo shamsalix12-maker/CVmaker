@@ -1,0 +1,741 @@
+id: B15
+name: "CV API Routes and Database Integration"
+phase: 1
+phase_name: "CV Management"
+
+goal: |
+  Create API routes for CV CRUD operations and a React hook for CV state management.
+  CVs are stored in Supabase. Each user has one comprehensive CV.
+  This integrates with the AI extraction from B12.
+
+dependencies: [B01, B02, B03, B04, B05, B06, B07, B08, B09, B10, B11, B12, B13, B14]
+
+files_to_create:
+  - id: F022
+    path: "src/app/api/cv/route.ts"
+    description: "API route for CV CRUD (GET, POST, PUT)"
+
+  - id: F082
+    path: "src/hooks/useCV.ts"
+    description: "React hook for CV operations"
+
+  - id: F116
+    path: "src/lib/cv/cv-service.ts"
+    description: "CV service layer for database operations"
+
+files_to_modify:
+  - id: F109
+    path: "src/lib/cv/index.ts"
+    description: "Export CV service"
+
+files_available:
+  - id: F063
+    path: "src/lib/supabase/client.ts"
+    from_block: B06
+  - id: F064
+    path: "src/lib/supabase/server.ts"
+    from_block: B06
+  - id: F079
+    path: "src/lib/types.ts"
+    from_block: B03
+  - id: F078
+    path: "src/lib/constants.ts"
+    from_block: B04
+  - id: F090
+    path: "src/context/AuthContext.tsx"
+    from_block: B07
+  - id: F074
+    path: "src/lib/cv/cv-extractor.ts"
+    from_block: B12
+  - id: F108
+    path: "src/lib/cv/cv-validator.ts"
+    from_block: B12
+
+commands: []
+
+instructions: |
+  1. Create cv-service.ts:
+     ```typescript
+     // ============================================
+     // [F116] src/lib/cv/cv-service.ts
+     // ============================================
+     
+     import { SupabaseClient } from '@supabase/supabase-js';
+     import { ComprehensiveCV } from '@/lib/types';
+     
+     export class CVService {
+       constructor(private supabase: SupabaseClient) {}
+       
+       async getCV(userId: string): Promise<ComprehensiveCV | null> {
+         const { data, error } = await this.supabase
+           .from('comprehensive_cvs')
+           .select('*')
+           .eq('user_id', userId)
+           .single();
+         
+         if (error) {
+           if (error.code === 'PGRST116') {
+             // No rows returned - CV doesn't exist
+             return null;
+           }
+           throw error;
+         }
+         
+         return this.mapDatabaseToCV(data);
+       }
+       
+       async createCV(userId: string, cv: Partial<ComprehensiveCV>): Promise<ComprehensiveCV> {
+         const dbData = this.mapCVToDatabase(userId, cv);
+         
+         const { data, error } = await this.supabase
+           .from('comprehensive_cvs')
+           .insert(dbData)
+           .select()
+           .single();
+         
+         if (error) throw error;
+         return this.mapDatabaseToCV(data);
+       }
+       
+       async updateCV(userId: string, cv: Partial<ComprehensiveCV>): Promise<ComprehensiveCV> {
+         const dbData = this.mapCVToDatabase(userId, cv);
+         
+         const { data, error } = await this.supabase
+           .from('comprehensive_cvs')
+           .update(dbData)
+           .eq('user_id', userId)
+           .select()
+           .single();
+         
+         if (error) throw error;
+         return this.mapDatabaseToCV(data);
+       }
+       
+       async upsertCV(userId: string, cv: Partial<ComprehensiveCV>): Promise<ComprehensiveCV> {
+         const dbData = this.mapCVToDatabase(userId, cv);
+         
+         const { data, error } = await this.supabase
+           .from('comprehensive_cvs')
+           .upsert(dbData, { onConflict: 'user_id' })
+           .select()
+           .single();
+         
+         if (error) throw error;
+         return this.mapDatabaseToCV(data);
+       }
+       
+       async deleteCV(userId: string): Promise<void> {
+         const { error } = await this.supabase
+           .from('comprehensive_cvs')
+           .delete()
+           .eq('user_id', userId);
+         
+         if (error) throw error;
+       }
+       
+       async updateCVField(
+         userId: string, 
+         fieldPath: string, 
+         value: any
+       ): Promise<ComprehensiveCV> {
+         // Get current CV
+         const currentCV = await this.getCV(userId);
+         if (!currentCV) {
+           throw new Error('CV not found');
+         }
+         
+         // Update the specific field
+         const updatedCV = this.setNestedValue(currentCV, fieldPath, value);
+         
+         // Save back to database
+         return this.updateCV(userId, updatedCV);
+       }
+       
+       // Helper: Map database row to ComprehensiveCV type
+       private mapDatabaseToCV(row: any): ComprehensiveCV {
+         return {
+           id: row.id,
+           user_id: row.user_id,
+           personal_info: row.personal_info || {},
+           work_experience: row.work_experience || [],
+           education: row.education || [],
+           skills: row.skills || [],
+           certifications: row.certifications || [],
+           languages: row.languages || [],
+           projects: row.projects || [],
+           additional_sections: row.additional_sections || [],
+           raw_text: row.raw_text || '',
+           created_at: row.created_at,
+           updated_at: row.updated_at,
+         };
+       }
+       
+       // Helper: Map ComprehensiveCV to database format
+       private mapCVToDatabase(userId: string, cv: Partial<ComprehensiveCV>): any {
+         return {
+           user_id: userId,
+           personal_info: cv.personal_info || {},
+           work_experience: cv.work_experience || [],
+           education: cv.education || [],
+           skills: cv.skills || [],
+           certifications: cv.certifications || [],
+           languages: cv.languages || [],
+           projects: cv.projects || [],
+           additional_sections: cv.additional_sections || [],
+           raw_text: cv.raw_text || '',
+         };
+       }
+       
+       // Helper: Set nested object value by path string
+       private setNestedValue(obj: any, path: string, value: any): any {
+         const clone = JSON.parse(JSON.stringify(obj));
+         const keys = path.split('.');
+         let current = clone;
+         
+         for (let i = 0; i < keys.length - 1; i++) {
+           if (!(keys[i] in current)) {
+             current[keys[i]] = {};
+           }
+           current = current[keys[i]];
+         }
+         
+         current[keys[keys.length - 1]] = value;
+         return clone;
+       }
+     }
+     
+     // Factory function
+     export function createCVService(supabase: SupabaseClient): CVService {
+       return new CVService(supabase);
+     }
+     ```
+  
+  2. Create src/app/api/cv/route.ts:
+     ```typescript
+     // ============================================
+     // [F022] src/app/api/cv/route.ts
+     // ============================================
+     
+     import { NextRequest, NextResponse } from 'next/server';
+     import { createServerSupabaseClient } from '@/lib/supabase/server';
+     import { createCVService } from '@/lib/cv/cv-service';
+     import { ComprehensiveCV } from '@/lib/types';
+     
+     // GET - Retrieve user's CV
+     export async function GET(request: NextRequest) {
+       try {
+         const userId = request.headers.get('x-user-id');
+         
+         if (!userId) {
+           return NextResponse.json(
+             { error: 'Unauthorized' },
+             { status: 401 }
+           );
+         }
+         
+         const supabase = createServerSupabaseClient();
+         const cvService = createCVService(supabase);
+         
+         const cv = await cvService.getCV(userId);
+         
+         return NextResponse.json({ cv });
+         
+       } catch (error: any) {
+         console.error('GET /api/cv error:', error);
+         return NextResponse.json(
+           { error: error.message || 'Failed to fetch CV' },
+           { status: 500 }
+         );
+       }
+     }
+     
+     // POST - Create or replace CV
+     export async function POST(request: NextRequest) {
+       try {
+         const userId = request.headers.get('x-user-id');
+         
+         if (!userId) {
+           return NextResponse.json(
+             { error: 'Unauthorized' },
+             { status: 401 }
+           );
+         }
+         
+         const body = await request.json();
+         const cvData: Partial<ComprehensiveCV> = body.cv;
+         
+         if (!cvData) {
+           return NextResponse.json(
+             { error: 'CV data is required' },
+             { status: 400 }
+           );
+         }
+         
+         const supabase = createServerSupabaseClient();
+         const cvService = createCVService(supabase);
+         
+         const cv = await cvService.upsertCV(userId, cvData);
+         
+         return NextResponse.json({ cv, success: true });
+         
+       } catch (error: any) {
+         console.error('POST /api/cv error:', error);
+         return NextResponse.json(
+           { error: error.message || 'Failed to save CV' },
+           { status: 500 }
+         );
+       }
+     }
+     
+     // PUT - Update specific fields of CV
+     export async function PUT(request: NextRequest) {
+       try {
+         const userId = request.headers.get('x-user-id');
+         
+         if (!userId) {
+           return NextResponse.json(
+             { error: 'Unauthorized' },
+             { status: 401 }
+           );
+         }
+         
+         const body = await request.json();
+         const { fieldPath, value, updates } = body;
+         
+         const supabase = createServerSupabaseClient();
+         const cvService = createCVService(supabase);
+         
+         let cv;
+         
+         if (fieldPath && value !== undefined) {
+           // Update single field
+           cv = await cvService.updateCVField(userId, fieldPath, value);
+         } else if (updates) {
+           // Update multiple fields
+           cv = await cvService.updateCV(userId, updates);
+         } else {
+           return NextResponse.json(
+             { error: 'Either fieldPath/value or updates is required' },
+             { status: 400 }
+           );
+         }
+         
+         return NextResponse.json({ cv, success: true });
+         
+       } catch (error: any) {
+         console.error('PUT /api/cv error:', error);
+         return NextResponse.json(
+           { error: error.message || 'Failed to update CV' },
+           { status: 500 }
+         );
+       }
+     }
+     
+     // DELETE - Delete user's CV
+     export async function DELETE(request: NextRequest) {
+       try {
+         const userId = request.headers.get('x-user-id');
+         
+         if (!userId) {
+           return NextResponse.json(
+             { error: 'Unauthorized' },
+             { status: 401 }
+           );
+         }
+         
+         const supabase = createServerSupabaseClient();
+         const cvService = createCVService(supabase);
+         
+         await cvService.deleteCV(userId);
+         
+         return NextResponse.json({ success: true });
+         
+       } catch (error: any) {
+         console.error('DELETE /api/cv error:', error);
+         return NextResponse.json(
+           { error: error.message || 'Failed to delete CV' },
+           { status: 500 }
+         );
+       }
+     }
+     ```
+  
+  3. Create hooks/useCV.ts:
+     ```typescript
+     // ============================================
+     // [F082] src/hooks/useCV.ts
+     // ============================================
+     
+     'use client';
+     
+     import { useState, useEffect, useCallback } from 'react';
+     import { useAuth } from '@/context/AuthContext';
+     import { 
+       ComprehensiveCV, 
+       CVFieldStatus, 
+       CVExtractionResult,
+       AIProviderName 
+     } from '@/lib/types';
+     import { validateExtractedCV, getCompletionPercentage } from '@/lib/cv/cv-validator';
+     
+     interface UseCVReturn {
+       cv: ComprehensiveCV | null;
+       loading: boolean;
+       saving: boolean;
+       error: string | null;
+       fieldStatuses: CVFieldStatus[];
+       completionPercentage: number;
+       
+       // Actions
+       fetchCV: () => Promise<void>;
+       saveCV: (cvData: Partial<ComprehensiveCV>) => Promise<void>;
+       updateCV: (updates: Partial<ComprehensiveCV>) => Promise<void>;
+       updateField: (fieldPath: string, value: any) => Promise<void>;
+       deleteCV: () => Promise<void>;
+       
+       // AI Extraction
+       extractFromFile: (
+         file: File,
+         provider: AIProviderName,
+         model: string
+       ) => Promise<CVExtractionResult>;
+       
+       extractFromText: (
+         text: string,
+         provider: AIProviderName,
+         model: string
+       ) => Promise<CVExtractionResult>;
+       
+       applyExtraction: (result: CVExtractionResult) => Promise<void>;
+     }
+     
+     export function useCV(): UseCVReturn {
+       const { user } = useAuth();
+       
+       const [cv, setCV] = useState<ComprehensiveCV | null>(null);
+       const [loading, setLoading] = useState(true);
+       const [saving, setSaving] = useState(false);
+       const [error, setError] = useState<string | null>(null);
+       
+       // Derived state
+       const fieldStatuses = cv ? validateExtractedCV(cv) : [];
+       const completionPercentage = getCompletionPercentage(fieldStatuses);
+       
+       // Fetch CV on mount
+       useEffect(() => {
+         if (user) {
+           fetchCV();
+         } else {
+           setCV(null);
+           setLoading(false);
+         }
+       }, [user?.id]);
+       
+       const fetchCV = useCallback(async () => {
+         if (!user) return;
+         
+         setLoading(true);
+         setError(null);
+         
+         try {
+           const res = await fetch('/api/cv', {
+             headers: { 'x-user-id': user.id }
+           });
+           
+           const data = await res.json();
+           
+           if (data.error) {
+             throw new Error(data.error);
+           }
+           
+           setCV(data.cv);
+           
+         } catch (err: any) {
+           setError(err.message);
+           setCV(null);
+         } finally {
+           setLoading(false);
+         }
+       }, [user]);
+       
+       const saveCV = useCallback(async (cvData: Partial<ComprehensiveCV>) => {
+         if (!user) return;
+         
+         setSaving(true);
+         setError(null);
+         
+         try {
+           const res = await fetch('/api/cv', {
+             method: 'POST',
+             headers: {
+               'Content-Type': 'application/json',
+               'x-user-id': user.id
+             },
+             body: JSON.stringify({ cv: cvData })
+           });
+           
+           const data = await res.json();
+           
+           if (data.error) {
+             throw new Error(data.error);
+           }
+           
+           setCV(data.cv);
+           
+         } catch (err: any) {
+           setError(err.message);
+           throw err;
+         } finally {
+           setSaving(false);
+         }
+       }, [user]);
+       
+       const updateCV = useCallback(async (updates: Partial<ComprehensiveCV>) => {
+         if (!user) return;
+         
+         setSaving(true);
+         setError(null);
+         
+         try {
+           const res = await fetch('/api/cv', {
+             method: 'PUT',
+             headers: {
+               'Content-Type': 'application/json',
+               'x-user-id': user.id
+             },
+             body: JSON.stringify({ updates })
+           });
+           
+           const data = await res.json();
+           
+           if (data.error) {
+             throw new Error(data.error);
+           }
+           
+           setCV(data.cv);
+           
+         } catch (err: any) {
+           setError(err.message);
+           throw err;
+         } finally {
+           setSaving(false);
+         }
+       }, [user]);
+       
+       const updateField = useCallback(async (fieldPath: string, value: any) => {
+         if (!user) return;
+         
+         setSaving(true);
+         setError(null);
+         
+         try {
+           const res = await fetch('/api/cv', {
+             method: 'PUT',
+             headers: {
+               'Content-Type': 'application/json',
+               'x-user-id': user.id
+             },
+             body: JSON.stringify({ fieldPath, value })
+           });
+           
+           const data = await res.json();
+           
+           if (data.error) {
+             throw new Error(data.error);
+           }
+           
+           setCV(data.cv);
+           
+         } catch (err: any) {
+           setError(err.message);
+           throw err;
+         } finally {
+           setSaving(false);
+         }
+       }, [user]);
+       
+       const deleteCV = useCallback(async () => {
+         if (!user) return;
+         
+         setSaving(true);
+         setError(null);
+         
+         try {
+           const res = await fetch('/api/cv', {
+             method: 'DELETE',
+             headers: { 'x-user-id': user.id }
+           });
+           
+           const data = await res.json();
+           
+           if (data.error) {
+             throw new Error(data.error);
+           }
+           
+           setCV(null);
+           
+         } catch (err: any) {
+           setError(err.message);
+           throw err;
+         } finally {
+           setSaving(false);
+         }
+       }, [user]);
+       
+       const extractFromFile = useCallback(async (
+         file: File,
+         provider: AIProviderName,
+         model: string
+       ): Promise<CVExtractionResult> => {
+         if (!user) throw new Error('Not authenticated');
+         
+         const formData = new FormData();
+         formData.append('file', file);
+         formData.append('provider', provider);
+         formData.append('model', model);
+         
+         const res = await fetch('/api/cv/extract', {
+           method: 'POST',
+           headers: { 'x-user-id': user.id },
+           body: formData
+         });
+         
+         const result = await res.json();
+         
+         if (!res.ok || !result.success) {
+           throw new Error(result.extractionNotes || 'Extraction failed');
+         }
+         
+         return result;
+       }, [user]);
+       
+       const extractFromText = useCallback(async (
+         text: string,
+         provider: AIProviderName,
+         model: string
+       ): Promise<CVExtractionResult> => {
+         if (!user) throw new Error('Not authenticated');
+         
+         const formData = new FormData();
+         formData.append('rawText', text);
+         formData.append('provider', provider);
+         formData.append('model', model);
+         
+         const res = await fetch('/api/cv/extract', {
+           method: 'POST',
+           headers: { 'x-user-id': user.id },
+           body: formData
+         });
+         
+         const result = await res.json();
+         
+         if (!res.ok || !result.success) {
+           throw new Error(result.extractionNotes || 'Extraction failed');
+         }
+         
+         return result;
+       }, [user]);
+       
+       const applyExtraction = useCallback(async (result: CVExtractionResult) => {
+         await saveCV(result.cv);
+       }, [saveCV]);
+       
+       return {
+         cv,
+         loading,
+         saving,
+         error,
+         fieldStatuses,
+         completionPercentage,
+         fetchCV,
+         saveCV,
+         updateCV,
+         updateField,
+         deleteCV,
+         extractFromFile,
+         extractFromText,
+         applyExtraction,
+       };
+     }
+     ```
+  
+  4. Update src/lib/cv/index.ts:
+     ```typescript
+     // ============================================
+     // [F109] src/lib/cv/index.ts (updated)
+     // ============================================
+     
+     export * from './cv-extractor';
+     export * from './cv-extraction-prompt';
+     export * from './cv-validator';
+     export * from './cv-service';
+     ```
+
+checkpoint_tests:
+  - id: T01
+    description: "API route and hook files exist"
+    type: "files_exist"
+    files:
+      - "src/app/api/cv/route.ts"
+      - "src/hooks/useCV.ts"
+      - "src/lib/cv/cv-service.ts"
+
+  - id: T02
+    description: "TypeScript compiles without errors"
+    type: "command"
+    command: "npx tsc --noEmit"
+    expected_exit_code: 0
+
+  - id: T03
+    description: "CV API route has all CRUD methods"
+    type: "grep"
+    file: "src/app/api/cv/route.ts"
+    patterns:
+      - "export async function GET"
+      - "export async function POST"
+      - "export async function PUT"
+      - "export async function DELETE"
+      - "createCVService"
+
+  - id: T04
+    description: "CV service has all methods"
+    type: "grep"
+    file: "src/lib/cv/cv-service.ts"
+    patterns:
+      - "getCV"
+      - "createCV"
+      - "updateCV"
+      - "upsertCV"
+      - "deleteCV"
+      - "updateCVField"
+
+  - id: T05
+    description: "useCV hook exports all functions"
+    type: "grep"
+    file: "src/hooks/useCV.ts"
+    patterns:
+      - "export function useCV"
+      - "fetchCV"
+      - "saveCV"
+      - "updateCV"
+      - "updateField"
+      - "extractFromFile"
+      - "extractFromText"
+      - "applyExtraction"
+
+  - id: T06
+    description: "useCV uses auth context"
+    type: "grep"
+    file: "src/hooks/useCV.ts"
+    patterns:
+      - "useAuth"
+      - "user.id"
+
+  - id: T07
+    description: "CV index exports cv-service"
+    type: "grep"
+    file: "src/lib/cv/index.ts"
+    patterns:
+      - "cv-service"
+
+max_retries: 3

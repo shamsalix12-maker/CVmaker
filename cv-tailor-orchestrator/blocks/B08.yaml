@@ -1,0 +1,234 @@
+id: B08
+name: "Main Layout (Header + Sidebar + Footer)"
+phase: 0
+phase_name: "Foundation"
+
+goal: |
+  Create the main application layout with Header, Sidebar navigation, and Footer.
+  The layout should be responsive, support RTL for Farsi, and include language switching.
+
+dependencies: [B01, B02, B03, B04, B05, B06, B07]
+
+files_to_create:
+  - id: F037
+    path: "src/components/layout/Header.tsx"
+    description: "Top header with logo, app name, language switcher, user info"
+
+  - id: F038
+    path: "src/components/layout/Sidebar.tsx"
+    description: "Side navigation menu with links to all main pages"
+
+  - id: F039
+    path: "src/components/layout/Footer.tsx"
+    description: "Simple footer with copyright"
+
+  - id: F040
+    path: "src/components/layout/LanguageSwitcher.tsx"
+    description: "Button/dropdown to switch between EN and FA"
+
+  - id: F093
+    path: "src/components/layout/MainLayout.tsx"
+    description: "Combines Header, Sidebar, Footer into main app layout"
+
+  - id: F094
+    path: "src/components/layout/MobileMenu.tsx"
+    description: "Hamburger menu for mobile devices"
+
+  - id: F012
+    path: "src/app/[locale]/dashboard/page.tsx"
+    description: "Dashboard page (placeholder for now)"
+
+files_to_modify:
+  - id: F010
+    path: "src/app/[locale]/layout.tsx"
+    description: "Use MainLayout for authenticated pages"
+
+  - id: F087
+    path: "src/i18n/en.json"
+    description: "Add navigation translations"
+
+  - id: F088
+    path: "src/i18n/fa.json"
+    description: "Add navigation translations"
+
+  - id: F009
+    path: "src/app/globals.css"
+    description: "Add layout-specific CSS if needed"
+
+files_available:
+  - id: F001
+    path: "package.json"
+    from_block: B01
+  - id: F027
+    path: "src/components/ui/button.tsx"
+    from_block: B02
+  - id: F036
+    path: "src/components/ui/dropdown-menu.tsx"
+    from_block: B02
+  - id: F079
+    path: "src/lib/types.ts"
+    from_block: B03
+  - id: F080
+    path: "src/lib/utils.ts"
+    from_block: B04
+  - id: F078
+    path: "src/lib/constants.ts"
+    from_block: B04
+  - id: F086
+    path: "src/i18n/config.ts"
+    from_block: B05
+  - id: F087
+    path: "src/i18n/en.json"
+    from_block: B05
+  - id: F088
+    path: "src/i18n/fa.json"
+    from_block: B05
+  - id: F090
+    path: "src/context/AuthContext.tsx"
+    from_block: B07
+
+commands: []
+
+instructions: |
+  1. Create Header.tsx:
+     - Logo/App name on the left (links to dashboard)
+     - LanguageSwitcher component
+     - User avatar/name from AuthContext
+     - Logout button
+     - Use shadcn/ui Button and DropdownMenu
+     - Responsive: hide some elements on mobile
+  
+  2. Create Sidebar.tsx:
+     - Navigation links:
+       * Dashboard (/[locale]/dashboard)
+       * My CV (/[locale]/cv-manager)
+       * New Application (/[locale]/new-application)
+       * My Applications (/[locale]/applications)
+       * Prompt Management (/[locale]/prompts)
+       * Settings (/[locale]/settings)
+     - Highlight active link
+     - Use lucide-react icons
+     - Collapsible on desktop (optional)
+     - Hidden on mobile (replaced by MobileMenu)
+  
+  3. Create Footer.tsx:
+     - Simple: "© 2025 CV Tailor. All rights reserved."
+     - Centered, subtle styling
+  
+  4. Create LanguageSwitcher.tsx:
+     - Show current language (EN/FA)
+     - Click to switch
+     - Use next-intl's useRouter and usePathname
+     - When switching, redirect to same page in new locale
+  
+  5. Create MobileMenu.tsx:
+     - Hamburger icon button
+     - Opens a drawer/sheet with navigation links
+     - Use shadcn Sheet or custom implementation
+  
+  6. Create MainLayout.tsx:
+     - Combines: Header (top), Sidebar (left), main content (center), Footer (bottom)
+     - Responsive grid/flex layout
+     - On mobile: no sidebar, use MobileMenu
+     - Handle RTL: sidebar on right for Farsi
+  
+  7. Create dashboard/page.tsx:
+     - Simple placeholder: "Welcome to Dashboard"
+     - Wrap with AuthGuard
+     - Will be expanded later
+  
+  8. Update [locale]/layout.tsx:
+     - Detect if route needs MainLayout (authenticated routes)
+     - For now, apply MainLayout to all routes except login
+  
+  9. Add to translations (nav section):
+     - dashboard, cv_manager, new_application, applications, prompts, settings
+     - logout, language
+
+checkpoint_tests:
+  - id: T01
+    description: "All layout component files exist"
+    type: "files_exist"
+    files:
+      - "src/components/layout/Header.tsx"
+      - "src/components/layout/Sidebar.tsx"
+      - "src/components/layout/Footer.tsx"
+      - "src/components/layout/LanguageSwitcher.tsx"
+      - "src/components/layout/MainLayout.tsx"
+      - "src/components/layout/MobileMenu.tsx"
+
+  - id: T02
+    description: "Dashboard page exists"
+    type: "files_exist"
+    files:
+      - "src/app/[locale]/dashboard/page.tsx"
+
+  - id: T03
+    description: "TypeScript compiles without errors"
+    type: "command"
+    command: "npx tsc --noEmit"
+    expected_exit_code: 0
+
+  - id: T04
+    description: "Header uses AuthContext"
+    type: "grep"
+    file: "src/components/layout/Header.tsx"
+    patterns:
+      - "useAuth"
+
+  - id: T05
+    description: "Sidebar has all navigation links"
+    type: "grep"
+    file: "src/components/layout/Sidebar.tsx"
+    patterns:
+      - "dashboard"
+      - "cv-manager"
+      - "new-application"
+      - "applications"
+      - "prompts"
+      - "settings"
+
+  - id: T06
+    description: "LanguageSwitcher handles locale change"
+    type: "grep"
+    file: "src/components/layout/LanguageSwitcher.tsx"
+    patterns:
+      - "useRouter"
+      - "usePathname"
+      - "locale"
+
+  - id: T07
+    description: "MainLayout combines all components"
+    type: "grep"
+    file: "src/components/layout/MainLayout.tsx"
+    patterns:
+      - "Header"
+      - "Sidebar"
+      - "Footer"
+
+  - id: T08
+    description: "English translations have nav keys"
+    type: "grep"
+    file: "src/i18n/en.json"
+    patterns:
+      - "dashboard"
+      - "cv_manager"
+      - "new_application"
+      - "settings"
+
+  - id: T09
+    description: "Farsi translations have nav keys"
+    type: "grep"
+    file: "src/i18n/fa.json"
+    patterns:
+      - "dashboard"
+      - "settings"
+
+  - id: T10
+    description: "Dashboard page uses AuthGuard"
+    type: "grep"
+    file: "src/app/[locale]/dashboard/page.tsx"
+    patterns:
+      - "AuthGuard"
+
+max_retries: 3
