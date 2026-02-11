@@ -8,6 +8,8 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { signInWithGoogle } from '@/lib/supabase/auth';
+
 export function GoogleLoginButton() {
     const t = useTranslations('auth');
     const locale = useLocale();
@@ -17,18 +19,7 @@ export function GoogleLoginButton() {
     const handleLogin = async () => {
         setLoading(true);
         try {
-            const { error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: `${window.location.origin}/${locale}/auth/callback`,
-                    queryParams: {
-                        access_type: 'offline',
-                        prompt: 'consent',
-                    },
-                },
-            });
-
-            if (error) throw error;
+            await signInWithGoogle(supabase, locale);
         } catch (error: any) {
             toast.error(t('login_error'));
             console.error('Login error:', error);

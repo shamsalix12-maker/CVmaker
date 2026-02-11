@@ -11,5 +11,15 @@ export async function GET(request: Request) {
         await supabase.auth.exchangeCodeForSession(code);
     }
 
-    return NextResponse.redirect(`${requestUrl.origin}${next}`);
+    // Get locale from the URL (path parameter)
+    const localeMatch = requestUrl.pathname.match(/^\/([^\/]+)\/auth\/callback/);
+    const locale = localeMatch ? localeMatch[1] : 'en';
+
+    // Ensure 'next' path has the locale prefix if it's not already internationalized
+    let redirectPath = next;
+    if (!redirectPath.startsWith(`/${locale}`)) {
+        redirectPath = `/${locale}${redirectPath.startsWith('/') ? '' : '/'}${redirectPath}`;
+    }
+
+    return NextResponse.redirect(`${requestUrl.origin}${redirectPath}`);
 }

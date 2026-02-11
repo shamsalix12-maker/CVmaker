@@ -1,7 +1,7 @@
 import createMiddleware from 'next-intl/middleware';
 import { locales, defaultLocale } from './i18n/config';
-import { createServerClient } from '@supabase/ssr';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { updateSession } from './lib/supabase/middleware';
 
 const intlMiddleware = createMiddleware({
     locales,
@@ -12,33 +12,8 @@ export default async function middleware(request: NextRequest) {
     // 1. Run intl middleware first to handle redirects/rewrites
     const intlResponse = intlMiddleware(request);
 
-    // 2. Initialize Supabase client
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                getAll() {
-                    return request.cookies.getAll();
-                },
-                setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({ name, value, options }) => {
-                        request.cookies.set(name, value);
-                    });
-                    cookiesToSet.forEach(({ name, value, options }) => {
-                        intlResponse.cookies.set(name, value, options);
-                    });
-                },
-            },
-        }
-    );
-
-    // 3. Refresh session
-    // This call essentially checks the JWT and if close to expiry, refreshes it.
-    // The setAll callback above ensures both the request (for downstream) and response (for browser) are updated.
-    await supabase.auth.getUser();
-
-    return intlResponse;
+    // 2. Refresh Supabase session
+    return await updateSession(request, intlResponse);
 }
 
 export const config = {
