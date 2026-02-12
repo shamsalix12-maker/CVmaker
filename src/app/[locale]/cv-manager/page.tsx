@@ -41,7 +41,9 @@ export default function CVManagerPage() {
         updateCV,
         deleteCV,
         applyExtraction,
-        refineCV
+        refineCV,
+        extractFromFile,
+        extractFromText
     } = useCV();
 
     const [activeTab, setActiveTab] = useState<CVTab>('upload');
@@ -178,30 +180,44 @@ export default function CVManagerPage() {
     };
 
     const handleManualConfirm = async (rawText: string) => {
+        const tid = toast.loading(t('analyzing'), {
+            description: t('extraction_started')
+        });
+
         try {
-            await saveCV({
-                personal_info: {
-                    full_name: '',
-                    email: '',
-                    phone: '',
-                    location: '',
-                    linkedin_url: '',
-                    website_url: '',
-                    summary: ''
-                },
-                work_experience: [],
-                education: [],
-                skills: [],
-                projects: [],
-                certifications: [],
-                languages: [],
-                additional_sections: [],
-                raw_text: rawText
-            });
-            toast.success(t('changes_saved'));
-            setActiveTab('fields');
-        } catch (err) {
-            toast.error(t('save_error'));
+            // Attempt AI extraction from the manually entered text
+            const result = await extractFromText(rawText, 'google', 'gemini-1.5-flash');
+
+            if (result.success) {
+                await applyExtraction(result);
+                toast.success(t('extraction_success'), { id: tid });
+                setActiveTab('fields');
+            } else {
+                // Fallback: Save just the raw text if AI fails
+                await saveCV({
+                    personal_info: { full_name: '', email: '', phone: '', location: '', linkedin_url: '', website_url: '', summary: '' },
+                    work_experience: [], education: [], skills: [], projects: [], certifications: [], languages: [], additional_sections: [],
+                    raw_text: rawText
+                });
+                toast.warning(t('extraction_failed_manual_fallback'), { id: tid });
+                setActiveTab('fields');
+            }
+        } catch (err: any) {
+            // Second Fallback: Save just the raw text if request fails
+            try {
+                await saveCV({
+                    personal_info: { full_name: '', email: '', phone: '', location: '', linkedin_url: '', website_url: '', summary: '' },
+                    work_experience: [], education: [], skills: [], projects: [], certifications: [], languages: [], additional_sections: [],
+                    raw_text: rawText
+                });
+                toast.warning(t('save_success_ai_failed'), {
+                    description: err.message,
+                    id: tid
+                });
+                setActiveTab('fields');
+            } catch (saveErr: any) {
+                toast.error(t('save_error'), { id: tid });
+            }
         }
     };
 

@@ -104,7 +104,11 @@
         "refining": "در حال بهینه‌سازی...",
         "refinement_success": "سی‌وی با موفقیت بهینه‌سازی شد",
         "refinement_success_desc": "هوش مصنوعی سی‌وی شما را بر اساس دستورالعمل‌های جدید بازنگری کرد.",
-        "refinement_error": "بهینه‌سازی ناموفق بود"
+        "refinement_error": "بهینه‌سازی ناموفق بود",
+        "analyzing": "در حال تحلیل...",
+        "extraction_started": "فرآیند استخراج اطلاعات آغاز شد",
+        "extraction_failed_manual_fallback": "تحلیل هوشمند ناموفق بود، اما متن خام ذخیره شد.",
+        "save_success_ai_failed": "اطلاعات با موفقیت ذخیره شد اما تحلیل هوشمند با خطا مواجه شد."
     },
     "dashboard": {
         "title": "داشبورد",
@@ -138,9 +142,9 @@
         "page_title": "سی‌وی من",
         "page_subtitle": "سی‌وی جامع خود را مدیریت کنید که برای تمام درخواست‌ها استفاده می‌شود",
         "upload_cv": "آپلود سی‌وی",
-        "upload_description": "سی‌وی جامع خود را به فرمت Word یا Markdown آپلود کنید",
+        "upload_description": "سی‌وی جامع خود را به فرمت‌های PDF، Word یا متنی آپلود کنید",
         "upload_drag_drop": "فایل را اینجا بکشید و رها کنید، یا کلیک کنید",
-        "supported_formats": "فرمت‌های پشتیبانی شده: .docx, .md",
+        "supported_formats": "فرمت‌های پشتیبانی شده: .docx, .pdf, .md, .txt",
         "ai_provider": "سرویس‌دهنده هوش مصنوعی",
         "ai_model": "مدل هوش مصنوعی",
         "or_enter_manually": "یا به صورت دستی وارد کنید",

@@ -104,7 +104,11 @@
         "refining": "Refining...",
         "refinement_success": "CV Refined Successfully",
         "refinement_success_desc": "AI has successfully refined your CV based on your instructions.",
-        "refinement_error": "Refinement Failed"
+        "refinement_error": "Refinement Failed",
+        "analyzing": "Analyzing...",
+        "extraction_started": "AI extraction process started",
+        "extraction_failed_manual_fallback": "AI analysis failed, but raw text was saved.",
+        "save_success_ai_failed": "Data saved successfully, but AI analysis failed."
     },
     "dashboard": {
         "title": "Dashboard",
@@ -138,9 +142,9 @@
         "page_title": "My CV",
         "page_subtitle": "Manage your comprehensive CV that will be used for all applications",
         "upload_cv": "Upload CV",
-        "upload_description": "Upload your comprehensive CV in Word or Markdown format",
+        "upload_description": "Upload your comprehensive CV in PDF, Word, or text format",
         "upload_drag_drop": "Drag and drop your file here, or click to browse",
-        "supported_formats": "Supported formats: .docx, .md",
+        "supported_formats": "Supported formats: .docx, .pdf, .md, .txt",
         "ai_provider": "AI Provider",
         "ai_model": "AI Model",
         "or_enter_manually": "Or enter manually",
