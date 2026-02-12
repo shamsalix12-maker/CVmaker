@@ -65,19 +65,53 @@ export abstract class BaseAIProvider implements AIProvider {
 
     parseJsonResponse<T>(response: string): T | null {
         try {
-            // Try to extract JSON from response
-            // Handle cases where AI wraps JSON in markdown code blocks
+            // First try direct JSON.parse for clean responses
+            try {
+                return JSON.parse(response) as T;
+            } catch {
+                // Ignore and continue to extraction logic
+            }
+
+            // Extract JSON string
             let jsonStr = response;
 
-            // Remove markdown code blocks if present
-            const jsonMatch = response.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-            if (jsonMatch) {
-                jsonStr = jsonMatch[1];
+            // 1. Try to find markdown code blocks first (standard AI behavior)
+            const markdownMatch = response.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+            if (markdownMatch) {
+                jsonStr = markdownMatch[1];
+            } else {
+                // 2. No code blocks - try to find the outermost object or array
+                const startObject = response.indexOf('{');
+                const endObject = response.lastIndexOf('}');
+                const startArray = response.indexOf('[');
+                const endArray = response.lastIndexOf(']');
+
+                // Heuristic: pick the outermost structure
+                let start = -1;
+                let end = -1;
+
+                if (startObject !== -1 && endObject !== -1) {
+                    if (startArray === -1 || startObject < startArray) {
+                        start = startObject;
+                        end = endObject;
+                    } else {
+                        start = startArray;
+                        end = endArray;
+                    }
+                } else if (startArray !== -1 && endArray !== -1) {
+                    start = startArray;
+                    end = endArray;
+                }
+
+                if (start !== -1 && end !== -1 && end > start) {
+                    jsonStr = response.substring(start, end + 1);
+                }
             }
 
             return JSON.parse(jsonStr) as T;
         } catch (e) {
-            console.error('Failed to parse JSON response:', e);
+            console.error('[BaseAIProvider] Failed to parse JSON response:', e);
+            console.error('[BaseAIProvider] Raw response head:', response.substring(0, 500));
             return null;
         }
     }

@@ -54,12 +54,15 @@ export default function CVManagerPage() {
     // Editor State
     const [editingSection, setEditingSection] = useState<CVSection | null>(null);
 
-    // Switch to fields tab when CV is loaded or extracted
+    const [initialSwitchDone, setInitialSwitchDone] = useState(false);
+
+    // Initial switch to fields tab if CV exists and we haven't switched yet
     useEffect(() => {
-        if (cv && activeTab === 'upload') {
+        if (!loading && cv && !initialSwitchDone && activeTab === 'upload') {
             setActiveTab('fields');
+            setInitialSwitchDone(true);
         }
-    }, [cv, activeTab]);
+    }, [cv, loading, initialSwitchDone, activeTab]);
 
     // Handle refinement
     const handleRefine = async () => {
@@ -91,23 +94,38 @@ export default function CVManagerPage() {
 
     // Handle extraction complete
     const handleExtractionComplete = async (result: CVExtractionResult) => {
-        setPendingExtraction(result);
+        // Show immediate feedback
         if (result.extractionNotes) {
             setAiFeedback(result.extractionNotes);
         }
+
+        if (!result.success) {
+            toast.error(t('extraction_error'), {
+                description: result.extractionNotes || 'AI failed to process the CV. Please try another model.',
+            });
+            return;
+        }
+
+        setPendingExtraction(result);
+        const tid = toast.loading(t('saving'), {
+            description: t('extraction_success_desc')
+        });
 
         try {
             await applyExtraction(result);
 
             toast.success(t('extraction_success'), {
                 description: t('extraction_success_desc'),
+                id: tid
             });
 
+            // Explicitly switch to fields to see results
             setActiveTab('fields');
 
         } catch (err: any) {
-            toast.error(t('extraction_error'), {
+            toast.error(t('save_error'), {
                 description: err.message,
+                id: tid
             });
         } finally {
             setPendingExtraction(null);
