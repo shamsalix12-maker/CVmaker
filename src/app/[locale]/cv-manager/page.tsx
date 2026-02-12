@@ -338,8 +338,6 @@ export default function CVManagerPage() {
                                                 onSave={handleCVUpdate}
                                             />
                                         )}
-
-                                        )}
                                     </div>
                                 )}
 
