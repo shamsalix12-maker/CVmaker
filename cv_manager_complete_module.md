@@ -160,7 +160,7 @@ Handles states, errors, and fallback logic.
 ```typescript
 const handleManualConfirm = async (rawText: string) => {
     // try {
-    //    const result = await extractFromText(rawText, 'google', 'gemini-1.5-flash');
+    //    const result = await extractFromText(rawText, 'google', 'gemini-2.5-flash');
     //    if (result.success) { await applyExtraction(result); setActiveTab('fields'); }
     //    else { await saveCV({ raw_text: rawText, ... }); }
     // } catch (err) { ... fallback to saving raw text ... }

@@ -185,8 +185,8 @@ export default function CVManagerPage() {
         });
 
         try {
-            // Attempt AI extraction from the manually entered text using the latest 2.0 Flash model
-            const result = await extractFromText(rawText, 'google', 'gemini-2.0-flash');
+            // Attempt AI extraction from the manually entered text using the latest 2.5 Flash model
+            const result = await extractFromText(rawText, 'google', 'gemini-2.5-flash');
 
             if (result.success) {
                 await applyExtraction(result);
