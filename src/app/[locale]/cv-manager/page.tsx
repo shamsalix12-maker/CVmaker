@@ -16,8 +16,11 @@ import {
 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { MainLayout } from '@/components/layout/MainLayout';
+import { toast } from 'sonner';
+import { CVExtractionResult, ComprehensiveCV, CVSection } from '@/lib/types';
 
 type CVTab = 'upload' | 'fields' | 'preview';
 
@@ -149,6 +152,8 @@ export default function CVManagerPage() {
     const incompleteFields = fieldStatuses.filter(s => !s.is_complete);
 
     const handleManualStart = () => {
+        setPendingExtraction(null);
+        setAiFeedback(null);
         if (!cv) {
             // Initialize with empty CV if none exists
             updateCV({
