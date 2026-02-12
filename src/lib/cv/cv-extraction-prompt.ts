@@ -35,6 +35,7 @@ The JSON structure must be:
     {
       "id": "unique string",
       "degree": "string",
+      "field_of_study": "string",
       "institution": "string",
       "location": "string or null",
       "start_date": "YYYY-MM or null",
@@ -65,6 +66,7 @@ The JSON structure must be:
       "id": "unique string",
       "name": "string",
       "description": "string",
+      "technologies": ["string"],
       "url": "string or null"
     }
   ],
@@ -79,12 +81,15 @@ Rules:
 4. Normalize dates to YYYY-MM format when possible
 5. If a date says "Present" or "Current", set is_current to true and end_date to null
 6. Extract achievements as separate items in the achievements array
-7. Be thorough - don't miss any information
-8. The confidence score should reflect how complete and clear the CV is
-9. Add any observations to the notes field`;
+7. Extract information in the SAME LANGUAGE as the source text (e.g., if CV is in Persian, extract Persian text).
+8. Be thorough - don't miss any information.
+9. The confidence score should reflect how complete and clear the CV is.
+10. Add any observations to the notes field.
+11. If the input contains both English and Persian, prioritize the language that is most predominant.
+12. Ensure all fields in the JSON structure are present, even if they are null or empty arrays.`;
 
 export const CV_EXTRACTION_USER_PROMPT = (cvText: string) =>
-    `Please parse the following CV/Resume and extract all structured information:
+  `Please parse the following CV/Resume and extract all structured information:
 
 ---CV TEXT START---
 ${cvText}
@@ -94,7 +99,7 @@ Respond with JSON only.`;
 
 // Alternative prompt for unclear/short CVs
 export const CV_EXTRACTION_CLARIFICATION_PROMPT = (cvText: string, missingFields: string[]) =>
-    `The CV appears to be missing some important information. Please try to extract what's available and note the missing fields.
+  `The CV appears to be missing some important information. Please try to extract what's available and note the missing fields.
 
 Missing fields: ${missingFields.join(', ')}
 

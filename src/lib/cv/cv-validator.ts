@@ -75,6 +75,15 @@ export function validateExtractedCV(cv: Partial<ComprehensiveCV>): CVFieldStatus
         current_value: cv.languages || [],
     });
 
+    // Check projects
+    statuses.push({
+        field_path: 'projects',
+        field_name: 'projects',
+        is_complete: (cv.projects?.length || 0) > 0,
+        is_required: false,
+        current_value: cv.projects || [],
+    });
+
     return statuses;
 }
 

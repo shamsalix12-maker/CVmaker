@@ -41,10 +41,15 @@ export async function extractCVWithAI(
     };
 
     try {
+        console.log(`[CV Extractor] Starting extraction with ${aiProvider}: ${aiModel}`);
         const response = await provider.complete(config, options);
+        console.log(`[CV Extractor] Raw response received. Length: ${response.length}`);
+
         const parsed = provider.parseJsonResponse<any>(response);
+        console.log(`[CV Extractor] Parsed response:`, parsed ? 'SUCCESS' : 'FAILED');
 
         if (!parsed) {
+            console.error(`[CV Extractor] Failed to parse JSON. Raw response head: ${response.substring(0, 100)}...`);
             return {
                 success: false,
                 cv: {},
@@ -61,21 +66,48 @@ export async function extractCVWithAI(
         const cv: Partial<ComprehensiveCV> = {
             personal_info: parsed.personal_info || {},
             work_experience: (parsed.work_experience || []).map((w: any) => ({
-                ...w,
+                job_title: w.job_title || '',
+                company: w.company || '',
+                location: w.location || '',
+                start_date: w.start_date || '',
+                end_date: w.end_date || null,
+                is_current: !!w.is_current,
+                description: w.description || '',
+                achievements: w.achievements || [],
                 id: w.id || generateId(),
             })),
             education: (parsed.education || []).map((e: any) => ({
-                ...e,
+                degree: e.degree || '',
+                field_of_study: e.field_of_study || '',
+                institution: e.institution || '',
+                location: e.location || '',
+                start_date: e.start_date || '',
+                end_date: e.end_date || '',
+                gpa: e.gpa || null,
+                description: e.description || '',
                 id: e.id || generateId(),
             })),
             skills: parsed.skills || [],
             certifications: (parsed.certifications || []).map((c: any) => ({
-                ...c,
+                name: c.name || '',
+                issuer: c.issuer || '',
+                date_obtained: c.date_obtained || '',
+                expiry_date: c.expiry_date || null,
+                credential_id: c.credential_id || null,
+                credential_url: c.credential_url || null,
                 id: c.id || generateId(),
             })),
-            languages: parsed.languages || [],
+            languages: (parsed.languages || []).map((l: any) => ({
+                language: l.language || '',
+                proficiency: (l.proficiency?.toLowerCase() || 'intermediate') as any,
+            })),
             projects: (parsed.projects || []).map((p: any) => ({
-                ...p,
+                name: p.name || '',
+                description: p.description || '',
+                technologies: p.technologies || [],
+                url: p.url || null,
+                start_date: p.start_date || null,
+                end_date: p.end_date || null,
                 id: p.id || generateId(),
             })),
             additional_sections: [],
@@ -96,6 +128,7 @@ export async function extractCVWithAI(
             extractionNotes: parsed.notes,
         };
     } catch (error: any) {
+        console.error(`[CV Extractor] Critical error:`, error);
         return {
             success: false,
             cv: {},
