@@ -288,6 +288,7 @@ export function useCV(): UseCVReturn {
         formData.append('provider', provider);
         formData.append('model', model);
 
+        // Do not set Content-Type header when using FormData, let the browser do it with the boundary
         const headers: HeadersInit = {};
         if (isDevUser(user.id)) {
             headers['x-user-id'] = user.id;
@@ -301,8 +302,12 @@ export function useCV(): UseCVReturn {
 
         const result = await res.json();
 
-        if (!res.ok || !result.success) {
-            throw new Error(result.extractionNotes || 'Extraction failed');
+        if (!res.ok) {
+            throw new Error(result.error || result.extractionNotes || 'Extraction failed');
+        }
+
+        if (!result.success) {
+            throw new Error(result.extractionNotes || 'AI extraction returned failure status');
         }
 
         return result;

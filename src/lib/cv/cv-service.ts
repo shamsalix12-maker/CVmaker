@@ -50,15 +50,33 @@ export class CVService {
     }
 
     async upsertCV(userId: string, cv: Partial<ComprehensiveCV>): Promise<ComprehensiveCV> {
-        // First check if CV exists
-        const existing = await this.getCV(userId);
+        try {
+            const dbData = this.mapCVToDatabase(userId, cv);
 
-        if (existing) {
-            // Update
-            return this.updateCV(userId, cv);
-        } else {
-            // Create
-            return this.createCV(userId, cv);
+            const { data, error } = await this.supabase
+                .from('comprehensive_cvs')
+                .upsert(
+                    {
+                        ...dbData,
+                        updated_at: new Date().toISOString()
+                    },
+                    {
+                        onConflict: 'user_id',
+                        ignoreDuplicates: false
+                    }
+                )
+                .select()
+                .single();
+
+            if (error) {
+                console.error('[CVService] Upsert failed:', error);
+                throw error;
+            }
+
+            return this.mapDatabaseToCV(data);
+        } catch (error) {
+            console.error('[CVService] Upsert error:', error);
+            throw error;
         }
     }
 

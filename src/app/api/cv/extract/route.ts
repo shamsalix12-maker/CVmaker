@@ -13,91 +13,114 @@ import { AIProviderName } from '@/lib/types';
 import { getUserId } from '@/lib/auth/server-auth';
 
 export async function POST(request: NextRequest) {
-    const userId = await getUserId(request);
-
-    if (!userId) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const supabase = await createServerSupabaseClient();
-
-    const formData = await request.formData();
-    const file = formData.get('file') as File | null;
-    const rawText = formData.get('rawText') as string | null;
-    const provider = formData.get('provider') as AIProviderName;
-    const model = formData.get('model') as string;
-
-    if (!provider || !model) {
-        return NextResponse.json({
-            error: 'AI provider and model are required',
-        }, { status: 400 });
-    }
-
-    // Get the user's API key for this provider
-    const { data: keyData, error: keyError } = await supabase
-        .from('ai_api_keys')
-        .select('api_key_encrypted')
-        .eq('user_id', userId)
-        .eq('provider_name', provider)
-        .single();
-
-    if (keyError || !keyData) {
-        return NextResponse.json({
-            error: `No API key found for ${provider}. Please add one in Settings.`,
-        }, { status: 400 });
-    }
-
-    // Decrypt the API key
-    let apiKey: string;
     try {
-        apiKey = decryptApiKey(keyData.api_key_encrypted);
-    } catch {
-        return NextResponse.json({
-            error: 'Failed to decrypt API key',
-        }, { status: 500 });
-    }
+        const userId = await getUserId(request);
+        if (!userId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
 
-    // Get the raw text (either from file or direct input)
-    let textToProcess: string;
-
-    if (file) {
-        console.log(`[API Extract] Received file: ${file.name}, size: ${file.size}, type: ${file.type}`);
-        try {
-            const parsed = await parseFile(file);
-            textToProcess = parsed.text;
-            console.log(`[API Extract] File parsed successfully. Text length: ${textToProcess.length}`);
-        } catch (error: any) {
-            console.error(`[API Extract] File parsing failed:`, error);
+        // Validate Content-Type
+        const contentType = request.headers.get('content-type') || '';
+        if (!contentType.includes('multipart/form-data')) {
+            console.error(`[API Extract] Invalid Content-Type: ${contentType}`);
             return NextResponse.json({
-                error: `Failed to parse file: ${error.message}`,
+                error: 'Expected multipart/form-data request'
             }, { status: 400 });
         }
-    } else if (rawText) {
-        console.log(`[API Extract] Received raw text. Length: ${rawText.length}`);
-        textToProcess = rawText;
-    } else {
+
+        const supabase = await createServerSupabaseClient();
+        const formData = await request.formData();
+        const file = formData.get('file') as File | null;
+        const rawText = formData.get('rawText') as string | null;
+        const provider = formData.get('provider') as AIProviderName;
+        const model = formData.get('model') as string;
+
+        console.log('[API Extract] Request received:', {
+            hasFile: !!file,
+            hasRawText: !!rawText,
+            provider,
+            model
+        });
+
+        if (!provider || !model) {
+            return NextResponse.json({
+                error: 'AI provider and model are required',
+            }, { status: 400 });
+        }
+
+        // Get the user's API key for this provider
+        const { data: keyData, error: keyError } = await supabase
+            .from('ai_api_keys')
+            .select('api_key_encrypted')
+            .eq('user_id', userId)
+            .eq('provider_name', provider)
+            .single();
+
+        if (keyError || !keyData) {
+            console.error(`[API Extract] API Key not found for ${provider}`);
+            return NextResponse.json({
+                error: `No API key found for ${provider}. Please add one in Settings.`,
+            }, { status: 400 });
+        }
+
+        // Decrypt the API key
+        let apiKey: string;
+        try {
+            apiKey = decryptApiKey(keyData.api_key_encrypted);
+        } catch (e) {
+            console.error('[API Extract] Decryption failed');
+            return NextResponse.json({
+                error: 'Failed to decrypt API key',
+            }, { status: 500 });
+        }
+
+        // Get the raw text (either from file or direct input)
+        let textToProcess: string;
+
+        if (file) {
+            console.log(`[API Extract] Received file: ${file.name}, size: ${file.size}, type: ${file.type}`);
+            try {
+                const parsed = await parseFile(file);
+                textToProcess = parsed.text;
+                console.log(`[API Extract] File parsed successfully. Text length: ${textToProcess.length}`);
+            } catch (error: any) {
+                console.error(`[API Extract] File parsing failed:`, error);
+                return NextResponse.json({
+                    error: `Failed to parse file: ${error.message}`,
+                }, { status: 400 });
+            }
+        } else if (rawText) {
+            console.log(`[API Extract] Received raw text. Length: ${rawText.length}`);
+            textToProcess = rawText;
+        } else {
+            return NextResponse.json({
+                error: 'Either file or rawText is required',
+            }, { status: 400 });
+        }
+
+        if (!textToProcess || textToProcess.trim().length === 0) {
+            return NextResponse.json({
+                error: 'Document text is empty after parsing. Please check the file/text.',
+            }, { status: 400 });
+        }
+
+        // Extract CV fields using AI
+        console.log(`[API Extract] Calling AI extraction with ${provider}...`);
+        const result = await extractCVWithAI(
+            {
+                rawText: textToProcess,
+                aiProvider: provider,
+                aiModel: model,
+            },
+            apiKey
+        );
+        console.log(`[API Extract] AI extraction finished. Success: ${result.success}`);
+
+        return NextResponse.json(result);
+    } catch (error: any) {
+        console.error('[API Extract] Unhandled Server Error:', error);
         return NextResponse.json({
-            error: 'Either file or rawText is required',
-        }, { status: 400 });
+            error: 'Internal server error during extraction process'
+        }, { status: 500 });
     }
-
-    if (!textToProcess || textToProcess.trim().length === 0) {
-        return NextResponse.json({
-            error: 'Document text is empty after parsing. Please check the file/text.',
-        }, { status: 400 });
-    }
-
-    // Extract CV fields using AI
-    console.log(`[API Extract] Calling AI extraction with ${provider}...`);
-    const result = await extractCVWithAI(
-        {
-            rawText: textToProcess,
-            aiProvider: provider,
-            aiModel: model,
-        },
-        apiKey
-    );
-    console.log(`[API Extract] AI extraction finished. Success: ${result.success}`);
-
-    return NextResponse.json(result);
 }

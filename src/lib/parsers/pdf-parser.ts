@@ -5,7 +5,7 @@
 
 /**
  * Parses a PDF file and extracts text.
- * This function only works on the server as it depends on Node.js 'fs' and 'buffer' via pdf-parse.
+ * This function only works on the server as it depends on Node.js internals via pdf-parse.
  */
 export async function parsePdf(file: File): Promise<{ text: string }> {
     if (typeof window !== 'undefined') {
@@ -13,19 +13,30 @@ export async function parsePdf(file: File): Promise<{ text: string }> {
     }
 
     try {
-        // Dynamic require to avoid bundling on client-side
-        const pdf = require('pdf-parse');
-
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        const data = await pdf(buffer);
+        if (buffer.length === 0) {
+            throw new Error('PDF file is empty');
+        }
+
+        // Dynamic import logic for better compatibility
+        const pdfParseModule = (await import('pdf-parse')) as any;
+        // Handle common variations in how pdf-parse is exported
+        const pdfParse = pdfParseModule.default || pdfParseModule.pdfParse || pdfParseModule;
+        const data = await pdfParse(buffer);
+
+        if (!data.text || data.text.trim().length === 0) {
+            throw new Error('PDF contains no extractable text. It might be a scanned document (image).');
+        }
+
+        console.log(`[PDF Parser] Successfully extracted ${data.text.length} characters from ${data.numpages} pages.`);
 
         return {
             text: data.text
         };
     } catch (error: any) {
-        console.error('Error parsing PDF:', error);
-        throw new Error(`Failed to parse PDF: ${error.message}`);
+        console.error('[PDF Parser] Error:', error);
+        throw new Error(`Failed to parse PDF: ${error.message || 'Unknown error'}`);
     }
 }

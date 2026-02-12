@@ -23,54 +23,24 @@ import { generateId } from '@/lib/helpers';
  * Transforms raw AI output into a standardized ComprehensiveCV structure
  */
 function transformAICVData(parsed: any, rawText?: string): Partial<ComprehensiveCV> {
+    const addIds = (arr: any[]) =>
+        (arr || []).map(item => ({
+            ...item,
+            id: item.id || generateId()
+        }));
+
     return {
         personal_info: parsed.personal_info || {},
-        work_experience: (parsed.work_experience || []).map((w: any) => ({
-            job_title: w.job_title || '',
-            company: w.company || '',
-            location: w.location || '',
-            start_date: w.start_date || '',
-            end_date: w.end_date || null,
-            is_current: !!w.is_current,
-            description: w.description || '',
-            achievements: w.achievements || [],
-            id: w.id || generateId(),
-        })),
-        education: (parsed.education || []).map((e: any) => ({
-            degree: e.degree || '',
-            field_of_study: e.field_of_study || '',
-            institution: e.institution || '',
-            location: e.location || '',
-            start_date: e.start_date || '',
-            end_date: e.end_date || '',
-            gpa: e.gpa || null,
-            description: e.description || '',
-            id: e.id || generateId(),
-        })),
+        work_experience: addIds(parsed.work_experience),
+        education: addIds(parsed.education),
         skills: parsed.skills || [],
-        certifications: (parsed.certifications || []).map((c: any) => ({
-            name: c.name || '',
-            issuer: c.issuer || '',
-            date_obtained: c.date_obtained || '',
-            expiry_date: c.expiry_date || null,
-            credential_id: c.credential_id || null,
-            credential_url: c.credential_url || null,
-            id: c.id || generateId(),
-        })),
+        certifications: addIds(parsed.certifications),
         languages: (parsed.languages || []).map((l: any) => ({
             language: l.language || '',
             proficiency: (l.proficiency?.toLowerCase() || 'intermediate') as any,
         })),
-        projects: (parsed.projects || []).map((p: any) => ({
-            name: p.name || '',
-            description: p.description || '',
-            technologies: p.technologies || [],
-            url: p.url || null,
-            start_date: p.start_date || null,
-            end_date: p.end_date || null,
-            id: p.id || generateId(),
-        })),
-        additional_sections: [],
+        projects: addIds(parsed.projects),
+        additional_sections: addIds(parsed.additional_sections),
         raw_text: rawText || parsed.raw_text,
     };
 }
@@ -81,33 +51,39 @@ export async function extractCVWithAI(
 ): Promise<CVExtractionResult> {
     const { rawText, aiProvider, aiModel } = request;
 
-    const provider = getAIProvider(aiProvider);
-
-    const config: AIProviderConfig = {
-        apiKey,
-        temperature: 0.1, // Low temperature for consistent extraction
-        maxTokens: 4096,
-    };
-
-    const options: AICompletionOptions = {
-        model: aiModel,
-        messages: [
-            { id: 'sys-1', role: 'system', content: CV_EXTRACTION_SYSTEM_PROMPT, timestamp: new Date().toISOString() },
-            { id: 'usr-1', role: 'user', content: CV_EXTRACTION_USER_PROMPT(rawText), timestamp: new Date().toISOString() },
-        ],
-        jsonMode: aiProvider !== 'google', // Request JSON output only for non-Google providers to avoid SDK coercion issues
-    };
-
     try {
-        console.log(`[CV Extractor] Starting extraction with ${aiProvider}: ${aiModel}`);
+        const provider = getAIProvider(aiProvider);
+
+        console.log(`[CV Extractor] Starting extraction with ${aiProvider}: ${aiModel}`, {
+            textLength: rawText?.length || 0
+        });
+
+        const config: AIProviderConfig = {
+            apiKey,
+            temperature: 0.1,
+            maxTokens: 4096,
+        };
+
+        const options: AICompletionOptions = {
+            model: aiModel,
+            messages: [
+                { id: 'sys-1', role: 'system', content: CV_EXTRACTION_SYSTEM_PROMPT, timestamp: new Date().toISOString() },
+                { id: 'usr-1', role: 'user', content: CV_EXTRACTION_USER_PROMPT(rawText), timestamp: new Date().toISOString() },
+            ],
+            jsonMode: aiProvider !== 'google',
+        };
+
         const response = await provider.complete(config, options);
-        console.log(`[CV Extractor] Raw response received. Length: ${response.length}`);
+        console.log(`[CV Extractor] Raw response received. Length: ${response?.length || 0}`);
+
+        if (!response) {
+            throw new Error('AI provider returned an empty response');
+        }
 
         const parsed = provider.parseJsonResponse<any>(response);
-        console.log(`[CV Extractor] Parsed response:`, parsed ? 'SUCCESS' : 'FAILED');
 
         if (!parsed) {
-            console.error(`[CV Extractor] Failed to parse JSON. Raw response head: ${response.substring(0, 100)}...`);
+            console.error(`[CV Extractor] Failed to parse JSON. Raw response head: ${response.substring(0, 500)}...`);
             return {
                 success: false,
                 cv: {},
@@ -116,20 +92,20 @@ export async function extractCVWithAI(
                 rawText,
                 aiProvider,
                 aiModel,
-                extractionNotes: 'Failed to parse AI response as JSON',
+                extractionNotes: 'AI failed to return a valid JSON structure. Please try again or use a different model.',
             };
         }
 
         // Transform parsed data to our CV structure
         const cv = transformAICVData(parsed, rawText);
 
-        console.log(`[CV Extractor] Transformation complete.`);
-        console.log(`[CV Extractor] Sections found: 
-            - Work Experience: ${cv.work_experience?.length || 0}
-            - Education: ${cv.education?.length || 0}
-            - Skills: ${cv.skills?.length || 0}
-            - Projects: ${cv.projects?.length || 0}
-        `);
+        console.log(`[CV Extractor] Transformation complete. Sections found:`, {
+            exps: cv.work_experience?.length,
+            edu: cv.education?.length,
+            skills: cv.skills?.length,
+            langs: cv.languages?.length,
+            certs: cv.certifications?.length
+        });
 
         const fieldStatuses = validateExtractedCV(cv);
         const completionPercentage = getCompletionPercentage(fieldStatuses);
@@ -145,7 +121,7 @@ export async function extractCVWithAI(
             extractionNotes: parsed.notes,
         };
     } catch (error: any) {
-        console.error(`[CV Extractor] Critical error:`, error);
+        console.error(`[CV Extractor] Critical error encountered:`, error);
         return {
             success: false,
             cv: {},
@@ -154,7 +130,7 @@ export async function extractCVWithAI(
             rawText,
             aiProvider,
             aiModel,
-            extractionNotes: `Extraction failed: ${error.message}`,
+            extractionNotes: `Extraction failed: ${error.message || 'Unknown AI error'}`,
         };
     }
 }
