@@ -123,6 +123,14 @@ export async function extractCVWithAI(
         // Transform parsed data to our CV structure
         const cv = transformAICVData(parsed, rawText);
 
+        console.log(`[CV Extractor] Transformation complete.`);
+        console.log(`[CV Extractor] Sections found: 
+            - Work Experience: ${cv.work_experience?.length || 0}
+            - Education: ${cv.education?.length || 0}
+            - Skills: ${cv.skills?.length || 0}
+            - Projects: ${cv.projects?.length || 0}
+        `);
+
         const fieldStatuses = validateExtractedCV(cv);
         const completionPercentage = getCompletionPercentage(fieldStatuses);
 

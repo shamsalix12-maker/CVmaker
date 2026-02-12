@@ -5,11 +5,13 @@
 
 import { parseDocx } from './docx-parser';
 import { parseMarkdown } from './markdown-parser';
+import { parsePdf } from './pdf-parser';
 
 export * from './docx-parser';
 export * from './markdown-parser';
+export * from './pdf-parser';
 
-export type SupportedFileType = 'docx' | 'md' | 'txt';
+export type SupportedFileType = 'docx' | 'md' | 'txt' | 'pdf';
 
 /**
  * Detects the type of the file based on its extension
@@ -26,6 +28,8 @@ export function detectFileType(filename: string): SupportedFileType | null {
             return 'md';
         case 'txt':
             return 'txt';
+        case 'pdf':
+            return 'pdf';
         default:
             return null;
     }
@@ -47,6 +51,8 @@ export async function parseFile(file: File): Promise<{ text: string; html?: stri
     } else if (fileType === 'md') {
         const text = await file.text();
         return parseMarkdown(text);
+    } else if (fileType === 'pdf') {
+        return parsePdf(file);
     } else if (fileType === 'txt') {
         const text = await file.text();
         return {

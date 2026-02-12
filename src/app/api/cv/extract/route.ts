@@ -61,15 +61,19 @@ export async function POST(request: NextRequest) {
     let textToProcess: string;
 
     if (file) {
+        console.log(`[API Extract] Received file: ${file.name}, size: ${file.size}, type: ${file.type}`);
         try {
             const parsed = await parseFile(file);
             textToProcess = parsed.text;
+            console.log(`[API Extract] File parsed successfully. Text length: ${textToProcess.length}`);
         } catch (error: any) {
+            console.error(`[API Extract] File parsing failed:`, error);
             return NextResponse.json({
                 error: `Failed to parse file: ${error.message}`,
             }, { status: 400 });
         }
     } else if (rawText) {
+        console.log(`[API Extract] Received raw text. Length: ${rawText.length}`);
         textToProcess = rawText;
     } else {
         return NextResponse.json({
@@ -77,7 +81,14 @@ export async function POST(request: NextRequest) {
         }, { status: 400 });
     }
 
+    if (!textToProcess || textToProcess.trim().length === 0) {
+        return NextResponse.json({
+            error: 'Document text is empty after parsing. Please check the file/text.',
+        }, { status: 400 });
+    }
+
     // Extract CV fields using AI
+    console.log(`[API Extract] Calling AI extraction with ${provider}...`);
     const result = await extractCVWithAI(
         {
             rawText: textToProcess,
@@ -86,6 +97,7 @@ export async function POST(request: NextRequest) {
         },
         apiKey
     );
+    console.log(`[API Extract] AI extraction finished. Success: ${result.success}`);
 
     return NextResponse.json(result);
 }
