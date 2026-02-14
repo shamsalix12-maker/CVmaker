@@ -43,6 +43,9 @@
     - Added a "Delete existing CV and start over" button to the CV Upload screen (Step 2).
     - Connected the deletion logic to the `useCV` hook and added a confirmation dialog to prevent accidental deletion.
     - Ensured the UI state is reset (`extracted_cv` and `gap_analysis` cleared) after successful deletion.
-- **CV Library View**:
-    - Added a "View saved CV directly" button to the first step (Domain Selection) if an existing CV is detected.
-    - This allows users to bypass the extraction and analysis flow and go straight to the comprehensive CV review.
+- **CV Library View & Editability Fixes**:
+    - **State Synchronization**: Fixed a bug where clicking "View saved CV" wouldn't show any data. Now the local state correctly syncs with the `existingCV` prop.
+    - **Full Edit Mode**: Implemented a comprehensive "Edit CV" mode in the review step.
+    - **Refinement**: Users can now modify professional summaries, work experience descriptions, education details, and skills directly.
+    - **Save/Cancel Flow**: Added "Apply Changes" and "Cancel" buttons to ensure data safety.
+    - **Navigation**: Added a functional "Back" button to return to the start/gaps page.

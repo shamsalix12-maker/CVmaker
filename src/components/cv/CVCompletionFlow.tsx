@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState, useCallback, useRef, Fragment } from 'react';
+import { useState, useCallback, useRef, Fragment, useEffect, useMemo } from 'react';
 import { ComprehensiveCV } from '@/lib/types';
 import {
   CVCompletionStep,
@@ -290,7 +290,16 @@ export function CVCompletionFlow({
     cv_language: 'en',
   });
 
+  // Sync with prop if changed
+  useEffect(() => {
+    if (existingCV && !state.extracted_cv) {
+      setState(prev => ({ ...prev, extracted_cv: existingCV }));
+    }
+  }, [existingCV, state.extracted_cv]);
+
   const [isLoading, setIsLoading] = useState(false);
+  const [isEditingReview, setIsEditingReview] = useState(false);
+  const [tempCV, setTempCV] = useState<Partial<ComprehensiveCV> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [rawText, setRawText] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -1058,16 +1067,51 @@ export function CVCompletionFlow({
     return (
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Header */}
-        <div className="text-center">
-          <span className="text-5xl block">✅</span>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mt-3">
-            {locale === 'fa' ? 'بازبینی نهایی رزومه جامع' : 'Final Review of Comprehensive CV'}
-          </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            {locale === 'fa'
-              ? 'رزومه جامع شما آماده است. قبل از ذخیره، آن را بازبینی کنید.'
-              : 'Your comprehensive CV is ready. Review it before saving.'}
-          </p>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex-1 text-center">
+            <span className="text-5xl block">✅</span>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mt-3">
+              {locale === 'fa' ? 'بازبینی نهایی رزومه جامع' : 'Final Review of Comprehensive CV'}
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              {locale === 'fa'
+                ? 'رزومه جامع شما آماده است. قبل از ذخیره، آن را بازبینی یا ویرایش کنید.'
+                : 'Your comprehensive CV is ready. Review or edit it before saving.'}
+            </p>
+          </div>
+        </div>
+
+        {/* Edit Toggle */}
+        <div className="flex justify-end mb-4">
+          {!isEditingReview ? (
+            <button
+              onClick={() => {
+                setTempCV(JSON.parse(JSON.stringify(cv)));
+                setIsEditingReview(true);
+              }}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+            >
+              ✏️ {locale === 'fa' ? 'ویرایش رزومه' : 'Edit CV'}
+            </button>
+          ) : (
+            <div className="flex gap-2">
+              <button
+                onClick={() => setIsEditingReview(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              >
+                {locale === 'fa' ? 'انصراف' : 'Cancel'}
+              </button>
+              <button
+                onClick={() => {
+                  setState(prev => ({ ...prev, extracted_cv: tempCV as any }));
+                  setIsEditingReview(false);
+                }}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                {locale === 'fa' ? 'اعمال تغییرات' : 'Apply Changes'}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Loading overlay for refinement */}
@@ -1089,54 +1133,142 @@ export function CVCompletionFlow({
           <ReviewSection
             title={`👤 ${locale === 'fa' ? 'اطلاعات شخصی' : 'Personal Info'}`}
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-              <ReviewField label={locale === 'fa' ? 'نام' : 'Name'} value={cv.personal_info?.full_name} />
-              <ReviewField label={locale === 'fa' ? 'ایمیل' : 'Email'} value={cv.personal_info?.email} />
-              <ReviewField label={locale === 'fa' ? 'تلفن' : 'Phone'} value={cv.personal_info?.phone} />
-              <ReviewField label={locale === 'fa' ? 'مکان' : 'Location'} value={cv.personal_info?.location} />
-              <ReviewField label="LinkedIn" value={cv.personal_info?.linkedin_url} />
-              <ReviewField label={locale === 'fa' ? 'وبسایت' : 'Website'} value={cv.personal_info?.website_url} />
-            </div>
+            {isEditingReview ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-500">{locale === 'fa' ? 'نام' : 'Name'}</label>
+                  <input
+                    value={tempCV?.personal_info?.full_name || ''}
+                    onChange={e => setTempCV(prev => ({ ...prev, personal_info: { ...(prev?.personal_info as any), full_name: e.target.value } }))}
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-500">{locale === 'fa' ? 'ایمیل' : 'Email'}</label>
+                  <input
+                    value={tempCV?.personal_info?.email || ''}
+                    onChange={e => setTempCV(prev => ({ ...prev, personal_info: { ...(prev?.personal_info as any), email: e.target.value } }))}
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-500">{locale === 'fa' ? 'تلفن' : 'Phone'}</label>
+                  <input
+                    value={tempCV?.personal_info?.phone || ''}
+                    onChange={e => setTempCV(prev => ({ ...prev, personal_info: { ...(prev?.personal_info as any), phone: e.target.value } }))}
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-500">{locale === 'fa' ? 'مکان' : 'Location'}</label>
+                  <input
+                    value={tempCV?.personal_info?.location || ''}
+                    onChange={e => setTempCV(prev => ({ ...prev, personal_info: { ...(prev?.personal_info as any), location: e.target.value } }))}
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                <ReviewField label={locale === 'fa' ? 'نام' : 'Name'} value={cv.personal_info?.full_name} />
+                <ReviewField label={locale === 'fa' ? 'ایمیل' : 'Email'} value={cv.personal_info?.email} />
+                <ReviewField label={locale === 'fa' ? 'تلفن' : 'Phone'} value={cv.personal_info?.phone} />
+                <ReviewField label={locale === 'fa' ? 'مکان' : 'Location'} value={cv.personal_info?.location} />
+                <ReviewField label="LinkedIn" value={cv.personal_info?.linkedin_url} />
+                <ReviewField label={locale === 'fa' ? 'وبسایت' : 'Website'} value={cv.personal_info?.website_url} />
+              </div>
+            )}
           </ReviewSection>
 
           {/* Summary */}
-          {cv.personal_info?.summary && (
+          {(cv.personal_info?.summary || isEditingReview) && (
             <ReviewSection
               title={`📝 ${locale === 'fa' ? 'خلاصه حرفه‌ای' : 'Professional Summary'}`}
             >
-              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                {cv.personal_info.summary}
-              </p>
+              {isEditingReview ? (
+                <textarea
+                  value={tempCV?.personal_info?.summary || ''}
+                  onChange={e => setTempCV(prev => ({
+                    ...prev,
+                    personal_info: { ...(prev?.personal_info as any), summary: e.target.value }
+                  }))}
+                  className="w-full p-3 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                  rows={4}
+                  dir={isRTL ? 'rtl' : 'ltr'}
+                />
+              ) : (
+                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                  {cv.personal_info?.summary}
+                </p>
+              )}
             </ReviewSection>
           )}
 
-          {/* Work Experience */}
           <ReviewSection
             title={`💼 ${locale === 'fa' ? 'سوابق شغلی' : 'Work Experience'} (${cv.work_experience?.length || 0})`}
           >
-            {(cv.work_experience?.length || 0) > 0 ? (
-              <div className="space-y-3">
-                {cv.work_experience!.map((w, i) => (
-                  <div key={w.id || i} className="text-sm">
-                    <div className="font-medium text-gray-900 dark:text-white">
-                      {w.job_title} {w.company && `@ ${w.company}`}
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      {w.start_date}{w.is_current ? ` — ${locale === 'fa' ? 'اکنون' : 'Present'}` : w.end_date ? ` — ${w.end_date}` : ''}
-                      {w.location ? ` • ${w.location}` : ''}
-                    </div>
-                    {w.description && (
-                      <p className="text-gray-600 dark:text-gray-400 mt-1">{w.description}</p>
-                    )}
-                    {w.achievements && w.achievements.length > 0 && (
-                      <ul className="mt-1 space-y-0.5">
-                        {w.achievements.map((a, j) => (
-                          <li key={j} className="flex items-start gap-1 text-gray-600 dark:text-gray-400">
-                            <span className="text-gray-400 flex-shrink-0">•</span>
-                            <span>{a}</span>
-                          </li>
-                        ))}
-                      </ul>
+            {(cv.work_experience?.length || 0) > 0 || isEditingReview ? (
+              <div className="space-y-6">
+                {(isEditingReview ? (tempCV?.work_experience || []) : (cv.work_experience || [])).map((w, i) => (
+                  <div key={w.id || i} className="text-sm p-3 bg-gray-50/50 dark:bg-gray-900/20 rounded-lg border border-gray-100 dark:border-gray-800">
+                    {isEditingReview ? (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <input
+                            value={w.job_title}
+                            placeholder={locale === 'fa' ? 'عنوان شغلی' : 'Job Title'}
+                            onChange={e => {
+                              const newWork = [...(tempCV?.work_experience || [])];
+                              newWork[i] = { ...newWork[i], job_title: e.target.value };
+                              setTempCV(prev => ({ ...prev, work_experience: newWork }));
+                            }}
+                            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          />
+                          <input
+                            value={w.company}
+                            placeholder={locale === 'fa' ? 'شرکت' : 'Company'}
+                            onChange={e => {
+                              const newWork = [...(tempCV?.work_experience || [])];
+                              newWork[i] = { ...newWork[i], company: e.target.value };
+                              setTempCV(prev => ({ ...prev, work_experience: newWork }));
+                            }}
+                            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          />
+                        </div>
+                        <textarea
+                          value={w.description}
+                          placeholder={locale === 'fa' ? 'توضیحات' : 'Description'}
+                          onChange={e => {
+                            const newWork = [...(tempCV?.work_experience || [])];
+                            newWork[i] = { ...newWork[i], description: e.target.value };
+                            setTempCV(prev => ({ ...prev, work_experience: newWork }));
+                          }}
+                          className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white h-20"
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <div className="font-medium text-gray-900 dark:text-white">
+                          {w.job_title} {w.company && `@ ${w.company}`}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {w.start_date}{w.is_current ? ` — ${locale === 'fa' ? 'اکنون' : 'Present'}` : w.end_date ? ` — ${w.end_date}` : ''}
+                          {w.location ? ` • ${w.location}` : ''}
+                        </div>
+                        {w.description && (
+                          <p className="text-gray-600 dark:text-gray-400 mt-1">{w.description}</p>
+                        )}
+                        {w.achievements && w.achievements.length > 0 && (
+                          <ul className="mt-1 space-y-0.5">
+                            {w.achievements.map((a, j) => (
+                              <li key={j} className="flex items-start gap-1 text-gray-600 dark:text-gray-400">
+                                <span className="text-gray-400 flex-shrink-0">•</span>
+                                <span>{a}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </>
                     )}
                   </div>
                 ))}
@@ -1150,23 +1282,83 @@ export function CVCompletionFlow({
           <ReviewSection
             title={`🎓 ${locale === 'fa' ? 'تحصیلات' : 'Education'} (${cv.education?.length || 0})`}
           >
-            {(cv.education?.length || 0) > 0 ? (
-              <div className="space-y-2">
-                {cv.education!.map((e, i) => (
-                  <div key={e.id || i} className="text-sm">
-                    <div className="font-medium text-gray-900 dark:text-white">
-                      {e.degree}{e.field_of_study ? ` — ${e.field_of_study}` : ''}
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      {e.institution}
-                      {e.end_date ? ` (${e.end_date})` : ''}
-                      {e.gpa ? ` • GPA: ${e.gpa}` : ''}
-                    </div>
+            {(cv.education?.length || 0) > 0 || isEditingReview ? (
+              <div className="space-y-4">
+                {(isEditingReview ? (tempCV?.education || []) : (cv.education || [])).map((e, i) => (
+                  <div key={e.id || i} className="text-sm p-3 bg-gray-50/50 dark:bg-gray-900/20 rounded-lg border border-gray-100 dark:border-gray-800">
+                    {isEditingReview ? (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <input
+                            value={e.degree}
+                            placeholder={locale === 'fa' ? 'مدرک' : 'Degree'}
+                            onChange={v => {
+                              const newEdu = [...(tempCV?.education || [])];
+                              newEdu[i] = { ...newEdu[i], degree: v.target.value };
+                              setTempCV(prev => ({ ...prev, education: newEdu }));
+                            }}
+                            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          />
+                          <input
+                            value={e.institution}
+                            placeholder={locale === 'fa' ? 'موسسه' : 'Institution'}
+                            onChange={v => {
+                              const newEdu = [...(tempCV?.education || [])];
+                              newEdu[i] = { ...newEdu[i], institution: v.target.value };
+                              setTempCV(prev => ({ ...prev, education: newEdu }));
+                            }}
+                            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="font-medium text-gray-900 dark:text-white">
+                          {e.degree}{e.field_of_study ? ` — ${e.field_of_study}` : ''}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {e.institution}
+                          {e.end_date ? ` (${e.end_date})` : ''}
+                          {e.gpa ? ` • GPA: ${e.gpa}` : ''}
+                        </div>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>
             ) : (
               <EmptyState locale={locale} />
+            )}
+          </ReviewSection>
+
+          {/* Skills */}
+          <ReviewSection
+            title={`🛠️ ${locale === 'fa' ? 'مهارت‌ها' : 'Skills'} (${cv.skills?.length || 0})`}
+          >
+            {isEditingReview ? (
+              <div className="space-y-2">
+                <textarea
+                  value={(tempCV?.skills || []).join(', ')}
+                  onChange={e => setTempCV(prev => ({ ...prev, skills: e.target.value.split(',').map(s => s.trim()).filter(Boolean) }))}
+                  className="w-full p-3 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white h-24 focus:ring-2 focus:ring-blue-500 outline-none"
+                  placeholder={locale === 'fa' ? 'مهارت‌ها را با کاما جدا کنید (مثلاً: React, TypeScript, Node.js)' : 'Enter skills separated by commas'}
+                />
+                <p className="text-[10px] text-gray-500">
+                  {locale === 'fa' ? 'مهارت‌ها را با علامت کاما انگلیسی (,) از هم جدا کنید.' : 'Separate skills with English commas (,).'}
+                </p>
+              </div>
+            ) : (
+              (cv.skills?.length || 0) > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {cv.skills!.map((s, i) => (
+                    <span key={i} className="px-2.5 py-1 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-xs text-gray-700 dark:text-gray-300">
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState locale={locale} />
+              )
             )}
           </ReviewSection>
 
@@ -1208,51 +1400,95 @@ export function CVCompletionFlow({
           )}
 
           {/* Languages */}
-          {(cv.languages?.length || 0) > 0 && (
+          {(cv.languages?.length || 0) > 0 || isEditingReview && (
             <ReviewSection
-              title={`🌐 ${locale === 'fa' ? 'زبان‌ها' : 'Languages'} (${cv.languages!.length})`}
+              title={`🌐 ${locale === 'fa' ? 'زبان‌ها' : 'Languages'} (${cv.languages?.length || 0})`}
             >
-              <div className="flex flex-wrap gap-2">
-                {cv.languages!.map((l, i) => (
-                  <span key={i} className="px-2.5 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-xs">
-                    {l.language} ({l.proficiency})
-                  </span>
-                ))}
-              </div>
+              {isEditingReview ? (
+                <textarea
+                  value={(tempCV?.languages || []).map(l => `${l.language} (${l.proficiency})`).join(', ')}
+                  onChange={e => setTempCV(prev => ({
+                    ...prev,
+                    languages: e.target.value.split(',').map(s => {
+                      const parts = s.trim().match(/^(.*?)\s*\((.*?)\)$/) || [s.trim(), s.trim(), 'fluent'];
+                      return { language: parts[1], proficiency: parts[2] as any };
+                    }).filter(l => l.language)
+                  }))}
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white h-20"
+                  placeholder={locale === 'fa' ? 'مثال: English (fluent), Persian (native)' : 'Example: English (fluent), Persian (native)'}
+                />
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {cv.languages!.map((l, i) => (
+                    <span key={i} className="px-2.5 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-xs">
+                      {l.language} ({l.proficiency})
+                    </span>
+                  ))}
+                </div>
+              )}
             </ReviewSection>
           )}
 
           {/* Projects */}
-          {(cv.projects?.length || 0) > 0 && (
+          {(cv.projects?.length || 0) > 0 || isEditingReview && (
             <ReviewSection
-              title={`🚀 ${locale === 'fa' ? 'پروژه‌ها' : 'Projects'} (${cv.projects!.length})`}
+              title={`🚀 ${locale === 'fa' ? 'پروژه‌ها' : 'Projects'} (${cv.projects?.length || 0})`}
             >
-              <div className="space-y-2">
-                {cv.projects!.map((p, i) => (
-                  <div key={p.id || i} className="text-sm">
-                    <div className="font-medium text-gray-900 dark:text-white">
-                      {p.name}
-                      {p.url && (
-                        <a href={p.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 text-xs ms-2">
-                          🔗
-                        </a>
+              {isEditingReview ? (
+                <div className="space-y-4">
+                  {(tempCV?.projects || []).map((p, i) => (
+                    <div key={p.id || i} className="space-y-2 p-3 bg-gray-50/50 dark:bg-gray-900/20 rounded-lg border border-gray-100 dark:border-gray-800">
+                      <input
+                        value={p.name}
+                        onChange={e => {
+                          const newProj = [...(tempCV?.projects || [])];
+                          newProj[i] = { ...newProj[i], name: e.target.value };
+                          setTempCV(prev => ({ ...prev, projects: newProj }));
+                        }}
+                        className="w-full p-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        placeholder={locale === 'fa' ? 'نام پروژه' : 'Project Name'}
+                      />
+                      <textarea
+                        value={p.description}
+                        onChange={e => {
+                          const newProj = [...(tempCV?.projects || [])];
+                          newProj[i] = { ...newProj[i], description: e.target.value };
+                          setTempCV(prev => ({ ...prev, projects: newProj }));
+                        }}
+                        className="w-full p-2 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white h-16"
+                        placeholder={locale === 'fa' ? 'توضیحات پروژه' : 'Project Description'}
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {cv.projects!.map((p, i) => (
+                    <div key={p.id || i} className="text-sm">
+                      <div className="font-medium text-gray-900 dark:text-white">
+                        {p.name}
+                        {p.url && (
+                          <a href={p.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 text-xs ms-2">
+                            🔗
+                          </a>
+                        )}
+                      </div>
+                      {p.description && (
+                        <p className="text-gray-600 dark:text-gray-400 text-xs mt-0.5">{p.description}</p>
+                      )}
+                      {p.technologies && p.technologies.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {p.technologies.map((t, j) => (
+                            <span key={j} className="px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded text-[10px]">
+                              {t}
+                            </span>
+                          ))}
+                        </div>
                       )}
                     </div>
-                    {p.description && (
-                      <p className="text-gray-600 dark:text-gray-400 text-xs mt-0.5">{p.description}</p>
-                    )}
-                    {p.technologies && p.technologies.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {p.technologies.map((t, j) => (
-                          <span key={j} className="px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded text-[10px]">
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </ReviewSection>
           )}
 
@@ -1276,10 +1512,12 @@ export function CVCompletionFlow({
         {/* Actions */}
         <div className="flex items-center justify-between pt-2">
           <button
-            onClick={() => goToStep('gap_analysis')}
+            onClick={() => goToStep(state.gap_analysis ? 'gap_analysis' : 'domain_selection')}
             className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
           >
-            {isRTL ? '→' : '←'} {locale === 'fa' ? 'بازگشت به نواقص' : 'Back to Gaps'}
+            {isRTL ? '→' : '←'} {locale === 'fa'
+              ? (state.gap_analysis ? 'بازگشت به نواقص' : 'بازگشت به شروع')
+              : (state.gap_analysis ? 'Back to Gaps' : 'Back to Start')}
           </button>
           <button
             onClick={handleSave}
