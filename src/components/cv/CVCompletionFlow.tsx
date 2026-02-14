@@ -215,6 +215,7 @@ interface CVCompletionFlowProps {
   aiModel: string;
   onComplete: (cv: Partial<ComprehensiveCV>) => void;
   refineCV?: (params: {
+    currentCV?: Partial<ComprehensiveCV>;
     resolvedGaps?: { gapId: string; userInput: string }[];
     selectedDomains?: string[];
     instructions?: string;
@@ -471,6 +472,7 @@ export function CVCompletionFlow({
     try {
       if (refineCV) {
         const result = await refineCV({
+          currentCV: state.extracted_cv,
           resolvedGaps,
           selectedDomains: state.selected_domains,
           cvLanguage: state.cv_language,

@@ -23,3 +23,15 @@
     - Explained `safeRefineCV` merge logic (never delete).
     - Detailed `JSON repair` mechanism (bracket counting).
     - Clarified scoring breakdown in `assessFieldQuality`.
+
+### Final CV Preservation & Race Condition Fix (2026-02-14)
+- **Status**: Critical fix for data loss.
+- **Root Causes Identified**:
+    1. **Stale State**: The refinement hook was using the hook's own state (often empty) instead of the wizard's active `extracted_cv`.
+    2. **Race Condition**: Auto-advancing stages led to API calls before state updates were finalized.
+- **Implemented Fixes**:
+    - **State Sync**: Updated `refineCV` to accept `currentCV` as a parameter. Wizard now sends its latest data.
+    - **Paranoid Safe Merge**: Hardened `safeRefineCV` on the server. It now performs **Integrity Checks**.
+    - **Automatic Restoration**: If a section's entry count decreases after AI refinement, the server **automatically restores** it from the original data.
+    - **Summary Protection**: Added a check to prevent AI from drastically shortening the professional summary.
+- **Result**: Data integrity is now guaranteed at multiple levels (State, API, and Merge logic).

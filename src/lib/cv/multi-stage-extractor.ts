@@ -94,7 +94,7 @@ export async function extractCVMultiStage(
 
   for (const stage of STAGES) {
     console.log(`[Multi-Stage] Starting stage: ${stage.name}`);
-    
+
     let result: any = null;
     let retries = 0;
     const MAX_RETRIES = 2;
@@ -128,7 +128,7 @@ export async function extractCVMultiStage(
         };
 
         const response = await provider.complete(stageConfig, options);
-        
+
         console.log(`[Multi-Stage] ${stage.name} response length: ${response?.length || 0}`);
 
         // JSON Repair
@@ -147,10 +147,10 @@ export async function extractCVMultiStage(
       }
     }
 
-    stageResults[stage.name] = { 
-      success: !!result, 
+    stageResults[stage.name] = {
+      success: !!result,
       retries,
-      data: result 
+      data: result
     };
 
     // ذخیره نتایج
@@ -174,11 +174,11 @@ export async function extractCVMultiStage(
   // Validation
   const validation = validateExtraction(extractedData, rawText, cvLanguage);
 
-  return { 
-    extractedData, 
-    gapAnalysis, 
-    stageResults, 
-    validation 
+  return {
+    extractedData,
+    gapAnalysis,
+    stageResults,
+    validation
   };
 }
 
@@ -188,7 +188,7 @@ export async function extractCVMultiStage(
 
 function getStageSystemPrompt(stageName: string, cvLanguage: string): string {
   const lang = cvLanguage === 'fa' ? 'Persian (Farsi)' : 'English';
-  
+
   return `You are a CV parser. Extract ONLY the requested section.
 
 CRITICAL RULES:
@@ -200,11 +200,11 @@ CRITICAL RULES:
 }
 
 function buildPersonalInfoPrompt(
-  rawText: string, 
-  _domains: CVDomainId[], 
+  rawText: string,
+  _domains: CVDomainId[],
   lang: string
 ): string {
-  const langNote = lang === 'en' 
+  const langNote = lang === 'en'
     ? 'IMPORTANT: This is an English CV. Keep ALL text in English. DO NOT translate to Persian or any other language.'
     : 'IMPORTANT: This is a Persian CV. Keep ALL text in Persian. DO NOT translate to English or any other language.';
 
@@ -230,8 +230,8 @@ ${rawText}
 }
 
 function buildWorkExperiencePrompt(
-  rawText: string, 
-  _domains: CVDomainId[], 
+  rawText: string,
+  _domains: CVDomainId[],
   lang: string
 ): string {
   const langNote = lang === 'en'
@@ -270,8 +270,8 @@ ${rawText}
 }
 
 function buildEducationSkillsPrompt(
-  rawText: string, 
-  _domains: CVDomainId[], 
+  rawText: string,
+  _domains: CVDomainId[],
   lang: string
 ): string {
   const langNote = lang === 'en'
@@ -316,8 +316,8 @@ ${rawText}
 }
 
 function buildGapAnalysisPrompt(
-  rawText: string, 
-  domains: CVDomainId[], 
+  rawText: string,
+  domains: CVDomainId[],
   lang: string
 ): string {
   const langNote = lang === 'en'
@@ -383,22 +383,22 @@ export function safeParseJSON(response: string): any {
   // Step 3: Find JSON boundaries
   const firstBrace = jsonStr.indexOf('{');
   const firstBracket = jsonStr.indexOf('[');
-  
+
   let start: number;
   let isArray = false;
-  
+
   if (firstBrace === -1 && firstBracket === -1) {
     console.error('[JSON Repair] No JSON structure found');
     return null;
   }
-  
+
   if (firstBracket !== -1 && (firstBrace === -1 || firstBracket < firstBrace)) {
     start = firstBracket;
     isArray = true;
   } else {
     start = firstBrace;
   }
-  
+
   jsonStr = jsonStr.substring(start);
 
   // Step 4: Repair
@@ -410,7 +410,7 @@ export function safeParseJSON(response: string): any {
   } catch (e) {
     console.error('[JSON Repair] Final parse failed:', (e as Error).message);
     console.error('[JSON Repair] Attempted (first 200 chars):', jsonStr.substring(0, 200));
-    
+
     // Last resort: try to extract partial data
     return extractPartialJsonData(jsonStr);
   }
@@ -422,7 +422,7 @@ function repairTruncatedJSON(json: string, isArray: boolean): string {
   // 1. Check for unclosed strings
   let inString = false;
   let escapeNext = false;
-  
+
   for (let i = 0; i < str.length; i++) {
     if (escapeNext) {
       escapeNext = false;
@@ -436,7 +436,7 @@ function repairTruncatedJSON(json: string, isArray: boolean): string {
       inString = !inString;
     }
   }
-  
+
   // Close unclosed string
   if (inString) {
     str += '"';
@@ -446,12 +446,12 @@ function repairTruncatedJSON(json: string, isArray: boolean): string {
   let braces = 0;
   let brackets = 0;
   inString = false;
-  
+
   for (let i = 0; i < str.length; i++) {
     if (str[i] === '\\' && inString) { i++; continue; }
     if (str[i] === '"') { inString = !inString; continue; }
     if (inString) continue;
-    
+
     if (str[i] === '{') braces++;
     else if (str[i] === '}') braces--;
     else if (str[i] === '[') brackets++;
@@ -481,13 +481,13 @@ function repairTruncatedJSON(json: string, isArray: boolean): string {
 
 function extractPartialJsonData(json: string): any {
   const result: any = {};
-  
+
   try {
     // Try to extract personal_info fields
     const nameMatch = json.match(/"full_name"\s*:\s*"([^"]*)"/);
     const emailMatch = json.match(/"email"\s*:\s*"([^"]*)"/);
     const phoneMatch = json.match(/"phone"\s*:\s*"([^"]*)"/);
-    
+
     if (nameMatch || emailMatch || phoneMatch) {
       result.personal_info = {
         full_name: nameMatch?.[1] || null,
@@ -528,7 +528,7 @@ function extractPartialJsonData(json: string): any {
 // ═══════════════════════════════════════════════════════════
 
 export function validateExtraction(
-  extracted: any, 
+  extracted: any,
   rawText: string,
   expectedLanguage: string
 ): ValidationResult {
@@ -540,26 +540,26 @@ export function validateExtraction(
   // Personal Info (20 points)
   if (extracted.personal_info?.full_name) score += 5;
   else warnings.push('Missing full_name');
-  
+
   if (extracted.personal_info?.email) score += 5;
   else warnings.push('Missing email');
-  
+
   if (extracted.personal_info?.phone) score += 5;
-  
+
   if (extracted.personal_info?.summary && extracted.personal_info.summary.length > 20) score += 5;
   else warnings.push('Missing or short summary');
 
   // Work Experience (30 points)
   const workCount = extracted.work_experience?.length || 0;
   const hasWorkKeywords = /experience|work|position|role|job|employ|manager|director|engineer|developer|professor|lecturer/i.test(rawText);
-  
+
   if (workCount > 0) {
     score += 20;
     // Check quality
     const avgDescLength = extracted.work_experience.reduce(
       (sum: number, w: any) => sum + (w.description?.length || 0), 0
     ) / workCount;
-    
+
     if (avgDescLength > 50) score += 10;
     else warnings.push('Work experiences have short descriptions');
   } else if (hasWorkKeywords) {
@@ -569,7 +569,7 @@ export function validateExtraction(
   // Education (20 points)
   const eduCount = extracted.education?.length || 0;
   const hasEduKeywords = /education|university|degree|bachelor|master|phd|diploma|school|college/i.test(rawText);
-  
+
   if (eduCount > 0) {
     score += 20;
   } else if (hasEduKeywords) {
@@ -604,17 +604,17 @@ export function validateExtraction(
 }
 
 export function validateLanguage(
-  data: any, 
+  data: any,
   expectedLanguage: string
 ): { isValid: boolean; violations: string[] } {
   const violations: string[] = [];
-  
+
   // Persian/Arabic Unicode ranges
   const persianRegex = /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/;
-  
+
   // For English CV, check for Persian characters
   // For Persian CV, allow both Persian and English (technical terms)
-  
+
   function checkValue(value: any, path: string): void {
     if (typeof value === 'string') {
       if (expectedLanguage === 'en' && persianRegex.test(value)) {
@@ -631,9 +631,9 @@ export function validateLanguage(
       Object.entries(value).forEach(([k, v]) => checkValue(v, `${path}.${k}`));
     }
   }
-  
+
   checkValue(data, 'root');
-  
+
   return {
     isValid: violations.length === 0,
     violations,
@@ -654,7 +654,7 @@ export function safeRefineCV(
   // Personal Info: only fill empty fields
   if (refinedCV.personal_info) {
     if (!result.personal_info) result.personal_info = {};
-    
+
     for (const [key, value] of Object.entries(refinedCV.personal_info)) {
       const currentValue = (result.personal_info as any)[key];
       // Only replace if current is empty/null and new has value
@@ -667,13 +667,13 @@ export function safeRefineCV(
   // Work Experience: NEVER delete, only add or enhance
   if (refinedCV.work_experience && refinedCV.work_experience.length > 0) {
     if (!result.work_experience) result.work_experience = [];
-    
+
     for (const refinedWork of refinedCV.work_experience) {
       const existingIdx = result.work_experience.findIndex(
-        (w: any) => w.id === refinedWork.id || 
-                     (w.company === refinedWork.company && w.job_title === refinedWork.job_title)
+        (w: any) => w.id === refinedWork.id ||
+          (w.company === refinedWork.company && w.job_title === refinedWork.job_title)
       );
-      
+
       if (existingIdx >= 0) {
         const existing = result.work_experience[existingIdx];
         // Only fill empty fields
@@ -683,8 +683,8 @@ export function safeRefineCV(
           }
         }
         // For description: only replace if new is longer
-        if (refinedWork.description && 
-            (!existing.description || refinedWork.description.length > existing.description.length)) {
+        if (refinedWork.description &&
+          (!existing.description || refinedWork.description.length > existing.description.length)) {
           existing.description = refinedWork.description;
         }
       } else {
@@ -697,12 +697,12 @@ export function safeRefineCV(
   // Education: same logic
   if (refinedCV.education && refinedCV.education.length > 0) {
     if (!result.education) result.education = [];
-    
+
     for (const refinedEdu of refinedCV.education) {
       const existingIdx = result.education.findIndex(
         (e: any) => e.id === refinedEdu.id || e.institution === refinedEdu.institution
       );
-      
+
       if (existingIdx >= 0) {
         const existing = result.education[existingIdx];
         for (const [key, value] of Object.entries(refinedEdu)) {
@@ -719,8 +719,8 @@ export function safeRefineCV(
   // Skills: merge, never delete
   if (refinedCV.skills) {
     if (!result.skills) {
-      result.skills = Array.isArray(refinedCV.skills) 
-        ? refinedCV.skills 
+      result.skills = Array.isArray(refinedCV.skills)
+        ? refinedCV.skills
         : [];
     } else {
       const existingSkills = new Set(
@@ -730,11 +730,11 @@ export function safeRefineCV(
           return '';
         })
       );
-      
+
       const refinedSkills: any[] = Array.isArray(refinedCV.skills) ? refinedCV.skills : [];
       for (const skill of refinedSkills) {
-        const skillName = typeof skill === 'string' 
-          ? skill 
+        const skillName = typeof skill === 'string'
+          ? skill
           : (typeof skill === 'object' && skill !== null ? (skill as any).name || '' : '');
         if (skillName && !existingSkills.has(skillName.toLowerCase())) {
           (result.skills as any[]).push(skill);
@@ -747,7 +747,7 @@ export function safeRefineCV(
   if (refinedCV.languages && refinedCV.languages.length > 0) {
     if (!result.languages) result.languages = [];
     const existingLangs = new Set(result.languages.map((l: any) => l.language?.toLowerCase()));
-    
+
     for (const lang of refinedCV.languages) {
       if (!existingLangs.has(lang.language?.toLowerCase())) {
         result.languages.push(lang);
@@ -773,6 +773,8 @@ export function safeRefineCV(
     edu: originalCV.education?.length || 0,
     skills: Array.isArray(originalCV.skills) ? originalCV.skills.length : 0,
     langs: originalCV.languages?.length || 0,
+    certs: originalCV.certifications?.length || 0,
+    projects: originalCV.projects?.length || 0,
   };
 
   const resultCounts = {
@@ -780,24 +782,41 @@ export function safeRefineCV(
     edu: result.education?.length || 0,
     skills: Array.isArray(result.skills) ? result.skills.length : 0,
     langs: result.languages?.length || 0,
+    certs: result.certifications?.length || 0,
+    projects: result.projects?.length || 0,
   };
 
-  // If counts decreased, restore from original
+  console.log('[SafeRefine] Integrity Check:', { original: originalCounts, result: resultCounts });
+
+  // CRITICAL FAIL-SAFE: If any major section disappeared, restore it entirely
   if (resultCounts.work < originalCounts.work) {
-    console.error('[SafeRefine] Work count decreased, restoring original');
-    result.work_experience = originalCV.work_experience;
+    console.error('[SafeRefine] 🚨 Work count decreased! Restoring original.');
+    result.work_experience = JSON.parse(JSON.stringify(originalCV.work_experience));
   }
   if (resultCounts.edu < originalCounts.edu) {
-    console.error('[SafeRefine] Education count decreased, restoring original');
-    result.education = originalCV.education;
+    console.error('[SafeRefine] 🚨 Education count decreased! Restoring original.');
+    result.education = JSON.parse(JSON.stringify(originalCV.education));
   }
   if (resultCounts.skills < originalCounts.skills) {
-    console.error('[SafeRefine] Skills count decreased, restoring original');
-    result.skills = originalCV.skills;
+    console.error('[SafeRefine] 🚨 Skills count decreased! Restoring original.');
+    result.skills = JSON.parse(JSON.stringify(originalCV.skills));
   }
   if (resultCounts.langs < originalCounts.langs) {
-    console.error('[SafeRefine] Languages count decreased, restoring original');
-    result.languages = originalCV.languages;
+    result.languages = JSON.parse(JSON.stringify(originalCV.languages));
+  }
+  if (resultCounts.certs < originalCounts.certs) {
+    result.certifications = JSON.parse(JSON.stringify(originalCV.certifications));
+  }
+  if (resultCounts.projects < originalCounts.projects) {
+    result.projects = JSON.parse(JSON.stringify(originalCV.projects));
+  }
+
+  // Personal Info Safety: Ensure summary isn't shorter than original if it exists
+  if (originalCV.personal_info?.summary && result.personal_info?.summary) {
+    if (result.personal_info.summary.length < originalCV.personal_info.summary.length * 0.8) {
+      console.warn('[SafeRefine] ⚠️ Refined summary is significantly shorter. Restoring original.');
+      result.personal_info.summary = originalCV.personal_info.summary;
+    }
   }
 
   return result;

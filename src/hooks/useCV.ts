@@ -40,6 +40,7 @@ interface UseCVReturn {
     ) => Promise<CVExtractionResult>;
 
     refineCV: (params: {
+        currentCV?: Partial<ComprehensiveCV>;
         resolvedGaps?: { gapId: string; userInput: string }[];
         selectedDomains?: string[];
         instructions?: string;
@@ -469,6 +470,7 @@ export function useCV(): UseCVReturn {
 
     const refineCV = useCallback(async (
         params: {
+            currentCV?: Partial<ComprehensiveCV>;
             resolvedGaps?: { gapId: string; userInput: string }[];
             selectedDomains?: string[];
             instructions?: string;
@@ -478,9 +480,8 @@ export function useCV(): UseCVReturn {
             model?: string;
         }
     ): Promise<CVExtractionResult> => {
-        if (!user || !cv) throw new Error('Not authenticated or no CV to refine');
-
         const {
+            currentCV: providedCV,
             resolvedGaps,
             selectedDomains,
             instructions,
@@ -489,6 +490,9 @@ export function useCV(): UseCVReturn {
             provider,
             model
         } = params;
+
+        const baseCV = providedCV || cv;
+        if (!user || !baseCV) throw new Error('Not authenticated or no CV to refine');
 
         const headers: HeadersInit = {
             'Content-Type': 'application/json'
@@ -501,7 +505,7 @@ export function useCV(): UseCVReturn {
             method: 'POST',
             headers,
             body: JSON.stringify({
-                currentCV: cv, // Using currentCV as per API requirement
+                currentCV: baseCV, // Using provided or hook's CV
                 resolvedGaps,
                 selectedDomains,
                 instructions,
