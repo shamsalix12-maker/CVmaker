@@ -22,6 +22,7 @@ interface GapResolutionWizardProps {
   onSkip: (gapId: string) => void;
   onComplete: () => void;
   onBack: () => void;
+  isLoading?: boolean;
 }
 
 // ─── Severity styles ───
@@ -64,6 +65,7 @@ export function GapResolutionWizard({
   onSkip,
   onComplete,
   onBack,
+  isLoading = false,
 }: GapResolutionWizardProps) {
   const isRTL = locale === 'fa';
 
@@ -149,9 +151,19 @@ export function GapResolutionWizard({
         </p>
         <button
           onClick={onComplete}
-          className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          disabled={isLoading}
+          className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 mx-auto disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          {locale === 'fa' ? '✅ مشاهده رزومه نهایی' : '✅ View Final CV'}
+          {isLoading ? (
+            <>
+              <span className="animate-spin text-xl">⚙️</span>
+              {locale === 'fa' ? 'در حال رفاین...' : 'Refining...'}
+            </>
+          ) : (
+            <>
+              {locale === 'fa' ? '✅ مشاهده رزومه نهایی' : '✅ View Final CV'}
+            </>
+          )}
         </button>
       </div>
     );

@@ -11,7 +11,7 @@ import { useCV } from '@/hooks/useCV';
 export default function CVManagerPage() {
   const params = useParams();
   const locale = params.locale as 'en' | 'fa';
-  const { refineCV } = useCV();
+  const { cv, refineCV, deleteCV } = useCV();
 
   const handleComplete = async (cv: Partial<ComprehensiveCV>) => {
     try {
@@ -51,6 +51,8 @@ export default function CVManagerPage() {
           aiModel={aiModel}
           refineCV={refineCV}
           onComplete={handleComplete}
+          onDeleteCV={deleteCV}
+          existingCV={cv || undefined}
         />
       </MainLayout>
     </AuthGuard>

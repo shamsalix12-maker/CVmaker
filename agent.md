@@ -34,4 +34,14 @@
     - **Paranoid Safe Merge**: Hardened `safeRefineCV` on the server. It now performs **Integrity Checks**.
     - **Automatic Restoration**: If a section's entry count decreases after AI refinement, the server **automatically restores** it from the original data.
     - **Summary Protection**: Added a check to prevent AI from drastically shortening the professional summary.
-- **Result**: Data integrity is now guaranteed at multiple levels (State, API, and Merge logic).
+### UX & CV Management Improvements (2026-02-14)
+- **Status**: Completed.
+- **Loading State**:
+    - Added a loading spinner and "Refining..." text to the "View Final CV" button in `GapResolutionWizard.tsx`.
+    - Synced `isLoading` state from `CVCompletionFlow` to ensure consistent feedback during AI refinement.
+- **CV Management**:
+    - Added a "Delete existing CV and start over" button to the CV Upload screen (Step 2).
+    - Connected the deletion logic to the `useCV` hook and added a confirmation dialog to prevent accidental deletion.
+    - Ensured the UI state is reset (`extracted_cv` and `gap_analysis` cleared) after successful deletion.
+- **Technical Detail**:
+    - Updated `CVCompletionFlowProps` and component signatures to propagate the new `onDeleteCV` and `isLoading` props.

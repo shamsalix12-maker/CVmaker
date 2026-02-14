@@ -214,6 +214,7 @@ interface CVCompletionFlowProps {
   aiProvider: string;
   aiModel: string;
   onComplete: (cv: Partial<ComprehensiveCV>) => void;
+  onDeleteCV?: () => Promise<void>;
   refineCV?: (params: {
     currentCV?: Partial<ComprehensiveCV>;
     resolvedGaps?: { gapId: string; userInput: string }[];
@@ -264,6 +265,7 @@ export function CVCompletionFlow({
   aiProvider,
   aiModel,
   onComplete,
+  onDeleteCV,
   refineCV,
   existingCV,
   initialDomains,
@@ -870,6 +872,23 @@ export function CVCompletionFlow({
                 🤖 {locale === 'fa' ? 'تحلیل با AI' : 'Analyze with AI'}
               </button>
             </div>
+
+            {/* Clear existing CV option */}
+            {existingCV && onDeleteCV && (
+              <div className="pt-4 border-t border-gray-100 dark:border-gray-800 text-center">
+                <button
+                  onClick={async () => {
+                    if (window.confirm(locale === 'fa' ? 'آیا از حذف رزومه فعلی و شروع مجدد اطمینان دارید؟' : 'Are you sure you want to delete the existing CV and start over?')) {
+                      await onDeleteCV();
+                      setState(prev => ({ ...prev, extracted_cv: null, gap_analysis: null }));
+                    }
+                  }}
+                  className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors"
+                >
+                  🗑️ {locale === 'fa' ? 'حذف رزومه قبلی و شروع مجدد' : 'Delete existing CV and start over'}
+                </button>
+              </div>
+            )}
           </div>
         );
 
@@ -973,6 +992,7 @@ export function CVCompletionFlow({
             onSkip={handleSkipGap}
             onComplete={handleResolutionComplete}
             onBack={() => goToStep('gap_analysis')}
+            isLoading={isLoading}
           />
         );
 
