@@ -114,6 +114,10 @@
 - **Temperature Locked to 0**: Set `temperature: 0` in `cv-extractor.ts` for both extraction and refinement to ensure maximum determinism in AI responses.
 - **maxTokens Logic Fixed**: Removed a hardcoded `65536` override in `google-ai-provider.ts` that was ignoring the `32768` value sent from the CV extractor. The provider now correctly honors the passed `config.maxTokens` or `options.maxTokens`.
 
+### Refinement Validation (2026-02-15)
+- **Robust Gap Mode Validation**: Added specialized validation logic in `refineCVWithAI` (`cv-extractor.ts`). When resolving gaps, the system now explicitly verifies that the AI hasn't accidentally removed or truncated existing work experience, education, skills, certifications, or projects. If a decrease in data is detected, the original data is restored to prevent data loss.
+
+
 
 
 
