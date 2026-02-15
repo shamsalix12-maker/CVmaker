@@ -315,6 +315,9 @@ export async function refineCVWithAI(
       userLength: userPrompt.length,
     });
 
+    console.log('[REFINE-DEBUG-2] Prompt length:', userPrompt.length);
+    console.log('[REFINE-DEBUG-3] Prompt preview:', userPrompt.substring(0, 500));
+
     const options: AICompletionOptions = {
       model: aiModel,
       messages: [
@@ -336,6 +339,11 @@ export async function refineCVWithAI(
 
     console.log('[CV Refiner] Calling AI provider...');
     const response = await provider.complete(config, options);
+
+    if (response) {
+      console.log('[REFINE-DEBUG-4] Raw AI response length:', response.length);
+      console.log('[REFINE-DEBUG-5] Raw AI response preview:', response.substring(0, 500));
+    }
     const parsed = provider.parseJsonResponse<any>(response);
 
     if (!parsed) {

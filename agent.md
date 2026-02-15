@@ -59,3 +59,13 @@
 - **Fix**: Synchronized the token limits by increasing `maxTokens` in `refineCVWithAI` (inside `src/lib/cv/cv-extractor.ts`) to 32768.
 - **Impact**: This prevents partial JSON output and accidental data loss for users with comprehensive career histories.
 
+### Temporary Debug Logging (2026-02-15)
+- **Task**: Added extensive debug logging to the CV refinement flow to trace data and merging issues.
+- **Locations**:
+    - `src/app/api/cv/refine/route.ts`: Logged input parameters (`[REFINE-DEBUG-1]`).
+    - `src/lib/cv/cv-extractor.ts`: Logged prompt and raw AI response (`[REFINE-DEBUG-2]` to `[REFINE-DEBUG-5]`).
+    - `src/lib/cv/multi-stage-extractor.ts`: Logged state before and after safe merge (`[REFINE-DEBUG-6]`, `[REFINE-DEBUG-7]`).
+    - `src/hooks/useCV.ts`: Logged frontend request and response metadata (`[REFINE-DEBUG-8]`, `[REFINE-DEBUG-9]`).
+- **Purpose**: To identify where data loss or truncation occurs during the multi-stage AI interaction.
+
+

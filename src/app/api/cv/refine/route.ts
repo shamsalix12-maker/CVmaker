@@ -149,6 +149,14 @@ export async function POST(request: NextRequest) {
     // ─── AI Refinement ───
     console.log(`[API Refine] Starting AI refinement with ${provider}/${model}...`);
 
+    console.log('[REFINE-DEBUG-1] Input to refine:',
+      JSON.stringify({
+        hasCurrentCV: !!currentCV,
+        cvSections: currentCV ? Object.keys(currentCV) : [],
+        gapCount: resolvedGaps?.length,
+        instructions: instructions?.substring(0, 100)
+      }));
+
     const result = await refineCVWithAI(
       currentCV,
       apiKey,

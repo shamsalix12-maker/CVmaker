@@ -648,6 +648,13 @@ export function safeRefineCV(
   originalCV: Partial<ComprehensiveCV>,
   refinedCV: Partial<ComprehensiveCV>
 ): Partial<ComprehensiveCV> {
+  console.log('[REFINE-DEBUG-6] safeRefineCV called:', {
+    originalSections: Object.keys(originalCV),
+    refinedSections: Object.keys(refinedCV),
+    originalWorkCount: originalCV.work_experience?.length,
+    refinedWorkCount: refinedCV.work_experience?.length
+  });
+
   // Start with original data
   const result = JSON.parse(JSON.stringify(originalCV));
 
@@ -818,6 +825,12 @@ export function safeRefineCV(
       result.personal_info.summary = originalCV.personal_info.summary;
     }
   }
+
+  console.log('[REFINE-DEBUG-7] safeRefineCV result:', {
+    resultSections: Object.keys(result),
+    resultWorkCount: result.work_experience?.length,
+    resultSkillCount: result.skills?.length
+  });
 
   return result;
 }

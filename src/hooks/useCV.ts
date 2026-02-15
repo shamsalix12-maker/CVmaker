@@ -501,6 +501,8 @@ export function useCV(): UseCVReturn {
             headers['x-user-id'] = user.id;
         }
 
+        console.log('[REFINE-DEBUG-8] Sending refine request');
+
         const res = await fetch('/api/cv/refine', {
             method: 'POST',
             headers,
@@ -517,6 +519,12 @@ export function useCV(): UseCVReturn {
         });
 
         const result = await res.json();
+
+        console.log('[REFINE-DEBUG-9] Refine response:', {
+            status: res.status,
+            hasData: !!result,
+            dataSections: result && result.cv ? Object.keys(result.cv) : []
+        });
 
         if (!res.ok || !result.success) {
             throw new Error(result.error || result.extractionNotes || 'Refinement failed');
