@@ -100,11 +100,11 @@ export async function extractCVWithAI(
     ('selectedDomains' in request && Array.isArray(request.selectedDomains) && request.selectedDomains.length > 0)
       ? request.selectedDomains
       : ['general'];
-      
+
   // تشخیص زبان CV: اگر در request بود استفاده کن، وگرنه en
   const cvLanguage: string =
-    ('cvLanguage' in request && typeof request.cvLanguage === 'string') 
-      ? request.cvLanguage 
+    ('cvLanguage' in request && typeof request.cvLanguage === 'string')
+      ? request.cvLanguage
       : 'en';
 
   console.log('[CV Extractor] Starting domain-aware extraction', {
@@ -298,7 +298,7 @@ export async function refineCVWithAI(
     const config: AIProviderConfig = {
       apiKey,
       temperature: 0.2,
-      maxTokens: 8192,
+      maxTokens: 32768,
     };
 
     const systemPrompt = buildRefinementSystemPrompt(domains, lang);
@@ -346,12 +346,12 @@ export async function refineCVWithAI(
     console.log('[CV Refiner] Response parsed. Keys:', Object.keys(parsed));
 
     const rawCV = transformExtractedData(parsed, additionalText || currentCV.raw_text);
-    
+
     // ═══════════════════════════════════════════════════════
     // استفاده از safeRefineCV برای جلوگیری از حذف داده‌ها
     // ═══════════════════════════════════════════════════════
     const cv = safeRefineCV(currentCV, rawCV);
-    
+
     // Validation نهایی
     const originalCounts = {
       work: currentCV.work_experience?.length || 0,
@@ -363,15 +363,15 @@ export async function refineCVWithAI(
       edu: cv.education?.length || 0,
       skills: Array.isArray(cv.skills) ? cv.skills.length : 0,
     };
-    
+
     console.log('[CV Refiner] Data counts:', { original: originalCounts, refined: refinedCounts });
-    
-    if (refinedCounts.work < originalCounts.work || 
-        refinedCounts.edu < originalCounts.edu ||
-        refinedCounts.skills < originalCounts.skills) {
+
+    if (refinedCounts.work < originalCounts.work ||
+      refinedCounts.edu < originalCounts.edu ||
+      refinedCounts.skills < originalCounts.skills) {
       console.warn('[CV Refiner] ⚠️ Data loss detected - this should not happen with safeRefineCV!');
     }
-    
+
     const gapAnalysis = transformGapAnalysis(parsed, domains);
     const metadata = transformMetadata(parsed);
     const fieldStatuses = validateExtractedCV(cv);
@@ -554,13 +554,13 @@ function transformGapAnalysis(
   // ─── Gaps ───
   const rawGaps = ensureArray(gapData.gaps);
   console.log('[CV Extractor] transformGapAnalysis - raw gaps count:', rawGaps.length);
-  
+
   // اگر gaps خالی است، گپ‌های پایه تولید کن
   if (rawGaps.length === 0) {
     console.log('[CV Extractor] Empty gaps array - generating basic gaps');
     return generateBasicGaps(parsed, selectedDomains);
   }
-  
+
   const gaps: CVGapItem[] = rawGaps.map((g: any, idx: number) => ({
     id: g.id || `gap-${idx + 1}`,
     field_path: g.field_path || '',
@@ -730,9 +730,9 @@ function generateBasicGaps(parsed: any, selectedDomains: CVDomainId[]): CVGapAna
   const data = parsed.extracted_data || parsed;
   const gaps: CVGapItem[] = [];
   const strengths: CVStrengthItem[] = [];
-  
+
   const pi = data.personal_info || {};
-  
+
   // بررسی فیلدهای ضروری
   if (!pi.phone || pi.phone.trim() === '') {
     gaps.push({
@@ -755,7 +755,7 @@ function generateBasicGaps(parsed: any, selectedDomains: CVDomainId[]): CVGapAna
       can_skip: true,
     });
   }
-  
+
   if (!pi.linkedin_url || pi.linkedin_url.trim() === '') {
     gaps.push({
       id: 'gap-linkedin',
@@ -777,7 +777,7 @@ function generateBasicGaps(parsed: any, selectedDomains: CVDomainId[]): CVGapAna
       can_skip: true,
     });
   }
-  
+
   if (!pi.summary || pi.summary.trim() === '' || pi.summary.length < 20) {
     gaps.push({
       id: 'gap-summary',
@@ -800,7 +800,7 @@ function generateBasicGaps(parsed: any, selectedDomains: CVDomainId[]): CVGapAna
       current_value: pi.summary || undefined,
     });
   }
-  
+
   const workExp = data.work_experience || [];
   if (workExp.length === 0) {
     gaps.push({
@@ -831,7 +831,7 @@ function generateBasicGaps(parsed: any, selectedDomains: CVDomainId[]): CVGapAna
       relevant_domains: selectedDomains,
     });
   }
-  
+
   const education = data.education || [];
   if (education.length === 0) {
     gaps.push({
@@ -854,7 +854,7 @@ function generateBasicGaps(parsed: any, selectedDomains: CVDomainId[]): CVGapAna
       can_skip: true,
     });
   }
-  
+
   const skills = data.skills || [];
   if (!Array.isArray(skills) || skills.length === 0) {
     gaps.push({
@@ -877,7 +877,7 @@ function generateBasicGaps(parsed: any, selectedDomains: CVDomainId[]): CVGapAna
       can_skip: true,
     });
   }
-  
+
   const projects = data.projects || [];
   if (projects.length === 0) {
     gaps.push({
@@ -900,7 +900,7 @@ function generateBasicGaps(parsed: any, selectedDomains: CVDomainId[]): CVGapAna
       can_skip: true,
     });
   }
-  
+
   const certifications = data.certifications || [];
   if (certifications.length === 0) {
     gaps.push({
@@ -923,15 +923,15 @@ function generateBasicGaps(parsed: any, selectedDomains: CVDomainId[]): CVGapAna
       can_skip: true,
     });
   }
-  
+
   // محاسبه امتیاز
   const totalChecks = 7;
-  const passedChecks = strengths.length + 
-    (pi.phone ? 1 : 0) + 
-    (workExp.length > 0 ? 1 : 0) + 
+  const passedChecks = strengths.length +
+    (pi.phone ? 1 : 0) +
+    (workExp.length > 0 ? 1 : 0) +
     (education.length > 0 ? 1 : 0);
   const overallScore = Math.round((passedChecks / totalChecks) * 100);
-  
+
   return {
     selected_domains: selectedDomains,
     detected_domains: selectedDomains,
@@ -970,7 +970,7 @@ function transformMetadata(parsed: any): EnhancedCVExtractionResult['metadata'] 
  */
 function transformSuggestedImprovements(improvements: any[]): SuggestedImprovement[] {
   if (!Array.isArray(improvements)) return [];
-  
+
   return improvements.map((imp, idx) => ({
     id: imp.id || `improve-${idx + 1}`,
     field_path: imp.field_path || '',
@@ -988,7 +988,7 @@ function transformSuggestedImprovements(improvements: any[]): SuggestedImproveme
  */
 function transformTranslationsApplied(translations: any[]): TranslationApplied[] {
   if (!Array.isArray(translations)) return [];
-  
+
   return translations.map((t, idx) => ({
     id: t.id || `trans-${idx + 1}`,
     field_path: t.field_path || '',
@@ -1162,7 +1162,7 @@ function extractPartialData(response: string): any {
     const phoneMatch = response.match(/"phone"\s*:\s*"([^"]+)"/);
     const locationMatch = response.match(/"location"\s*:\s*"([^"]+)"/);
     const linkedinMatch = response.match(/"linkedin_url"\s*:\s*"([^"]+)"/);
-    
+
     // استخراج summary - می‌تواند طولانی باشد
     const summaryMatch = response.match(/"summary"\s*:\s*"([\s\S]*?)(?=",\s*"|\s*}\s*,|\s*}\s*$)/);
 
@@ -1185,14 +1185,14 @@ function extractPartialData(response: string): any {
         const blockStart = response.indexOf(match[0]);
         const blockEnd = response.indexOf('},', blockStart) || response.indexOf('}]', blockStart);
         const block = response.substring(blockStart, blockEnd);
-        
+
         // استخراج description از بلاک
         const descMatch = block.match(/"description"\s*:\s*"([\s\S]*?)(?=",\s*"[a-z_]+"\s*:|\s*})/);
         const companyMatch = block.match(/"company"\s*:\s*"([^"]*)"/);
         const startDateMatch = block.match(/"start_date"\s*:\s*"([^"]*)"/);
         const endDateMatch = block.match(/"end_date"\s*:\s*"([^"]*)"/);
         const isCurrentMatch = block.match(/"is_current"\s*:\s*(true|false)/);
-        
+
         return {
           id: match[1] || `work-${i + 1}`,
           job_title: match[2] || '',

@@ -53,3 +53,9 @@
     - Added "Skip and Save Directly" (ذخیره مستقیم) buttons to both the `Classification Review` and `Gap Analysis Dashboard` steps.
     - This allows users to bypass the AI refinement process if they just want to store their extracted data quickly.
     - The button correctly routes users to the final review/edit step for storage.
+
+### AI Refinement Token Limit Fix (2026-02-15)
+- **Problem**: Large CVs were being truncated during the refinement step because the `maxTokens` limit was set to only 8192, while the extraction step used 32768.
+- **Fix**: Synchronized the token limits by increasing `maxTokens` in `refineCVWithAI` (inside `src/lib/cv/cv-extractor.ts`) to 32768.
+- **Impact**: This prevents partial JSON output and accidental data loss for users with comprehensive career histories.
+
