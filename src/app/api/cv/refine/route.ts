@@ -172,6 +172,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         ...result,
         cv: result.cv ? v2.toComprehensiveCV(result.cv as any) : null,
+        gapAnalysis: result.audit ? v2.toV1GapAnalysis(result.audit, result.gaps, selectedDomains) : null,
       });
     }
 
