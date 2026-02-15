@@ -161,19 +161,30 @@ export async function POST(request: NextRequest) {
       }));
 
     if (managerVersion === 'v2') {
-      console.log('[API Refine] Using Processor V2.0 Refinement (Patch-based)');
-      const v2 = new CVProcessorV2(provider, model, apiKey);
+      const startTime = Date.now();
+      console.log('[API Refine] Starting Processor V2.0 Refinement (Patch-based)...');
+      try {
+        const v2 = new CVProcessorV2(provider, model, apiKey);
 
-      // V2 expects a patch. If the UI sends Full CV updates, we merge them.
-      // If the UI sends resolvedGaps, we would ideally have an AI agent convert them to a Patch.
-      // For now, we use the Merger to apply simple updates if currentCV is provided as the new state.
-      const result = await v2.refine(currentCV as CanonicalCV, (body as any).patch || {});
+        // V2 expects a patch.
+        const result = await v2.refine(currentCV as CanonicalCV, (body as any).patch || {});
 
-      return NextResponse.json({
-        ...result,
-        cv: result.cv ? v2.toComprehensiveCV(result.cv as any) : null,
-        gapAnalysis: result.audit ? v2.toV1GapAnalysis(result.audit, result.gaps, selectedDomains) : null,
-      });
+        const duration = Date.now() - startTime;
+        console.log(`[API Refine] V2 Refinement finished in ${duration}ms. Success: ${result.success}`);
+
+        return NextResponse.json({
+          ...result,
+          cv: result.cv ? v2.toComprehensiveCV(result.cv as any) : null,
+          gapAnalysis: result.audit ? v2.toV1GapAnalysis(result.audit, result.gaps, selectedDomains) : null,
+        });
+      } catch (e: any) {
+        console.error('[API Refine] V2 Refinement CRITICAL EXCEPTION:', e);
+        return NextResponse.json({
+          success: false,
+          error: 'Critical failure in V2 refinement',
+          details: e.message
+        }, { status: 500 });
+      }
     }
 
     const result = await refineCVWithAI(

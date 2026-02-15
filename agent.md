@@ -10,9 +10,10 @@
 - Verified temperature settings, schema validation, and state mutation patterns.
 - Implemented CV Processor V2.0 structured architecture in `src/lib/cv/v2`.
 - Created Zod schemas for `CanonicalCV`, `FieldAudit`, and `GapGuidance` in `types.ts`.
-- Implemented `BlindExtractor` (Phase 2) with strict schema validation.
-- Implemented `Auditor` (Phase 5) and `GapGenerator` (Phase 6).
-- Implemented `Merger` (Phase 7) for lossless patch-based updates.
-- Implemented `Renderer` (Phase 8) for professional CV text generation.
+- Implemented `BlindExtractor` (Phase 2), `Auditor` (Phase 5), `GapGenerator` (Phase 6), `Merger` (Phase 7), and `Renderer` (Phase 8).
 - Exposed unified `CVProcessorV2` API in `index.ts`.
-- Consolidated prompt templates in `prompts.ts`.
+- Connected V2.0 to API routes (`/api/cv/extract` and `/api/cv/refine`) via `managerVersion: 'v2'`.
+- Added `toComprehensiveCV` compatibility mapper to ensure V2 output works with existing UI components.
+- Enabled V2.0 by default in the `CVManagerPage` using `CVManagerVersion.V2`.
+- Updated `useCV` hook to manage `audit` and `gaps` state.
+- Implemented `toV1GapAnalysis` bridge to map V2 Audit/Guidance to V1 `CVGapAnalysis`, fixing the "No analysis data" issue in the Dashboard.

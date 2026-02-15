@@ -185,18 +185,38 @@ export async function POST(request: NextRequest) {
     console.log(`[API Extract] Starting AI extraction with ${provider}/${model}...`);
 
     if (managerVersion === 'v2') {
-      console.log('[API Extract] Using Processor V2.0 Pipeline');
-      const v2 = new CVProcessorV2(provider, model, apiKey);
-      const result = await v2.fullProcess(textToProcess, domainsRaw || '');
+      const startTime = Date.now();
+      console.log('[API Extract] Starting Processor V2.0 Pipeline...');
+      try {
+        const v2 = new CVProcessorV2(provider, model, apiKey);
+        const result = await v2.fullProcess(textToProcess, domainsRaw || '');
 
-      return NextResponse.json({
-        ...result,
-        cv: result.cv ? v2.toComprehensiveCV(result.cv) : null,
-        gapAnalysis: result.audit ? v2.toV1GapAnalysis(result.audit, result.gaps, selectedDomains) : null,
-        aiProvider: provider,
-        aiModel: model,
-        rawText: textToProcess,
-      });
+        const duration = Date.now() - startTime;
+        console.log(`[API Extract] V2.0 Pipeline finished in ${duration}ms. Success: ${result.success}`);
+
+        if (!result.success) {
+          return NextResponse.json(result, { status: 400 });
+        }
+
+        const mappedResponse = {
+          ...result,
+          cv: result.cv ? v2.toComprehensiveCV(result.cv) : null,
+          gapAnalysis: result.audit ? v2.toV1GapAnalysis(result.audit, result.gaps, selectedDomains) : null,
+          aiProvider: provider,
+          aiModel: model,
+          rawText: textToProcess,
+        };
+
+        console.log('[API Extract] V2.0 Response mapped and sending');
+        return NextResponse.json(mappedResponse);
+      } catch (v2Error: any) {
+        console.error('[API Extract] V2.0 CRITICAL EXCEPTION:', v2Error);
+        return NextResponse.json({
+          success: false,
+          error: 'Critical failure in V2 pipeline',
+          details: v2Error.message
+        }, { status: 500 });
+      }
     }
 
     const extractionRequest: EnhancedCVExtractionRequest = {

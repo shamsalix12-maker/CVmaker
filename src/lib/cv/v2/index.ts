@@ -37,26 +37,58 @@ export class CVProcessorV2 {
      * Complete pipeline from raw text to canonical CV with assessment.
      */
     async fullProcess(rawText: string, domainRules: string = '') {
+        console.log('[CVProcessorV2] starting full process');
         // 1. Extract
-        const extraction = await this.extractor.extract(rawText);
+        let extraction;
+        try {
+            extraction = await this.extractor.extract(rawText);
+        } catch (e: any) {
+            console.error('[CVProcessorV2] Extraction CRITICAL failure:', e);
+            return { success: false, step: 'extraction', error: e.message };
+        }
+
         if (!extraction.success || !extraction.cv) {
+            console.error('[CVProcessorV2] Extraction failed:', extraction.error);
             return { success: false, step: 'extraction', error: extraction.error };
         }
 
+        console.log('[CVProcessorV2] Extraction success');
+
         // 2. Audit
-        const audit = await this.auditor.audit(extraction.cv);
-        if (!audit.success || !audit.audit) {
-            return { success: true, cv: extraction.cv, auditError: audit.error };
+        let auditResult = null;
+        try {
+            const audit = await this.auditor.audit(extraction.cv);
+            if (audit.success && audit.audit) {
+                auditResult = audit.audit;
+                console.log('[CVProcessorV2] Audit success');
+            } else {
+                console.warn('[CVProcessorV2] Audit failed, continuing:', audit.error);
+            }
+        } catch (e: any) {
+            console.error('[CVProcessorV2] Audit error (non-blocking):', e);
         }
 
         // 3. Gaps
-        const gaps = await this.gapGenerator.generate(audit.audit, domainRules);
+        let gapsResult = null;
+        if (auditResult) {
+            try {
+                const gaps = await this.gapGenerator.generate(auditResult, domainRules);
+                if (gaps.success && gaps.guidance) {
+                    gapsResult = gaps.guidance;
+                    console.log('[CVProcessorV2] Gaps success');
+                } else {
+                    console.warn('[CVProcessorV2] Gaps failed, continuing:', gaps.error);
+                }
+            } catch (e: any) {
+                console.error('[CVProcessorV2] Gaps error (non-blocking):', e);
+            }
+        }
 
         return {
             success: true,
             cv: extraction.cv,
-            audit: audit.audit,
-            gaps: gaps.success ? gaps.guidance : null,
+            audit: auditResult,
+            gaps: gapsResult,
         };
     }
 
