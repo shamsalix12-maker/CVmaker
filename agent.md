@@ -105,6 +105,12 @@
     - **Final Merge Verification** (`[DEBUG-GAP-5]`, `[DEBUG-GAP-6]`): Compares the state before and after `safeRefineCV` in `cv-extractor.ts` to detect data gain/loss.
     - **Merge Input Analysis** (`[DEBUG-GAP-7]`): Inspects the raw inputs to `safeRefineCV` in `multi-stage-extractor.ts` for deep comparison.
 
+### Critical Duplication Fixes (2026-02-15)
+- **Bug 1: Duplicated Skills UI**: Removed the redundant Skill section render block in `CVCompletionFlow.tsx`.
+- **Bug 2: Duplicate Certifications & Projects**: Implemented Set-based deduplication in `safeRefineCV` (`multi-stage-extractor.ts`) to prevent existing items from being appended multiple times during refinement.
+- **Bug 3: Duplicate Work Achievements**: Added granular deduplication for work experience achievements in `safeRefineCV`. It now checks the first 50 characters of each achievement to determine if it's already present before adding.
+
+
 
 
 

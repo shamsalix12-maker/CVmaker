@@ -1392,26 +1392,6 @@ export function CVCompletionFlow({
             )}
           </ReviewSection>
 
-          {/* Skills */}
-          <ReviewSection
-            title={`🛠 ${locale === 'fa' ? 'مهارت‌ها' : 'Skills'} (${cv.skills?.length || 0})`}
-          >
-            {(cv.skills?.length || 0) > 0 ? (
-              <div className="flex flex-wrap gap-1.5">
-                {cv.skills!.map((skill, i) => (
-                  <span
-                    key={i}
-                    className="px-2.5 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-xs"
-                  >
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <EmptyState locale={locale} />
-            )}
-          </ReviewSection>
-
           {/* Certifications */}
           {(cv.certifications?.length || 0) > 0 && (
             <ReviewSection
@@ -1557,7 +1537,7 @@ export function CVCompletionFlow({
             💾 {locale === 'fa' ? 'ذخیره رزومه جامع' : 'Save Comprehensive CV'}
           </button>
         </div>
-      </div>
+      </div >
     );
   }
 }

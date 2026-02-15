@@ -750,13 +750,30 @@ export function safeRefineCV(
           }
 
           // Special logic for lists and long text
-          if (key === 'description' || key === 'achievements') {
+          if (key === 'description') {
             const valStr = Array.isArray(value) ? value.join(' ') : String(value || '');
             const curStr = Array.isArray(curVal) ? curVal.join(' ') : String(curVal || '');
-
             if (valStr.length > curStr.length * 1.1 || valStr.toLowerCase().includes(curStr.toLowerCase().substring(0, 30))) {
               (existing as any)[key] = value;
               console.log(`[SafeRefine] Work [${existing.company}] enriched ${key}`);
+            }
+          }
+
+          if (key === 'achievements') {
+            if (Array.isArray(value) && value.length > 0) {
+              if (!existing.achievements) existing.achievements = [];
+              const existingAchievements = new Set(
+                existing.achievements.map((a: string) => a.toLowerCase().trim().substring(0, 50))
+              );
+              for (const achievement of value) {
+                const achKey = achievement.toLowerCase().trim().substring(0, 50);
+                if (!existingAchievements.has(achKey)) {
+                  existing.achievements.push(achievement);
+                  console.log(`[SafeRefine] Work [${existing.company}] Added achievement:`, achievement.substring(0, 60));
+                } else {
+                  console.log(`[SafeRefine] Work [${existing.company}] Skipped duplicate achievement:`, achievement.substring(0, 60));
+                }
+              }
             }
           }
           // For core fields like job_title, company, start_date -> Keep original
@@ -842,22 +859,37 @@ export function safeRefineCV(
     }
   }
 
-  // 6. Projects & Certifications: Simple Merge (Append new)
+  // 6. Projects & Certifications: Deduped Merge
   if (refinedCV.projects && refinedCV.projects.length > 0) {
     if (!result.projects) result.projects = [];
-    // Only add if not seemingly already there (simple name check)
-    for (const proj of refinedCV.projects) {
-      if (!result.projects.some((p: any) => p.name === (proj as any).name)) {
-        result.projects.push(proj);
+    const existingProjectIds = new Set(
+      result.projects.map((p: any) => (p.name || '').toLowerCase())
+    );
+    for (const project of refinedCV.projects) {
+      const projKey = (project.name || '').toLowerCase();
+      if (!existingProjectIds.has(projKey)) {
+        result.projects.push(project);
+        console.log('[SafeRefine] Added new project:', project.name);
+      } else {
+        console.log('[SafeRefine] Skipped duplicate project:', project.name);
       }
     }
   }
 
   if (refinedCV.certifications && refinedCV.certifications.length > 0) {
     if (!result.certifications) result.certifications = [];
+    const existingCertIds = new Set(
+      result.certifications.map((c: any) =>
+        (c.name || '').toLowerCase() + '|' + (c.issuer || '').toLowerCase()
+      )
+    );
     for (const cert of refinedCV.certifications) {
-      if (!result.certifications.some((c: any) => c.name === (cert as any).name)) {
+      const certKey = (cert.name || '').toLowerCase() + '|' + (cert.issuer || '').toLowerCase();
+      if (!existingCertIds.has(certKey)) {
         result.certifications.push(cert);
+        console.log('[SafeRefine] Added new cert:', cert.name);
+      } else {
+        console.log('[SafeRefine] Skipped duplicate cert:', cert.name);
       }
     }
   }
