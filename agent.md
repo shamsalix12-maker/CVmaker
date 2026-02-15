@@ -119,6 +119,10 @@
 - **AI-Driven Gap Analysis**: Refactored the gap detection system to remove rigid, hardcoded quality rules (like length checks). The system now relies on:
     1.  **Strict Structural Check**: Only flags fields as "Missing" if they are truly empty (null/empty string) and required by the selected domain.
     2.  **AI Contextual Analysis**: Trusting the AI to identify qualitative gaps (weak descriptions, missing accomplishments, professional tone) rather than using arbitrary string length rules.
+- **Improved Data Integrity & Refinement**:
+    - **No Duplication Rule**: Updated refinement prompts to explicitly prevent duplicating information that is already present in the CV.
+    - **Language Preservation**: Strengthened rules to ensure the `languages` array is preserved and not merged into other sections during extraction or refinement.
+    - **Flow Optimization**: The "Improvement Review" step is now automatically skipped if the AI doesn't suggest any quality changes or translations, taking the user directly to the final review.
 - **Deterministic Prioritization**: Maintained severity-based sorting (`critical` to `optional`).
 - **Gap Resolution Bug Fix**: Fixed a bug in `GapResolutionWizard.tsx` where the "Skip" confirmation for critical gaps wasn't working due to a missing dependency in the `handleSkip` callback.
 
