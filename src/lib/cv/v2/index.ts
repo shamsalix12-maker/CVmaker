@@ -156,7 +156,7 @@ export class CVProcessorV2 {
         }));
 
         const strengths = (audit.items || [])
-            .filter((item: any) => item.quality_score >= 80)
+            .filter((item: any) => item && typeof item.quality_score === 'number' && item.quality_score >= 80)
             .map((item: any) => ({
                 title_en: `${item.field_path.replace(/_/g, ' ')} Quality`,
                 title_fa: item.field_path,

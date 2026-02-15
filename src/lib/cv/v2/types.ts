@@ -6,11 +6,11 @@ import { z } from 'zod';
 
 export const IdentitySchema = z.object({
     full_name: z.string().nullable().default(null),
-    email: z.string().email().nullable().default(null),
+    email: z.string().nullable().default(null),
     phone: z.string().nullable().default(null),
     location: z.string().nullable().default(null),
-    linkedin_url: z.string().url().nullable().default(null).or(z.string().length(0)),
-    website_url: z.string().url().nullable().default(null).or(z.string().length(0)),
+    linkedin_url: z.string().nullable().default(null),
+    website_url: z.string().nullable().default(null),
     summary: z.string().nullable().default(null),
 });
 
@@ -22,7 +22,7 @@ export const ExperienceSchema = z.object({
     start_date: z.string().nullable().default(null),
     end_date: z.string().nullable().default(null),
     is_current: z.boolean().default(false),
-    description: z.string(),
+    description: z.string().nullable().default(null).or(z.string().default('')),
     achievements: z.array(z.string()).default([]),
     metrics: z.array(z.string()).default([]),
 });
@@ -42,7 +42,7 @@ export const EducationSchema = z.object({
 export const ProjectSchema = z.object({
     id: z.string(),
     name: z.string(),
-    description: z.string(),
+    description: z.string().nullable().default(null).or(z.string().default('')),
     technologies: z.array(z.string()).default([]),
     url: z.string().url().nullable().default(null).or(z.string().length(0)),
     start_date: z.string().nullable().default(null),
@@ -56,7 +56,7 @@ export const CertificationSchema = z.object({
     date_obtained: z.string().nullable().default(null),
     expiry_date: z.string().nullable().default(null),
     credential_id: z.string().nullable().default(null),
-    credential_url: z.string().url().nullable().default(null).or(z.string().length(0)),
+    credential_url: z.string().nullable().default(null),
 });
 
 export const GenericSectionSchema = z.object({
@@ -95,11 +95,11 @@ export type CanonicalCV = z.infer<typeof CanonicalCVSchema>;
 
 export const FieldAuditItemSchema = z.object({
     field_path: z.string(),
-    exists: z.boolean(),
-    completeness_score: z.number().min(0).max(100),
-    quality_score: z.number().min(0).max(100),
-    issues: z.array(z.string()),
-    recommendations: z.array(z.string()),
+    exists: z.boolean().default(true),
+    completeness_score: z.number().min(0).max(100).default(50),
+    quality_score: z.number().min(0).max(100).default(50),
+    issues: z.array(z.string()).default([]),
+    recommendations: z.array(z.string()).default([]),
 });
 
 export const FieldAuditSchema = z.object({
@@ -118,7 +118,7 @@ export type FieldAudit = z.infer<typeof FieldAuditSchema>;
 export const GapGuidanceItemSchema = z.object({
     field: z.string(),
     guidance_text: z.string(),
-    example: z.string(),
+    example: z.string().default(''),
     skip_allowed: z.boolean().default(true),
 });
 

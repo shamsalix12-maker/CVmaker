@@ -17,3 +17,5 @@
 - Enabled V2.0 by default in the `CVManagerPage` using `CVManagerVersion.V2`.
 - Updated `useCV` hook to manage `audit` and `gaps` state.
 - Implemented `toV1GapAnalysis` bridge to map V2 Audit/Guidance to V1 `CVGapAnalysis`, fixing the "No analysis data" issue in the Dashboard.
+- Hardened V2 Pipeline resilience by relaxing Zod schemas (making many AI-generated fields optional/defaulted) and ensuring robust ID/date normalization.
+- Added comprehensive server-side logging and error boundaries to prevent UI bounces on partial failures.

@@ -119,9 +119,9 @@ export class BlindExtractor {
         const now = new Date().toISOString();
 
         return {
-            id: data.id || uuidv4(),
+            id: uuidv4(),
             user_id: data.user_id || 'unassigned',
-            version: data.version || 1,
+            version: 1,
             identity: {
                 full_name: data.identity?.full_name || data.personal_info?.full_name || null,
                 email: data.identity?.email || data.personal_info?.email || null,
@@ -143,8 +143,8 @@ export class BlindExtractor {
             volunteering: ensureIds(data.volunteering || [], 'volunteer'),
             other: ensureIds(data.other || [], 'other'),
             raw_text: rawText,
-            created_at: data.created_at || now,
-            updated_at: data.updated_at || now,
+            created_at: now,
+            updated_at: now,
             metadata: data.metadata || {},
         };
     }
